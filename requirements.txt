@@ -2,5 +2,5 @@ streamlit
 panda
 numpy
 plotly.express
-io
+StringIO
 datetime
