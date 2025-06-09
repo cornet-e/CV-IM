@@ -573,9 +573,14 @@ if uploaded_eeq:
         ]
 
     # Choix des paramètres via menu déroulant
+    # parametres_disponibles = df_IM['Paramètre'].unique()
+    # param_selectionnes = st.multiselect("Sélectionnez un ou plusieurs paramètres",options=parametres_disponibles,
+    #    default=[p for p in params_visibles_par_défaut if p in parametres_disponibles])
+
+     # Choix des paramètres via menu déroulant
     parametres_disponibles = df_IM['Paramètre'].unique()
     param_selectionnes = st.multiselect("Sélectionnez un ou plusieurs paramètres",options=parametres_disponibles,
-        default=[p for p in params_visibles_par_défaut if p in parametres_disponibles])
+        default=None)
 
     # Filtrer selon les paramètres choisis
     df_IM_filtré = df_IM[df_IM['Paramètre'].isin(param_selectionnes)]
