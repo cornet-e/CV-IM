@@ -586,7 +586,7 @@ if uploaded_eeq:
     df_IM_filtré = df_IM[df_IM['Paramètre'].isin(param_selectionnes)]
 
     # Graphique faceté
-    st.subheader("Incertitudes élargies (U%) par année et par automate")
+    st.subheader("Incertitudes élargies (U) par année et par analyseur")
 
     fig_IM = px.bar(
         df_IM_filtré,
@@ -596,8 +596,8 @@ if uploaded_eeq:
         facet_row="lot_niveau_proche",     # ➜ 1 ligne par lot_niveau_proche
         facet_col="Paramètre",             # ➜ 1 colonne par paramètre
         barmode="group",
-        title="Incertitude élargie (U) par Paramètre et par Année",
-        labels={"U": "Incertitude élargie (%)", "Annee": "Année"}
+        title="Incertitude élargie par Paramètre et par Année",
+        labels={"U": "Incertitude élargie", "Annee": "Année"}
     )
 
     # Axe y indépendant pour chaque facette
