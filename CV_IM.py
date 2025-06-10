@@ -667,6 +667,9 @@ if uploaded_eeq:
             axis.title = dict(text="Annee")
 
     lots_ordre = df_IM_filtré['lot_niveau_proche'].unique()
+    print("Ordre des facettes (lot_niveau_proche) :", lots_ordre)
+    lots_ordre = sorted(df_IM_filtré['lot_niveau_proche'].unique())
+    print("Ordre forcé des facettes (lot_niveau_proche) :", lots_ordre)
 
     xref_yref_map = {
         lot: (f"x{i+1}" if i > 0 else "x", f"y{i+1}" if i > 0 else "y")
