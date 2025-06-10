@@ -438,7 +438,7 @@ if uploaded_eeq:
         "Hématies (impédance)": "RBC(10^6/uL)",
         "Hématies (optique)": "[RBC-O(10^6/uL)]",
         "Hématocrite": "HCT(%)",
-        "Hémoglobine": "HGB(g/dL)",
+        "Hémoglobine": "HGB(g/L)",
         "IDR": "RDW-CV(%)",
         "Leucocytes": "WBC(10^3/uL)",
         "Lymphocytes": "LYMPH%(%)",
