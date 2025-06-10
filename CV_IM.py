@@ -671,14 +671,22 @@ if uploaded_eeq:
     lots_ordre = sorted(df_IM_filtré['lot_niveau_proche'].unique())
     print("Ordre forcé des facettes (lot_niveau_proche) :", lots_ordre)
 
-    xref_yref_map = {
-        lot: (f"x{i+1}" if i > 0 else "x", f"y{i+1}" if i > 0 else "y")
-        for i, lot in enumerate(lots_ordre)
-    }
+    combis = df_IM_filtré[['automate', 'lot_niveau_proche']].drop_duplicates().reset_index(drop=True)
+    print(combis)
+
+    xref_yref_map = {}
+    for i, row in combis.iterrows():
+        key = (row['automate'], row['lot_niveau_proche'])
+        xref = f"x{i+1}" if i > 0 else "x"
+        yref = f"y{i+1}" if i > 0 else "y"
+        xref_yref_map[key] = (xref, yref)
+
+
 
     for _, row in df_IM_filtré.iterrows():
         if pd.notnull(row['limite_accept']):
-            xref, yref = xref_yref_map.get(row['lot_niveau_proche'], ("x", "y"))
+            key = (row['automate'], row['lot_niveau_proche'])
+            xref, yref = xref_yref_map.get(key, ("x", "y"))
             fig_IM.add_shape(
                 type="line",
                 x0=row['Annee'] - 0.4,
@@ -689,6 +697,7 @@ if uploaded_eeq:
                 xref=xref,
                 yref=yref
             )
+
 
     nb_lots = df_IM_filtré["lot_niveau_proche"].nunique()
     nb_params = df_IM_filtré["Paramètre"].nunique()
