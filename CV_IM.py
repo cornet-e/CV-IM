@@ -711,31 +711,40 @@ facet_row_order_reversed = list(reversed(facet_row_order))  # 🔄 Inverse l'ord
             #row=facet_row_order_reversed.index(lot) + 1,  # 🔥 Utilisation correcte des indices réels
             #col=facet_col_order.index(param) + 1  # 🔥 Alignement parfait des colonnes
         #)
+annees = sorted(df_IM_filtré["Annee"].unique())
 
 for lot in facet_row_order:
     for param in facet_col_order:
         for nickname in df_IM_filtré["Nickname"].unique():
-            df_subset = df_IM_filtré[
+            # Extraire la valeur unique limite_accept pour cette combinaison (lot, param, nickname)
+            limites = df_IM_filtré[
                 (df_IM_filtré["lot_niveau_proche"] == lot) &
                 (df_IM_filtré["Paramètre"] == param) &
                 (df_IM_filtré["Nickname"] == nickname)
-            ]
+            ]["limite_accept"].unique()
+            
+            if len(limites) == 0:
+                continue  # pas de limite, skip
+            
+            limite_val = limites[0]  # prendre la première si plusieurs
+            
+            # Créer des points pour dessiner une ligne horizontale
+            x_vals = annees
+            y_vals = np.repeat(limite_val, len(annees))
+            
+            fig_IM.add_trace(
+                go.Scatter(
+                    x=x_vals,
+                    y=y_vals,
+                    mode="lines",
+                    line=dict(color="red", dash="dash", width=2),
+                    name=f"Limite {nickname}",
+                    showlegend=False
+                ),
+                row=facet_row_order_reversed.index(lot) + 1,
+                col=facet_col_order.index(param) + 1
+            )
 
-            if not df_subset.empty:
-                fig_IM.add_trace(
-                    go.Scatter(
-                        x=df_subset["Annee"],
-                        y=df_subset["limite_accept"],
-                        mode="lines",
-                        line=dict(color="red", dash="dash", width=2),
-                        name=f"Limite acceptée - {nickname}",
-                        text=[nickname] * len(df_subset),
-                        textposition="top center",
-                        showlegend=False  # sinon trop de légendes
-                    ),
-                    row=facet_row_order_reversed.index(lot) + 1,
-                    col=facet_col_order.index(param) + 1
-                )
 
 
     # fig_IM.update_layout(height=300 * len(param_selectionnes))
