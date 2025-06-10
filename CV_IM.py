@@ -707,7 +707,7 @@ for lot in facet_row_order:
         
         fig_IM.add_trace(
             go.Scatter(
-                x=df_subset["Annee"],
+                x=df_subset["Annee","Nickname"],
                 y=df_subset["limite_accept"],
                 mode="markers",
                 marker=dict(color="red", size=8),
