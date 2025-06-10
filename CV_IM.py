@@ -674,26 +674,30 @@ if uploaded_eeq:
 )
 
 import plotly.graph_objects as go
-# Récupération **de l'ordre réel** des facettes utilisé par Plotly
-facet_row_order = list(df_IM_filtré["lot_niveau_proche"].unique())  # Ordre d'affichage des lignes
-facet_col_order = list(df_IM_filtré["Paramètre"].unique())  # Ordre d'affichage des colonnes
+# Récupérer les valeurs uniques pour les facettes
+lots_ordre = df_IM_filtré['lot_niveau_proche'].unique().tolist()
+params_ordre = df_IM_filtré['Paramètre'].unique().tolist()
 
-# Ajout des points pour 'limite_accept' en respectant l'ordre des facettes
-for lot in facet_row_order:
-    for param in facet_col_order:
-        df_subset = df_IM_filtré[(df_IM_filtré["lot_niveau_proche"] == lot) & (df_IM_filtré["Paramètre"] == param)]
-        
-        fig_IM.add_trace(
-            go.Scatter(
-                x=df_subset["Annee"],
-                y=df_subset["limite_accept"],
-                mode="markers",
-                marker=dict(color="red", size=8),
-                name=f"Limite acceptée - {lot}, {param}",
-            ),
-            row=facet_row_order.index(lot) + 1,  # Attribution correcte selon l'ordre réel des facettes
-            col=facet_col_order.index(param) + 1  # Attribution correcte selon l'ordre réel des facettes
-        )
+# Pour chaque facette (lot + paramètre), ajouter une ligne horizontale
+for _, row in df_IM_filtré.iterrows():
+    lot = row['lot_niveau_proche']
+    param = row['Paramètre']
+    limite = row['limite_accept']
+
+    row_idx = lots_ordre.index(lot) + 1
+    col_idx = params_ordre.index(param) + 1
+
+    # Ajouter une ligne rouge horizontale pour la limite
+    fig_IM.add_shape(
+        type="line",
+        x0=min(df_IM_filtré['Annee']),
+        x1=max(df_IM_filtré['Annee']),
+        y0=limite,
+        y1=limite,
+        line=dict(color="red", width=2, dash="dash"),
+        row=row_idx,
+        col=col_idx
+    )
 
 
     # fig_IM.update_layout(height=300 * len(param_selectionnes))
