@@ -642,7 +642,7 @@ if uploaded_eeq:
     fig_IM = px.bar(
         df_IM_filtré,
         x="Annee",
-        y="U",
+        y=["U","limite_accept"],
         color="Nickname",
         facet_row="lot_niveau_proche",     # ➜ 1 ligne par lot_niveau_proche
         facet_col="Paramètre",             # ➜ 1 colonne par paramètre
