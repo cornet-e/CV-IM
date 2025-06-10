@@ -149,6 +149,11 @@ CIQ['lot_niveau'] = CIQ[col_lot].astype(str).str[18:22]
 CIQ['Date'] = pd.to_datetime(CIQ['Date'], errors='coerce')
 CIQ['Annee'] = CIQ['Date'].dt.year.astype("Int64")
 
+# Modifier l'unité de l'Hb : g/dL => g/L
+CIQ['HGB(g/dL)'] = CIQ['HGB(g/dL)'] * 10
+# Renommer la colonne
+CIQ.rename(columns={'HGB(g/dL)': 'HGB(g/L)'}, inplace=True)
+
 st.subheader("Graph par paramètre sélectionné (détail par année)")
 
 # === Choix du paramètre ===
