@@ -727,7 +727,7 @@ for lot in facet_row_order:
                         x=df_subset["Annee"],
                         y=df_subset["limite_accept"],
                         mode="lines",
-                        marker=dict(color="red", size=8),
+                        marker=dict(color="red", width=2),
                         name=f"Limite acceptée - {nickname}",
                         text=[nickname] * len(df_subset),
                         textposition="top center",
