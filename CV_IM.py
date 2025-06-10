@@ -726,7 +726,7 @@ for lot in facet_row_order:
                     go.Scatter(
                         x=df_subset["Annee"],
                         y=df_subset["limite_accept"],
-                        mode="markers+text",
+                        mode="lines+text",
                         marker=dict(color="red", size=8),
                         name=f"Limite acceptée - {nickname}",
                         text=[nickname] * len(df_subset),
