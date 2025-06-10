@@ -674,14 +674,16 @@ if uploaded_eeq:
 )
 
 import plotly.graph_objects as go
-# Récupérer les valeurs uniques pour les facettes
-lots_ordre = df_IM_filtré['lot_niveau_proche'].astype(str).unique().tolist()
-st.write("lots_ordre:", lots_ordre)
-params_ordre = df_IM_filtré['Paramètre'].unique().astype(str).tolist()
+# 📌 Récupérer l'ordre des facettes **tel que Plotly Express les affiche**
+facet_row_order = sorted(df_IM_filtré["lot_niveau_proche"].unique(), key=lambda x: str(x))
+facet_col_order = sorted(df_IM_filtré["Paramètre"].unique(), key=lambda x: str(x))
 
-# Ajout des points pour 'limite_accept' en respectant l'ordre des facettes
-for lot in lots_ordre:
-    for param in params_ordre:
+st.write("Ordre des facettes - lot_niveau_proche:", facet_row_order)
+st.write("Ordre des facettes - Paramètre:", facet_col_order)
+
+# Ajout des points pour 'limite_accept' en respectant l'affichage des facettes
+for lot in facet_row_order:
+    for param in facet_col_order:
         df_subset = df_IM_filtré[(df_IM_filtré["lot_niveau_proche"] == lot) & (df_IM_filtré["Paramètre"] == param)]
         
         fig_IM.add_trace(
@@ -692,8 +694,8 @@ for lot in lots_ordre:
                 marker=dict(color="red", size=8),
                 name=f"Limite acceptée - {lot}, {param}",
             ),
-            row=lots_ordre.index(lot) + 1,  # Attribution correcte selon l'ordre réel des facettes
-            col=params_ordre.index(param) + 1  # Attribution correcte selon l'ordre réel des facettes
+            row=facet_row_order.index(lot) + 1,  # 🔥 Utilisation correcte des indices réels
+            col=facet_col_order.index(param) + 1  # 🔥 Alignement parfait des colonnes
         )
 
 
