@@ -675,10 +675,17 @@ if uploaded_eeq:
 
     nb_lots = df_IM_filtré["lot_niveau_proche"].nunique()
     nb_params = df_IM_filtré["Paramètre"].nunique()
-    
+
     fig_IM.update_layout(
-    height=max(300, 250 * nb_lots * nb_params),  # Ajustement plus fin si tu veux
-)
+    height=max(300, 250 * len(facet_row_order)),  # Ajuste en fonction du nombre réel de lignes
+    showlegend=True,
+    facet_row_wrap=1  # 🔥 Forcer une seule série de facettes
+    )
+
+    
+    #fig_IM.update_layout(
+    #height=max(300, 250 * nb_lots * nb_params),  # Ajustement plus fin si tu veux
+#)
 
 import plotly.graph_objects as go
 # 📌 Récupérer l'ordre des facettes **tel que Plotly Express les affiche**
