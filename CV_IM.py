@@ -713,6 +713,9 @@ facet_row_order_reversed = list(reversed(facet_row_order))  # 🔄 Inverse l'ord
         #)
 annees = sorted(df_IM_filtré["Annee"].unique())
 
+fig_IM.update_yaxes(range=[0, max(df_IM_filtré["U"].max(), df_IM_filtré["limite_accept"].max()) * 1.1])
+
+
 for lot in facet_row_order:
     for param in facet_col_order:
         for nickname in df_IM_filtré["Nickname"].unique():
@@ -732,13 +735,18 @@ for lot in facet_row_order:
             # Créer des points pour dessiner une ligne horizontale
             x_vals = annees
             y_vals = np.repeat(limite_val, len(annees))
+
+            st.write("Annees utilisées pour tracer la ligne :", x_vals)
+
+
+
             
             fig_IM.add_trace(
                 go.Scatter(
                     x=x_vals,
                     y=y_vals,
                     mode="lines",
-                    line=dict(color="red", dash="dash", width=2),
+                    line=dict(color="red", dash="dash", width=4),
                     name=f"Limite {nickname}",
                     showlegend=False
                 ),
