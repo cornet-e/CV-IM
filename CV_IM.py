@@ -619,7 +619,7 @@ if uploaded_eeq:
     for axis in fig_IM.layout:
         if axis.startswith("yaxis"):
             fig_IM.layout[axis].showticklabels = True
-            fig_IM.layout[axis].title = dict(text="Incertitude Elargie (U)(%)")
+            fig_IM.layout[axis].title = dict(text="Incertitude Elargie (U)")
 
     for axis_name in fig_IM.layout:
         if axis_name.startswith("xaxis"):
