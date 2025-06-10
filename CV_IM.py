@@ -617,6 +617,7 @@ if uploaded_eeq:
         color="Nickname",
         facet_row="lot_niveau_proche",     # ➜ 1 ligne par lot_niveau_proche
         facet_col="Paramètre",             # ➜ 1 colonne par paramètre
+        facet_row_spacing=0.1,
         barmode="group",
         title="Incertitude élargie par Paramètre et par Année",
         labels={"U": "Incertitude élargie", "Annee": "Année"}
