@@ -455,7 +455,7 @@ if uploaded_eeq:
 
     # Extraire Année
     EEQ['Annee'] = EEQ['Date'].dt.year
-    EEQ['HGB(g/dL)'] = EEQ['HGB(g/dL)'] / 10 # conversion d'unité de g/L à g/dL
+    # EEQ['HGB(g/dL)'] = EEQ['HGB(g/dL)'] / 10 # conversion d'unité de g/L à g/dL
     
     # Joindre CIQ et EEQ pour la même variable, Nickname (automate), année
     # Dans CIQ, on doit avoir colonne Année à créer (par exemple date d’analyse)
