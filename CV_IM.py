@@ -640,7 +640,7 @@ if uploaded_eeq:
     st.subheader("Incertitudes élargies (U) par année et par analyseur")
 
     facet_row_order = sorted(df_IM_filtré["lot_niveau_proche"].unique(), key=lambda x: str(x))
-
+    facet_col_order = sorted(df_IM_filtré["Paramètre"].unique(), key=lambda x: str(x))
     
     fig_IM = px.bar(
         df_IM_filtré,
@@ -679,7 +679,7 @@ if uploaded_eeq:
 
 import plotly.graph_objects as go
 # 📌 Récupérer l'ordre des facettes **tel que Plotly Express les affiche**
-#facet_col_order = sorted(df_IM_filtré["Paramètre"].unique(), key=lambda x: str(x))
+
 
 # Inversion de l'indexation des facettes pour correspondre au vrai mapping
 facet_row_order_reversed = list(reversed(facet_row_order))  # 🔄 Inverse l'ordre des lignes
