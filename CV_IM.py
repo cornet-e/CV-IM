@@ -701,23 +701,47 @@ facet_row_order_reversed = list(reversed(facet_row_order))  # 🔄 Inverse l'ord
 
 
 # Ajout des points pour 'limite_accept' en respectant l'affichage des facettes
-for lot in facet_row_order:
-    for param in facet_col_order:
-        df_subset = df_IM_filtré[(df_IM_filtré["lot_niveau_proche"] == lot) & (df_IM_filtré["Paramètre"] == param)]
-        
-        fig_IM.add_trace(
-            go.Scatter(
-                x=df_subset["Annee"],
-                y=df_subset["limite_accept"],
-                mode="markers",
-                marker=dict(color="red", size=8),
-                name=f"Limite acceptée - {lot}, {param}",
-            ),
-            row=facet_row_order_reversed.index(lot) + 1,  # 🔥 Utilisation correcte des indices réels
-            col=facet_col_order.index(param) + 1  # 🔥 Alignement parfait des colonnes
-        )
+#for lot in facet_row_order:
+ #   for param in facet_col_order:
+  #      df_subset = df_IM_filtré[(df_IM_filtré["lot_niveau_proche"] == lot) & (df_IM_filtré["Paramètre"] == param)]
+   #     
+    #    fig_IM.add_trace(
+     #       go.Scatter(
+      #          x=df_subset["Annee"],
+       #         y=df_subset["limite_accept"],
+        #        mode="markers",
+         #       marker=dict(color="red", size=8),
+          #      name=f"Limite acceptée - {lot}, {param}",
+           # ),
+            #row=facet_row_order_reversed.index(lot) + 1,  # 🔥 Utilisation correcte des indices réels
+            #col=facet_col_order.index(param) + 1  # 🔥 Alignement parfait des colonnes
+        #)
 
+    for lot in facet_row_order:
+        for param in facet_col_order:
+            for nickname in df_IM_filtré["Nickname"].unique():
+                df_subset = df_IM_filtré[
+                    (df_IM_filtré["lot_niveau_proche"] == lot) &
+                    (df_IM_filtré["Paramètre"] == param) &
+                    (df_IM_filtré["Nickname"] == nickname)
+                ]
     
+                if not df_subset.empty:
+                    fig_IM.add_trace(
+                        go.Scatter(
+                            x=df_subset["Annee"],
+                            y=df_subset["limite_accept"],
+                            mode="markers+text",
+                            marker=dict(color="red", size=8),
+                            name=f"Limite acceptée - {nickname}",
+                            text=[nickname] * len(df_subset),
+                            textposition="top center",
+                            showlegend=False  # sinon trop de légendes
+                        ),
+                        row=facet_row_order_reversed.index(lot) + 1,
+                        col=facet_col_order.index(param) + 1
+                    )
+
 
     # fig_IM.update_layout(height=300 * len(param_selectionnes))
     st.plotly_chart(fig_IM, use_container_width=True)
