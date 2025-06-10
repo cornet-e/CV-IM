@@ -666,20 +666,26 @@ if uploaded_eeq:
             axis.showticklabels = True
             axis.title = dict(text="Annee")
 
+    lots_ordre = df_IM_filtré['lot_niveau_proche'].unique()
+
+    xref_yref_map = {
+        lot: (f"x{i+1}" if i > 0 else "x", f"y{i+1}" if i > 0 else "y")
+        for i, lot in enumerate(lots_ordre)
+    }
+
     for _, row in df_IM_filtré.iterrows():
         if pd.notnull(row['limite_accept']):
+            xref, yref = xref_yref_map.get(row['lot_niveau_proche'], ("x", "y"))
             fig_IM.add_shape(
                 type="line",
-                x0=row['Annee'] - 0.4,  # pour que la ligne couvre la barre
+                x0=row['Annee'] - 0.4,
                 x1=row['Annee'] + 0.4,
                 y0=row['limite_accept'],
                 y1=row['limite_accept'],
                 line=dict(color="red", dash="dash"),
-                xref="x",  # automatique car plotly.express gère le mapping
-                yref="y",  # idem
-                name="Limite acceptable"
+                xref=xref,
+                yref=yref
             )
-
 
     nb_lots = df_IM_filtré["lot_niveau_proche"].nunique()
     nb_params = df_IM_filtré["Paramètre"].nunique()
