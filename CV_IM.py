@@ -711,10 +711,6 @@ facet_row_order_reversed = list(reversed(facet_row_order))  # 🔄 Inverse l'ord
             #row=facet_row_order_reversed.index(lot) + 1,  # 🔥 Utilisation correcte des indices réels
             #col=facet_col_order.index(param) + 1  # 🔥 Alignement parfait des colonnes
         #)
-annees = sorted(df_IM_filtré["Annee"].unique())
-
-fig_IM.update_yaxes(range=[0, max(df_IM_filtré["U"].max(), df_IM_filtré["limite_accept"].max()) * 1.1])
-
 
 for lot in facet_row_order:
     for param in facet_col_order:
@@ -745,8 +741,8 @@ for lot in facet_row_order:
                 go.Scatter(
                     x=x_vals,
                     y=y_vals,
-                    mode="lines",
-                    line=dict(color="red", dash="dash", width=4),
+                    mode="markers+text",
+                    marker=dict(color="red", width=2),
                     name=f"Limite {nickname}",
                     showlegend=False
                 ),
