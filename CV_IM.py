@@ -674,18 +674,25 @@ if uploaded_eeq:
 )
 
 import plotly.graph_objects as go
-# Ajout des points pour 'limit_accept'
-for param in df_IM_filtré["Paramètre"].unique():
-    for lot in df_IM_filtré["lot_niveau_proche"].unique():
-        df_subset = df_IM_filtré[(df_IM_filtré["Paramètre"] == param) & (df_IM_filtré["lot_niveau_proche"] == lot)]
-        fig_IM.add_trace(
+# Récupération des facettes pour correctement positionner les points
+lots_uniques = df_IM_filtré["lot_niveau_proche"].unique()
+params_uniques = df_IM_filtré["Paramètre"].unique()
+
+# Ajout des points pour 'limite_accept' dans chaque facette correspondante
+for i, lot in enumerate(lots_uniques):  
+    for j, param in enumerate(params_uniques):  
+        df_subset = df_IM_filtré[(df_IM_filtré["lot_niveau_proche"] == lot) & (df_IM_filtré["Paramètre"] == param)]
+        
+        fig.add_trace(
             go.Scatter(
                 x=df_subset["Annee"],
                 y=df_subset["limite_accept"],
                 mode="markers",
                 marker=dict(color="red", size=8),
-                name=f"Limite acceptée - {param}, {lot}",
-            )
+                name=f"Limite acceptée - {lot}, {param}",
+            ),
+            row=i+1,  # Assignation à la bonne ligne (facette de lot_niveau_proche)
+            col=j+1   # Assignation à la bonne colonne (facette de Paramètre)
         )
 
 
