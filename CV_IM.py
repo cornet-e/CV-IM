@@ -676,11 +676,14 @@ if uploaded_eeq:
 
 import plotly.graph_objects as go
 # 📌 Récupérer l'ordre des facettes **tel que Plotly Express les affiche**
-facet_row_order = sorted(df_IM_filtré["lot_niveau_proche"].unique(), key=lambda x: str(x))
-facet_col_order = sorted(df_IM_filtré["Paramètre"].unique(), key=lambda x: str(x))
+#facet_row_order = sorted(df_IM_filtré["lot_niveau_proche"].unique(), key=lambda x: str(x))
+#facet_col_order = sorted(df_IM_filtré["Paramètre"].unique(), key=lambda x: str(x))
 
-st.write("Ordre des facettes - lot_niveau_proche:", facet_row_order)
-st.write("Ordre des facettes - Paramètre:", facet_col_order)
+# Inversion de l'indexation des facettes pour correspondre au vrai mapping
+facet_row_order_reversed = list(reversed(facet_row_order))  # 🔄 Inverse l'ordre des lignes
+
+st.write("Ordre des facettes inversé - lot_niveau_proche:", facet_row_order_reversed)
+
 
 # Ajout des points pour 'limite_accept' en respectant l'affichage des facettes
 for lot in facet_row_order:
@@ -695,7 +698,7 @@ for lot in facet_row_order:
                 marker=dict(color="red", size=8),
                 name=f"Limite acceptée - {lot}, {param}",
             ),
-            row=facet_row_order.index(lot) + 1,  # 🔥 Utilisation correcte des indices réels
+            row=facet_row_order_reversed.index(lot) + 1,  # 🔥 Utilisation correcte des indices réels
             col=facet_col_order.index(param) + 1  # 🔥 Alignement parfait des colonnes
         )
 
