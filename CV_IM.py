@@ -642,7 +642,7 @@ if uploaded_eeq:
     facet_row_order = sorted(df_IM_filtré["lot_niveau_proche"].unique(), key=lambda x: str(x))
     facet_col_order = sorted(df_IM_filtré["Paramètre"].unique(), key=lambda x: str(x))
 
-    st.write("Données uniques pour lot_niveau_proche et Paramètre:", df_IM_filtré[["lot_niveau_proche", "Paramètre"]].drop_duplicates())
+    # st.write("Données uniques pour lot_niveau_proche et Paramètre:", df_IM_filtré[["lot_niveau_proche", "Paramètre"]].drop_duplicates())
 
     
     fig_IM = px.bar(
@@ -677,7 +677,7 @@ if uploaded_eeq:
     nb_params = df_IM_filtré["Paramètre"].nunique()
     
     fig_IM.update_layout(
-    height=max(300, 250 * nb_lots),  # Ajustement plus fin si tu veux
+    height=max(300, 250 * nb_lots * nb_params),  # Ajustement plus fin si tu veux
 )
 
 import plotly.graph_objects as go
@@ -686,8 +686,8 @@ import plotly.graph_objects as go
 
 # Inversion de l'indexation des facettes pour correspondre au vrai mapping
 facet_row_order_reversed = list(reversed(facet_row_order))  # 🔄 Inverse l'ordre des lignes
-st.write("Ordre des facettes  - lot_niveau_proche:", facet_row_order)
-st.write("Ordre des facettes inversé - lot_niveau_proche:", facet_row_order_reversed)
+# st.write("Ordre des facettes  - lot_niveau_proche:", facet_row_order)
+# st.write("Ordre des facettes inversé - lot_niveau_proche:", facet_row_order_reversed)
 
 
 # Ajout des points pour 'limite_accept' en respectant l'affichage des facettes
