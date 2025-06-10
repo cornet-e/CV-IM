@@ -111,7 +111,7 @@ else:
 CIQ['HGB(g/dL)'] = CIQ['HGB(g/dL)'] * 10
 # Renommer la colonne
 CIQ.rename(columns={'HGB(g/dL)': 'HGB(g/L)'}, inplace=True)
-st.datafarame(CIQ)
+st.dataframe(CIQ)
 
 # === Chargement de la liste des champs ===
 try:
