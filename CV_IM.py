@@ -578,6 +578,7 @@ if uploaded_eeq:
     df_IM['u_CIQ'] = df_IM['SD_MAD']
     df_IM['u_total'] = np.sqrt(df_IM['u_biais']**2 + df_IM['u_CIQ']**2)
     df_IM['U'] = df_IM['u_total'] * 2  # élargie (k=2)
+    df_IM['U%'] = 100 * df_IM['U'] / df_IM['Moyenne']
 
     st.dataframe(df_IM)
     
@@ -646,6 +647,7 @@ if uploaded_eeq:
 
     # fig_IM.update_layout(height=300 * len(param_selectionnes))
     st.plotly_chart(fig_IM, use_container_width=True)
+
 
 
 else:
