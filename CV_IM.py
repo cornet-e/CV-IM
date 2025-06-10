@@ -222,7 +222,7 @@ plot_cv("CV_MAD", f"{param} : CV MAD", "CV (%)")
 # ➕ Graphique Facets (CV_MAD par paramètre)
 # =======================
 
-st.subheader("Facets : CV MAD par paramètre (moyenne de toutes les CIQ)")
+st.subheader("Facets : CV MAD par paramètre (moyenne de tous les CIQ)")
 
 
 # Sélectionne les colonnes de l'index 8 à 125 pour permettre la conversion en numérique
