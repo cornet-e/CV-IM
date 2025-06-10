@@ -693,7 +693,7 @@ for lot in df_IM_filtré["lot_niveau_proche"].unique():
             ),
             row=facet_row_values[lot],  # Attribution correcte des lignes de facette
             col=facet_col_values[param]  # Attribution correcte des colonnes de facette
-        
+        )
 
 
 
