@@ -684,7 +684,10 @@ if uploaded_eeq:
 
     
     fig_IM.update_layout(
-    height=max(300, 250 * nb_lots * nb_params),  # Ajustement plus fin si tu veux
+    height=max(300, 250 * len(facet_row_order)),  # Ajuste en fonction du nombre réel de lignes
+    showlegend=True,
+    facet_row_wrap=1,  # 🔥 Forcer une seule série de facettes
+    #    height=max(300, 250 * nb_lots * nb_params),  # Ajustement plus fin si tu veux
 )
 
 import plotly.graph_objects as go
