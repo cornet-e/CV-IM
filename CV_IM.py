@@ -674,13 +674,13 @@ if uploaded_eeq:
 )
 
 import plotly.graph_objects as go
-# Mapping des facettes correctement pour éviter les doublons
-facet_row_values = {lot: i+1 for i, lot in enumerate(df_IM_filtré["lot_niveau_proche"].unique())}
-facet_col_values = {param: j+1 for j, param in enumerate(df_IM_filtré["Paramètre"].unique())}
+# Récupération **de l'ordre réel** des facettes utilisé par Plotly
+facet_row_order = list(df_IM_filtré["lot_niveau_proche"].unique())  # Ordre d'affichage des lignes
+facet_col_order = list(df_IM_filtré["Paramètre"].unique())  # Ordre d'affichage des colonnes
 
-# Ajout des points pour 'limite_accept'
-for lot in df_IM_filtré["lot_niveau_proche"].unique():
-    for param in df_IM_filtré["Paramètre"].unique():
+# Ajout des points pour 'limite_accept' en respectant l'ordre des facettes
+for lot in facet_row_order:
+    for param in facet_col_order:
         df_subset = df_IM_filtré[(df_IM_filtré["lot_niveau_proche"] == lot) & (df_IM_filtré["Paramètre"] == param)]
         
         fig_IM.add_trace(
@@ -691,10 +691,9 @@ for lot in df_IM_filtré["lot_niveau_proche"].unique():
                 marker=dict(color="red", size=8),
                 name=f"Limite acceptée - {lot}, {param}",
             ),
-            row=facet_row_values[lot],  # Attribution correcte des lignes de facette
-            col=facet_col_values[param]  # Attribution correcte des colonnes de facette
+            row=facet_row_order.index(lot) + 1,  # Attribution correcte selon l'ordre réel des facettes
+            col=facet_col_order.index(param) + 1  # Attribution correcte selon l'ordre réel des facettes
         )
-
 
 
     # fig_IM.update_layout(height=300 * len(param_selectionnes))
