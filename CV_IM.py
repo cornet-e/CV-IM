@@ -190,14 +190,27 @@ grouped = data_filtrée.groupby([col_automate, 'lot_niveau','Annee'])[param].agg
 
 st.dataframe(grouped)
 
+grouped['lot_annee'] = grouped['lot_niveau'].astype(str) + " (" + grouped['Annee'].astype(str) + ")"
+
+
 # Graphs interactifs
+#def plot_cv(y, title, ylabel):
+#    fig = px.bar(grouped, x='lot_niveau', y=y, color=col_automate,
+#                 barmode='group',
+#                 hover_data=['n'],
+#                 title=title,
+#                 labels={y: ylabel, 'lot_niveau': 'Niveau de lot'})
+#    st.plotly_chart(fig)
+
 def plot_cv(y, title, ylabel):
-    fig = px.bar(grouped, x='lot_niveau', y=y, color=col_automate,
+    fig = px.bar(grouped, x='lot_annee', y=y, color=col_automate,
                  barmode='group',
-                 hover_data=['n'],
+                 hover_data=['n', 'Annee', 'lot_niveau'],
                  title=title,
-                 labels={y: ylabel, 'lot_niveau': 'Niveau de lot'})
+                 labels={y: ylabel, 'lot_annee': 'Niveau de lot (Année)'}
+                )
     st.plotly_chart(fig)
+
 
 st.subheader("Graphiques des CV")
 plot_cv("CV", f"{param} : CV classique", "CV (%)")
