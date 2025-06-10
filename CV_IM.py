@@ -149,7 +149,7 @@ CIQ['lot_niveau'] = CIQ[col_lot].astype(str).str[18:22]
 CIQ['Date'] = pd.to_datetime(CIQ['Date'], errors='coerce')
 CIQ['Annee'] = CIQ['Date'].dt.year.astype("Int64")
 
-st.subheader("Graph par paramètre sélectionné (détail par année")
+st.subheader("Graph par paramètre sélectionné (détail par année)")
 
 # === Choix du paramètre ===
 choix_param = CIQ.columns[8:]  # adapter si besoin
