@@ -703,7 +703,7 @@ facet_row_order_reversed = list(reversed(facet_row_order))  # 🔄 Inverse l'ord
 # Ajout des points pour 'limite_accept' en respectant l'affichage des facettes
 for lot in facet_row_order:
     for param in facet_col_order:
-        df_subset = df_IM_filtré[(df_IM_filtré["lot_niveau_proche"] == lot) & (df_IM_filtré["Paramètre"] == param)]
+        df_subset = df_IM_filtré[(df_IM_filtré["lot_niveau_proche"] == lot) & (df_IM_filtré["Paramètre"] == param)] & (df_IM_filtré["Nickname"] == Nickname)]
         
         fig_IM.add_trace(
             go.Scatter(
