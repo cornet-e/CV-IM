@@ -205,7 +205,7 @@ grouped['lot_annee'] = grouped['lot_niveau'].astype(str) + " (" + grouped['Annee
 def plot_cv(y, title, ylabel):
     fig = px.bar(grouped, x='lot_annee', y=y, color=col_automate,
                  barmode='group',
-                 hover_data=['n', 'lot_niveau', 'Annee'],
+                 hover_data=['n', 'Annee', 'lot_niveau'],
                  title=title,
                  labels={y: ylabel, 'lot_annee': 'Niveau de lot (Année)'}
                 )
