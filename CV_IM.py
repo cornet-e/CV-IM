@@ -108,10 +108,10 @@ else:
     st.stop()
 
 # Modifier l'unité de l'Hb : g/dL => g/L
-CIQ['HGB(g/dL)'] = CIQ['HGB(g/dL)'] * 10
+CIQ['HGB(g/dL)'] = pd.to_numeric(CIQ['HGB(g/dL)'], errors='coerce') * 10
 # Renommer la colonne
 CIQ.rename(columns={'HGB(g/dL)': 'HGB(g/L)'}, inplace=True)
-st.dataframe(CIQ)
+st.dataframe(head(CIQ))
 
 # === Chargement de la liste des champs ===
 try:
