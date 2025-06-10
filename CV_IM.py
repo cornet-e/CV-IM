@@ -677,7 +677,7 @@ if uploaded_eeq:
     nb_params = df_IM_filtré["Paramètre"].nunique()
     
     fig_IM.update_layout(
-    height=max(300, 250 * nb_lots * nb_params),  # Ajustement plus fin si tu veux
+    height=max(300, 250 * nb_lots),  # Ajustement plus fin si tu veux
 )
 
 import plotly.graph_objects as go
