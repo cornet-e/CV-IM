@@ -641,6 +641,9 @@ if uploaded_eeq:
 
     facet_row_order = sorted(df_IM_filtré["lot_niveau_proche"].unique(), key=lambda x: str(x))
     facet_col_order = sorted(df_IM_filtré["Paramètre"].unique(), key=lambda x: str(x))
+
+    st.write("Données uniques pour lot_niveau_proche et Paramètre:", df_IM_filtré[["lot_niveau_proche", "Paramètre"]].drop_duplicates())
+
     
     fig_IM = px.bar(
         df_IM_filtré,
