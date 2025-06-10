@@ -149,7 +149,7 @@ CIQ['lot_niveau'] = CIQ[col_lot].astype(str).str[18:22]
 CIQ['Date'] = pd.to_datetime(CIQ['Date'], errors='coerce')
 CIQ['Annee'] = CIQ['Date'].dt.year.astype("Int64")
 
-st.subheader("Graph par paramètre sélectionné")
+st.subheader("Graph par paramètre sélectionné (détail par année")
 
 # === Choix du paramètre ===
 choix_param = CIQ.columns[8:]  # adapter si besoin
@@ -222,7 +222,7 @@ plot_cv("CV_MAD", f"{param} : CV MAD", "CV (%)")
 # ➕ Graphique Facets (CV_MAD par paramètre)
 # =======================
 
-st.subheader("Facets : CV MAD par paramètre")
+st.subheader("Facets : CV MAD par paramètre (moyenne de toutes les CIQ)")
 
 
 # Sélectionne les colonnes de l'index 8 à 125 pour permettre la conversion en numérique
