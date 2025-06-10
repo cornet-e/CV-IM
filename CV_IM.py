@@ -642,7 +642,7 @@ if uploaded_eeq:
     fig_IM = px.bar(
         df_IM_filtré,
         x="Annee",
-        y=["U","limite_accept"],
+        y="U",
         color="Nickname",
         facet_row="lot_niveau_proche",     # ➜ 1 ligne par lot_niveau_proche
         facet_col="Paramètre",             # ➜ 1 colonne par paramètre
@@ -672,6 +672,22 @@ if uploaded_eeq:
     fig_IM.update_layout(
     height=max(300, 250 * nb_lots * nb_params),  # Ajustement plus fin si tu veux
 )
+
+import plotly.graph_objects as go
+# Ajout des points pour 'limit_accept'
+for param in df_IM_filtré["Paramètre"].unique():
+    for lot in df_IM_filtré["lot_niveau_proche"].unique():
+        df_subset = df_IM_filtré[(df_IM_filtré["Paramètre"] == param) & (df_IM_filtré["lot_niveau_proche"] == lot)]
+        fig.add_trace(
+            go.Scatter(
+                x=df_subset["Annee"],
+                y=df_subset["limite_accept"],
+                mode="markers",
+                marker=dict(color="red", size=8),
+                name=f"Limite acceptée - {param}, {lot}",
+            )
+        )
+
 
     # fig_IM.update_layout(height=300 * len(param_selectionnes))
     st.plotly_chart(fig_IM, use_container_width=True)
