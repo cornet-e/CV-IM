@@ -712,39 +712,41 @@ facet_row_order_reversed = list(reversed(facet_row_order))  # 🔄 Inverse l'ord
             #col=facet_col_order.index(param) + 1  # 🔥 Alignement parfait des colonnes
         #)
 
+# Palette de couleurs (tu peux choisir d'autres couleurs ou symboles)
+colors = px.colors.qualitative.Plotly
+symbols = ["circle", "square", "diamond", "star", "triangle-up", "cross"]
+
+nicknames = df_IM_filtré["Nickname"].unique()
+
 for lot in facet_row_order:
     for param in facet_col_order:
-        for nickname in df_IM_filtré["Nickname"].unique():
-            # Extraire la valeur unique limite_accept pour cette combinaison (lot, param, nickname)
-            limites = df_IM_filtré[
+        for i, nickname in enumerate(nicknames):
+            df_subset = df_IM_filtré[
                 (df_IM_filtré["lot_niveau_proche"] == lot) &
                 (df_IM_filtré["Paramètre"] == param) &
                 (df_IM_filtré["Nickname"] == nickname)
-            ]["limite_accept"].unique()
-            
-            if len(limites) == 0:
-                continue  # pas de limite, skip
-            
-            limite_val = limites[0]  # prendre la première si plusieurs
-            st.write(f"Trace limite: lot={lot}, param={param}, nickname={nickname}, limite={limite_val}")
-            
-            # Créer des points pour dessiner une ligne horizontale
-            x_vals = annees
-            y_vals = np.repeat(limite_val, len(annees))
+            ]
+            if df_subset.empty:
+                continue
 
-            st.write("Annees utilisées pour tracer la ligne :", x_vals)
-
-
-
-            
             fig_IM.add_trace(
                 go.Scatter(
-                    x=x_vals,
-                    y=y_vals,
-                    mode="markers+text",
-                    marker=dict(color="red", width=2),
-                    name=f"Limite {nickname}",
-                    showlegend=False
+                    x=df_subset["Annee"],
+                    y=df_subset["limite_accept"],
+                    mode="markers",
+                    marker=dict(
+                        color=colors[i % len(colors)],
+                        size=10,
+                        symbol=symbols[i % len(symbols)],
+                        line=dict(width=1, color="black")  # contour noir pour bien voir
+                    ),
+                    name=f"Limite acceptée - {nickname}",
+                    showlegend=True,
+                    hovertemplate=(
+                        f"Limite: %{y}<br>"
+                        f"Année: %{x}<br>"
+                        f"Analyseur: {nickname}<extra></extra>"
+                    )
                 ),
                 row=facet_row_order_reversed.index(lot) + 1,
                 col=facet_col_order.index(param) + 1
