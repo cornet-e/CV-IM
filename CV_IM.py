@@ -717,6 +717,7 @@ for lot in facet_row_order:
             col=facet_col_order.index(param) + 1  # 🔥 Alignement parfait des colonnes
         )
 
+    
 
     # fig_IM.update_layout(height=300 * len(param_selectionnes))
     st.plotly_chart(fig_IM, use_container_width=True)
