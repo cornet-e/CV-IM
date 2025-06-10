@@ -193,7 +193,7 @@ st.dataframe(grouped)
 # Graphs interactifs
 def plot_cv(y, title, ylabel):
     fig = px.bar(grouped, x='lot_niveau', y=y, color=col_automate,
-                 barmode='overlay',
+                 barmode='group',
                  hover_data=['n'],
                  title=title,
                  labels={y: ylabel, 'lot_niveau': 'Niveau de lot'})
