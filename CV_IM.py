@@ -679,26 +679,22 @@ lots_ordre = df_IM_filtré['lot_niveau_proche'].astype(str).unique().tolist()
 st.write("lots_ordre:", lots_ordre)
 params_ordre = df_IM_filtré['Paramètre'].unique().astype(str).tolist()
 
-# Pour chaque facette (lot + paramètre), ajouter une ligne horizontale
-for _, row in df_IM_filtré.iterrows():
-    lot = row['lot_niveau_proche']
-    param = row['Paramètre']
-    limite = row['limite_accept']
-
-    row_idx = lots_ordre.index(lot) + 1
-    col_idx = params_ordre.index(param) + 1
-
-    # Ajouter une ligne rouge horizontale pour la limite
-    fig_IM.add_shape(
-        type="line",
-        x0=min(df_IM_filtré['Annee']),
-        x1=max(df_IM_filtré['Annee']),
-        y0=limite,
-        y1=limite,
-        line=dict(color="red", width=2, dash="dash"),
-        row=row_idx,
-        col=col_idx
-    )
+# Ajout des points pour 'limite_accept' en respectant l'ordre des facettes
+for lot in lots_ordre:
+    for param in params_ordre:
+        df_subset = df_IM_filtré[(df_IM_filtré["lot_niveau_proche"] == lot) & (df_IM_filtré["Paramètre"] == param)]
+        
+        fig_IM.add_trace(
+            go.Scatter(
+                x=df_subset["Annee"],
+                y=df_subset["limite_accept"],
+                mode="markers",
+                marker=dict(color="red", size=8),
+                name=f"Limite acceptée - {lot}, {param}",
+            ),
+            row=lots_ordre.index(lot) + 1,  # Attribution correcte selon l'ordre réel des facettes
+            col=params_ordre.index(param) + 1  # Attribution correcte selon l'ordre réel des facettes
+        )
 
 
     # fig_IM.update_layout(height=300 * len(param_selectionnes))
