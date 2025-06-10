@@ -675,8 +675,8 @@ if uploaded_eeq:
 
 import plotly.graph_objects as go
 # Récupérer les valeurs uniques pour les facettes
-lots_ordre = df_IM_filtré['lot_niveau_proche'].unique().tolist()
-params_ordre = df_IM_filtré['Paramètre'].unique().tolist()
+lots_ordre = df_IM_filtré['lot_niveau_proche'].astype(str).unique().tolist()
+params_ordre = df_IM_filtré['Paramètre'].unique().astype(str).tolist()
 
 # Pour chaque facette (lot + paramètre), ajouter une ligne horizontale
 for _, row in df_IM_filtré.iterrows():
