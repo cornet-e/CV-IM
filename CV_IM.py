@@ -743,8 +743,8 @@ for lot in facet_row_order:
                     name=f"Limite acceptée - {nickname}",
                     showlegend=True,
                     hovertemplate=(
-                        f"Limite: %{y}<br>"
-                        f"Année: %{x}<br>"
+                        f"Limite: %{{y}}<br>"
+                        f"Année: %{{x}}<br>"
                         f"Analyseur: {nickname}<extra></extra>"
                     )
                 ),
