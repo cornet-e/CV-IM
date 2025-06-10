@@ -678,7 +678,7 @@ import plotly.graph_objects as go
 for param in df_IM_filtré["Paramètre"].unique():
     for lot in df_IM_filtré["lot_niveau_proche"].unique():
         df_subset = df_IM_filtré[(df_IM_filtré["Paramètre"] == param) & (df_IM_filtré["lot_niveau_proche"] == lot)]
-        fig.add_trace(
+        fig_IM.add_trace(
             go.Scatter(
                 x=df_subset["Annee"],
                 y=df_subset["limite_accept"],
