@@ -667,18 +667,18 @@ if uploaded_eeq:
             axis.title = dict(text="Annee")
 
     for _, row in df_IM_filtré.iterrows():
-    if pd.notnull(row['limite_accept']):
-        fig_IM.add_shape(
-            type="line",
-            x0=row['Annee'] - 0.4,  # pour que la ligne couvre la barre
-            x1=row['Annee'] + 0.4,
-            y0=row['limite_accept'],
-            y1=row['limite_accept'],
-            line=dict(color="red", dash="dash"),
-            xref="x",  # automatique car plotly.express gère le mapping
-            yref="y",  # idem
-            name="Limite acceptable"
-        )
+        if pd.notnull(row['limite_accept']):
+            fig_IM.add_shape(
+                type="line",
+                x0=row['Annee'] - 0.4,  # pour que la ligne couvre la barre
+                x1=row['Annee'] + 0.4,
+                y0=row['limite_accept'],
+                y1=row['limite_accept'],
+                line=dict(color="red", dash="dash"),
+                xref="x",  # automatique car plotly.express gère le mapping
+                yref="y",  # idem
+                name="Limite acceptable"
+            )
 
 
     nb_lots = df_IM_filtré["lot_niveau_proche"].nunique()
