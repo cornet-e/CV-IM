@@ -66,11 +66,6 @@ def trouver_lot_niveau_proche(row, ciq_moyennes):
 
     return candidats.loc[idx_min, "lot_niveau"]
 
-
-
-
-
-
 # === Chargement des fichiers ===
 uploaded_files = st.file_uploader("Importer un ou plusieurs fichiers CSV", type=["csv"], accept_multiple_files=True)
 
