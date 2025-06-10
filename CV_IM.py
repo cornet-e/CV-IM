@@ -649,7 +649,8 @@ if uploaded_eeq:
         facet_row_spacing=0.1,
         barmode="group",
         title="Incertitude élargie par Paramètre et par Année",
-        labels={"U": "Incertitude élargie", "Annee": "Année"}
+        labels={"U": "Incertitude élargie", "Annee": "Année"},
+        category_orders={"lot_niveau_proche": facet_row_order}  # 🔥 Assure l'ordre correct des lots
     )
 
     # Axe y indépendant pour chaque facette
