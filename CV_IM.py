@@ -727,6 +727,7 @@ for lot in facet_row_order:
                 continue  # pas de limite, skip
             
             limite_val = limites[0]  # prendre la première si plusieurs
+            st.write(f"Trace limite: lot={lot}, param={param}, nickname={nickname}, limite={limite_val}")
             
             # Créer des points pour dessiner une ligne horizontale
             x_vals = annees
