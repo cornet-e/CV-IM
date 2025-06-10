@@ -560,7 +560,22 @@ if uploaded_eeq:
     # on=["Nickname", "Paramètre", "Annee"],
     # how="inner"  # ou "left", "right", "outer" selon ton besoin
 # )
-
+    limites_en_pourcentage = {
+    "WBC(10^3/uL)": 15.49,
+    "RBC(10^6/uL)": 4.4,
+    "HGB(g/dL)": 4.19,
+    "HCT(%)": 3.97,
+    "PLT(10^3/uL)": 13.4,
+    "[PLT-F(10^3/uL)]": 13.4,
+    "RET#(10^3/uL)": 16.8,
+    "VGM(fL)": 2.42,
+    "LYMPH#(10^3/uL)": 17.6,
+    "MONO#(10^3/uL)": 27.9,
+    "BASO#(10^3/uL)": 38.5,
+    "EO#(10^3/uL)": 37.1,
+    "NEUT#(10^3/uL)": 23.35
+    }
+    
     df_IM = pd.merge(
         biais_moyen,
         CIQ_grouped,
@@ -570,6 +585,19 @@ if uploaded_eeq:
     )
 
     df_IM = df_IM.drop(columns="lot_niveau")
+
+    # Crée une colonne de limite absolue si une limite en % est connue
+    def calculer_limite_absolue(row):
+        param = row['Paramètre']
+        moyenne = row['Moyenne']
+        if param in limites_en_pourcentage and pd.notnull(moyenne):
+            return moyenne * limites_en_pourcentage[param] / 100
+        else:
+            return np.nan
+
+    df_IM['limite_accept'] = df_IM.apply(calculer_limite_absolue, axis=1)
+
+    
     # st.dataframe(df_IM)
 
 
@@ -637,6 +665,21 @@ if uploaded_eeq:
             axis = fig_IM.layout[axis_name]
             axis.showticklabels = True
             axis.title = dict(text="Annee")
+
+    for _, row in df_IM_filtré.iterrows():
+    if pd.notnull(row['limite_accept']):
+        fig_IM.add_shape(
+            type="line",
+            x0=row['Annee'] - 0.4,  # pour que la ligne couvre la barre
+            x1=row['Annee'] + 0.4,
+            y0=row['limite_accept'],
+            y1=row['limite_accept'],
+            line=dict(color="red", dash="dash"),
+            xref="x",  # automatique car plotly.express gère le mapping
+            yref="y",  # idem
+            name="Limite acceptable"
+        )
+
 
     nb_lots = df_IM_filtré["lot_niveau_proche"].nunique()
     nb_params = df_IM_filtré["Paramètre"].nunique()
