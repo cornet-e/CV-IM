@@ -287,7 +287,7 @@ st.subheader("Facets : CV MAD par paramètre (moyenne de tous les CIQ)")
 
 # Sélectionne les colonnes de l'index 8 à 125 pour permettre la conversion en numérique
 st.dataframe(CIQ.head())
-colonnes_numeriques = CIQ.columns[7:125]
+colonnes_numeriques = CIQ.columns[6:125]
 
 # Nettoyage et conversion en float
 for col in colonnes_numeriques:
