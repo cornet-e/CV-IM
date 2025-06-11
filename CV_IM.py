@@ -415,13 +415,59 @@ else:
 ### ---------------- #####
 ### EEQ => IM ###
 
+# === Fonction générique de lecture EEQ (sans ignorer la première ligne) ===
+def lire_fichier_eeq(fichier_path=None, contenu_brut=None, nom=""):
+    """
+    Lit un fichier EEQ en gardant la première ligne (en-tête),
+    en utilisant le séparateur ';' et encodage ISO-8859-1.
+    """
+    try:
+        if fichier_path:
+            with open(fichier_path, 'r', encoding='ISO-8859-1', errors='replace') as f:
+                content = f.read().splitlines()
+        elif contenu_brut:
+            content = contenu_brut.decode('ISO-8859-1', errors='replace').splitlines()
+        else:
+            return None
+
+        if len(content) < 1:
+            st.warning(f"Le fichier {nom} semble vide ou mal formaté.")
+            return None
+
+        content_str = StringIO('\n'.join(content))  # On garde toutes les lignes
+        df = pd.read_csv(content_str, sep=';', on_bad_lines='skip')
+        return df
+
+    except Exception as e:
+        st.error(f"Erreur lecture du fichier {nom or fichier_path} : {e}")
+        return None
+        
 # --- Chargement fichiers ---
 st.title("Incertitudes élargies")
 
-uploaded_eeq = st.file_uploader("Importer fichier EEQ (exportEEQ.csv)", type=["csv"])
+# === Choix de la source de données EEQ ===
+choix_eeq = st.radio("Source du fichier EEQ :", ["Importer un fichier EEQ", "Utiliser un fichier EEQ par défaut"])
 
-if uploaded_eeq:
-    EEQ = pd.read_csv(uploaded_eeq, sep=";", encoding="ISO-8859-1", on_bad_lines="skip")
+if choix_eeq == "Importer un fichier EEQ":
+    uploaded_eeq = st.file_uploader("Importer fichier EEQ (exportEEQ1952.csv)", type=["csv"])
+    
+    if uploaded_eeq:
+        EEQ = lire_fichier_eeq(contenu_brut=uploaded_eeq.read(), nom=uploaded_eeq.name)
+        if EEQ is not None:
+            st.success(f"Fichier EEQ importé avec succès : {uploaded_eeq.name}")
+            st.dataframe(EEQ.head())
+        else:
+            st.stop()
+    else:
+        st.stop()
+
+elif choix_eeq == "Utiliser un fichier EEQ par défaut":
+    EEQ = lire_fichier_eeq(fichier_path="exportEEQ1952.csv")
+    if EEQ is not None:
+        st.success("Fichier EEQ par défaut chargé depuis `exportEEQ1952.csv`.")
+        st.dataframe(EEQ.head())
+    else:
+        st.stop()
    
     # === Traitement données EEQ ===
     # Exemple: filtrer et ajouter 'Nickname', 'variable', 'Date' (adapter selon colonnes EEQ)
