@@ -794,39 +794,39 @@ symbols = ["circle", "square", "diamond", "star", "triangle-up", "cross"]
 
 nicknames = df_IM_filtré["Nickname"].unique()
 
-for lot in facet_row_order:
-    for param in facet_col_order:
-        for i, nickname in enumerate(nicknames):
-            df_subset = df_IM_filtré[
-                (df_IM_filtré["lot_niveau_proche"] == lot) &
-                (df_IM_filtré["Paramètre"] == param) &
-                (df_IM_filtré["Nickname"] == nickname)
-            ]
-            if df_subset.empty:
-                continue
+# for lot in facet_row_order:
+#    for param in facet_col_order:
+#       for i, nickname in enumerate(nicknames):
+#           df_subset = df_IM_filtré[
+#               (df_IM_filtré["lot_niveau_proche"] == lot) &
+#               (df_IM_filtré["Paramètre"] == param) &
+#               (df_IM_filtré["Nickname"] == nickname)
+#           ]
+#           if df_subset.empty:
+#               continue
 
-            fig_IM.add_trace(
-                go.Scatter(
-                    x=df_subset["Annee"],
-                    y=df_subset["limite_accept"],
-                    mode="markers",
-                    marker=dict(
-                        color=colors[i % len(colors)],
-                        size=10,
-                        symbol=symbols[i % len(symbols)],
-                        line=dict(width=1, color="black")  # contour noir pour bien voir
-                    ),
-                    name=f"Limite acceptée - {nickname}",
-                    showlegend=True,
-                    hovertemplate=(
-                        f"Limite: %{{y}}<br>"
-                        f"Année: %{{x}}<br>"
-                        f"Analyseur: {nickname}<extra></extra>"
-                    )
-                ),
-                row=facet_row_order_reversed.index(lot) + 1,
-                col=facet_col_order.index(param) + 1
-            )
+#           fig_IM.add_trace(
+#               go.Scatter(
+#                   x=df_subset["Annee"],
+#                   y=df_subset["limite_accept"],
+#                   mode="markers",
+#                   marker=dict(
+#                       color=colors[i % len(colors)],
+#                       size=10,
+#                       symbol=symbols[i % len(symbols)],
+#                       line=dict(width=1, color="black")  # contour noir pour bien voir
+#                   ),
+#                   name=f"Limite acceptée - {nickname}",
+#                   showlegend=True,
+#                   hovertemplate=(
+#                       f"Limite: %{{y}}<br>"
+#                       f"Année: %{{x}}<br>"
+#                       f"Analyseur: {nickname}<extra></extra>"
+#                   )
+#               ),
+#               row=facet_row_order_reversed.index(lot) + 1,
+#               col=facet_col_order.index(param) + 1
+#           )
 
     # fig_IM.update_layout(height=300 * len(param_selectionnes))
     st.plotly_chart(fig_IM, use_container_width=True)
