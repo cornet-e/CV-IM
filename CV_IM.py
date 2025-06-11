@@ -311,7 +311,7 @@ params_numeriques = [col for col in params_numeriques if col not in ['n']]
 
 # Liste par défaut
 params_visibles_par_défaut = [    
-    'WBC(10^3/uL)','RBC(10^6/uL)','HGB(g/dL)','HCT(%)','MCV(fL)','MCH(pg)','MCHC(g/dL)','PLT(10^3/uL)','[RBC-O(10^6/uL)]','[PLT-O(10^3/uL)]','[PLT-F(10^3/uL)]','IPF#(10^3/uL)','[HGB-O(g/dL)]'
+    'WBC(10^3/uL)','RBC(10^6/uL)','HGB(g/L)','HCT(%)','MCV(fL)','MCH(pg)','MCHC(g/L)','PLT(10^3/uL)','[RBC-O(10^6/uL)]','[PLT-O(10^3/uL)]','[PLT-F(10^3/uL)]','IPF#(10^3/uL)','[HGB-O(g/dL)]'
     ]
 
 # Sélecteur des paramètres à inclure dans les facets
