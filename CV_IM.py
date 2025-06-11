@@ -849,21 +849,22 @@ df_long = df_plot.melt(
     value_name='Valeur'
 )
 
-# Création du graphique interactif
-fig_IM2 = px.line(
+# Création du graphique en barres interactif
+fig_IM2 = px.bar(
     df_long,
-    x='Annee',
+    x='Nickname',
+    facet_row='Annee',
     y='Valeur',
     color='Type',
-    line_dash='Type',
-    markers=True,
+    barmode='group',
     facet_col='lot_niveau_proche',
     facet_col_wrap=3,
-    symbol='Nickname',
+    pattern_shape='Type',
     title='Évolution de U et des limites acceptables par année, par nickname et par lot_niveau_proche',
-    labels={'Annee': 'Année', 'Valeur': 'Valeur', 'Type': 'Type de mesure'}
+    labels={'Annee': 'Année', 'Valeur': 'Valeur', 'Type': 'Type de mesure'},
+    hover_data=['Nickname']
 )
 
 fig_IM2.update_layout(height=600, legend_title_text='Type')
-fig_IM2.update_traces(mode="lines+markers")
+#fig_IM2.update_traces(mode="lines+markers")
 st.plotly_chart(fig_IM2, use_container_width=True)
