@@ -112,8 +112,8 @@ if choix_source == "Importer des fichiers CSV":
 
 elif choix_source == "Utiliser les données par défaut":
     try:
-        CIQ = pd.read_csv("data/lot_default.csv")  # Remplace le chemin selon ton arborescence
-        st.success("Données par défaut chargées depuis `data/lot_default.csv`.")
+        CIQ = pd.read_csv("lot_default.csv")  # Remplace le chemin selon ton arborescence
+        st.success("Données par défaut chargées depuis `lot_default.csv`.")
         st.dataframe(CIQ.head())
     except Exception as e:
         st.error(f"Erreur lors du chargement des données par défaut : {e}")
