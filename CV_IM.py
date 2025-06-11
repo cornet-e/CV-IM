@@ -5,7 +5,6 @@ import plotly.express as px
 from io import StringIO
 from datetime import datetime
 
-
 # === Fonctions de calcul de CV ===
 def cv(x):
     x = pd.to_numeric(x, errors='coerce')
