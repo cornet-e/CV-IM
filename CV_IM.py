@@ -70,6 +70,36 @@ import streamlit as st
 import pandas as pd
 from io import StringIO
 
+def lire_CIQ_csv(fichier_path=None, contenu_brut=None, nom=""):
+    """
+    Traite un fichier CSV soit à partir d’un chemin local (fichier_path),
+    soit à partir d’un contenu brut (contenu_brut).
+    Ignore la première ligne, utilise ',' comme séparateur.
+    """
+    try:
+        if fichier_path:
+            with open(fichier_path, 'r', encoding='utf-8', errors='replace') as f:
+                content = f.read().splitlines()
+        elif contenu_brut:
+            content = contenu_brut.decode('utf-8', errors='replace').splitlines()
+        else:
+            return None
+
+        if len(content) < 2:
+            st.warning(f"Le fichier {nom} semble vide ou mal formaté.")
+            return None
+
+        lines = content[1:]  # ignorer la première ligne
+        content_str = StringIO('\n'.join(lines))
+
+        df = pd.read_csv(content_str, sep=',', on_bad_lines='skip')
+        return df
+
+    except Exception as e:
+        st.error(f"Erreur lecture du fichier {nom or fichier_path} : {e}")
+        return None
+
+
 # === Choix de la source de données ===
 choix_source = st.radio("Choisissez la source des données :", ["Importer des fichiers CSV", "Utiliser les données par défaut"])
 
@@ -79,30 +109,13 @@ if choix_source == "Importer des fichiers CSV":
     if uploaded_files:
         list_df = []
         for file in uploaded_files:
-            try:
-                content = file.read().decode('utf-8', errors='replace').splitlines()
-            except UnicodeDecodeError:
-                file.seek(0)
-                content = file.read().decode('cp1252', errors='replace').splitlines()
-
-            if len(content) < 2:
-                st.warning(f"Le fichier {file.name} semble vide ou mal formaté.")
-                continue
-
-            lines = content[1:]  # on ignore la 1ère ligne
-            content_str = StringIO('\n'.join(lines))
-
-            try:
-                df = pd.read_csv(content_str, sep=',', on_bad_lines='skip')
-            except Exception as e:
-                st.error(f"Erreur lecture du fichier {file.name}: {e}")
-                continue
-
-            list_df.append(df)
+            df = lire_CIQ_csv(contenu_brut=file.read(), nom=file.name)
+            if df is not None:
+                list_df.append(df)
 
         if list_df:
             CIQ = pd.concat(list_df, ignore_index=True)
-            st.success(f"{len(uploaded_files)} fichier(s) chargé(s), total : {CIQ.shape[0]} lignes.")
+            st.success(f"{len(list_df)} fichier(s) chargé(s), total : {CIQ.shape[0]} lignes.")
             st.dataframe(CIQ.head())
         else:
             st.warning("Aucun fichier n'a pu être chargé correctement.")
@@ -111,12 +124,12 @@ if choix_source == "Importer des fichiers CSV":
         st.stop()
 
 elif choix_source == "Utiliser les données par défaut":
-    try:
-        CIQ = pd.read_csv("lot_default.csv")  # Remplace le chemin selon ton arborescence
+    df = lire_CIQ_csv(fichier_path="lot_default.csv")
+    if df is not None:
+        CIQ = df
         st.success("Données par défaut chargées depuis `lot_default.csv`.")
         st.dataframe(CIQ.head())
-    except Exception as e:
-        st.error(f"Erreur lors du chargement des données par défaut : {e}")
+    else:
         st.stop()
 
 
