@@ -927,7 +927,7 @@ df_long_filtre = df_long[df_long['Analyseur'].isin(analyseurs_selectionnes)]
 # Création du graphique en barres interactif
 fig_IM2 = px.bar(
     df_long_filtre,
-    x='Nickname',
+    x='Analyseur',
     facet_row='lot_niveau_proche',
     y='Valeur',
     color='Type',
