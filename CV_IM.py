@@ -478,7 +478,7 @@ if choix_eeq == "Importer un fichier EEQ":
         EEQ = lire_fichier_eeq(contenu_brut=uploaded_eeq.read(), nom=uploaded_eeq.name)
         if EEQ is not None:
             st.success(f"Fichier EEQ importé avec succès : {uploaded_eeq.name}")
-            st.dataframe(EEQ.head())
+            # st.dataframe(EEQ.head())
         else:
             st.stop()
     else:
@@ -488,7 +488,7 @@ elif choix_eeq == "Utiliser un fichier EEQ par défaut":
     EEQ = lire_fichier_eeq(fichier_path="exportEEQ1952.csv")
     if EEQ is not None:
         st.success("Fichier EEQ par défaut chargé depuis `exportEEQ1952.csv`.")
-        st.dataframe(EEQ.head())
+        # st.dataframe(EEQ.head())
     else:
         st.stop()
    
