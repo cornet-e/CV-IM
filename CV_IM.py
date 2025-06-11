@@ -672,7 +672,7 @@ elif choix_eeq == "Utiliser un fichier EEQ par défaut":
     "PLT(10^3/uL)": 13.4,
     "[PLT-F(10^3/uL)]": 13.4,
     "RET#(10^3/uL)": 16.8,
-    "VGM(fL)": 2.42,
+    "MCV(fL)": 2.42,
     "LYMPH#(10^3/uL)": 17.6,
     "MONO#(10^3/uL)": 27.9,
     "BASO#(10^3/uL)": 38.5,
