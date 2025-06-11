@@ -829,12 +829,41 @@ for lot in facet_row_order:
                 col=facet_col_order.index(param) + 1
             )
 
-
-
     # fig_IM.update_layout(height=300 * len(param_selectionnes))
     st.plotly_chart(fig_IM, use_container_width=True)
 
 
+### Méthode 2 pour graph ###
 
-#else:
-   # st.info("Importer le fichier EEQ pour démarrer.")
+    # Charger le fichier
+#df = pd.read_csv("2025-06-11T06-52_export.csv")
+
+# Garder uniquement les colonnes utiles et supprimer les lignes avec U ou Annee manquants
+df_plot = df_IM_filtré[['Annee', 'Nickname', 'lot_niveau_proche', 'U', 'limite_accept']].dropna(subset=['U', 'Annee'])
+
+# Transformer en format long pour U et limite_accept
+df_long = df_plot.melt(
+    id_vars=['Annee', 'Nickname', 'lot_niveau_proche'],
+    value_vars=['U', 'limite_accept'],
+    var_name='Type',
+    value_name='Valeur'
+)
+
+# Création du graphique interactif
+fig = px.line(
+    df_long,
+    x='Annee',
+    y='Valeur',
+    color='Type',
+    line_dash='Type',
+    markers=True,
+    facet_col='lot_niveau_proche',
+    facet_col_wrap=3,
+    symbol='Nickname',
+    title='Évolution de U et des limites acceptables par année, par nickname et par lot_niveau_proche',
+    labels={'Annee': 'Année', 'Valeur': 'Valeur', 'Type': 'Type de mesure'}
+)
+
+fig.update_layout(height=600, legend_title_text='Type')
+fig.update_traces(mode="lines+markers")
+fig.show()
