@@ -115,8 +115,7 @@ if choix_source == "Importer des fichiers CSV":
 
         if list_df:
             CIQ = pd.concat(list_df, ignore_index=True)
-            st.success(f"{len(list_df)} fichier(s) chargé(s), total : {CIQ.shape[0]} lignes.")
-            st.dataframe(CIQ.head())
+            st.success(f"{len(list_df)} fichier(s) chargé(s), total : {CIQ.shape[0]} lignes.")            
         else:
             st.warning("Aucun fichier n'a pu être chargé correctement.")
             st.stop()
@@ -127,8 +126,7 @@ elif choix_source == "Utiliser les données par défaut":
     df = lire_CIQ_csv(fichier_path="lot_default.csv")
     if df is not None:
         CIQ = df
-        st.success("Données par défaut chargées depuis `lot_default.csv`.")
-        st.dataframe(CIQ.head())
+        st.success("Données par défaut chargées depuis `lot_default.csv`.")        
     else:
         st.warning("Impossible de charger `lot_default.csv`.")
         st.stop()
@@ -143,8 +141,7 @@ elif choix_source == "Rechercher un fichier lot*.csv localement":
             df = lire_CIQ_csv(fichier_path=fichier_selectionne)
             if df is not None:
                 CIQ = df
-                st.success(f"Fichier sélectionné : `{fichier_selectionne}` ({df.shape[0]} lignes).")
-                st.dataframe(CIQ.head())
+                st.success(f"Fichier sélectionné : `{fichier_selectionne}` ({df.shape[0]} lignes).")                
             else:
                 st.warning(f"Le fichier `{fichier_selectionne}` n'a pas pu être lu correctement.")
                 st.stop()
@@ -155,6 +152,7 @@ elif choix_source == "Rechercher un fichier lot*.csv localement":
         st.warning("Aucun fichier correspondant à `lot*.csv` trouvé dans le répertoire courant.")
         st.stop()
 
+st.dataframe(CIQ.head())
 
 # Modifier l'unité de l'Hb : g/dL => g/L
 CIQ['HGB(g/dL)'] = pd.to_numeric(CIQ['HGB(g/dL)'], errors='coerce') * 10
