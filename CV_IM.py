@@ -850,7 +850,7 @@ df_long = df_plot.melt(
 )
 
 # Création du graphique interactif
-fig = px.line(
+fig_IM2 = px.line(
     df_long,
     x='Annee',
     y='Valeur',
@@ -864,6 +864,6 @@ fig = px.line(
     labels={'Annee': 'Année', 'Valeur': 'Valeur', 'Type': 'Type de mesure'}
 )
 
-fig.update_layout(height=600, legend_title_text='Type')
-fig.update_traces(mode="lines+markers")
-fig.show()
+fig_IM2.update_layout(height=600, legend_title_text='Type')
+fig_IM2.update_traces(mode="lines+markers")
+st.plotly_chart(fig_IM2, use_container_width=True)
