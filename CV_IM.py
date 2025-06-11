@@ -945,7 +945,7 @@ fig_IM2 = px.bar(
     },
     title=titre_graph,
     labels={'Annee': 'Année', 'Valeur': 'Valeur', 'Type': 'Type de mesure'},
-    hover_data=['Nickname']
+    hover_data=['Analyseur']
 )
 
 fig_IM2.update_layout(height=600, legend_title_text='Type')
