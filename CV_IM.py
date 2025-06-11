@@ -162,6 +162,12 @@ CIQ['HGB(g/dL)'] = pd.to_numeric(CIQ['HGB(g/dL)'], errors='coerce') * 10
 CIQ.rename(columns={'HGB(g/dL)': 'HGB(g/L)'}, inplace=True)
 st.dataframe(CIQ.head())
 
+# Modifier l'unité de la CCMH : g/dL => g/L
+CIQ['MCHC(g/dL)'] = pd.to_numeric(CIQ['MCHC(g/dL)'], errors='coerce') * 10
+# Renommer la colonne
+CIQ.rename(columns={'MCHC(g/dL)': 'MCHC(g/dL)'}, inplace=True)
+st.dataframe(CIQ.head())
+
 # === Chargement de la liste des champs ===
 try:
     liste_champs_df = pd.read_csv("liste_champs.csv", sep=',', encoding="utf-8")
