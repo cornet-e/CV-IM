@@ -892,24 +892,41 @@ df_long = df_plot.melt(
     value_name='Valeur'
 )
 
+df_long = df_long.rename(columns={"Nickname": "Analyseur"})
+df_long['Type'] = df_long['Type'].replace({
+    'U': 'U',
+    'limite_accept': 'Limites acceptables'
+})
+
 # st.dataframe(df_long)
 
 color_discrete_map = {
     'U': 'royalblue',
-    'limite_accept': 'red'
+    'Limites acceptables': 'red'
 }
 
-pattern_shape='Type',
-pattern_shape_map={
+pattern_shape_map = {
     'U': '',
-    'limite_accept': '/'
+    'Limites acceptables': '/'
 }
+
+
+titre_graph = f"Évolution de {param_selectionnes} et des limites acceptables par année, par analyseur et par niveau de lot"
+
+# Sélection interactive des analyseurs
+analyseurs_disponibles = df_long['Analyseur'].unique()
+analyseurs_selectionnes = st.multiselect(
+    "Sélectionnez les analyseurs à afficher :",
+    options=sorted(analyseurs_disponibles),
+    default=sorted(analyseurs_disponibles)
+)
+df_long_filtre = df_long[df_long['Analyseur'].isin(analyseurs_selectionnes)]
 
 # 🎨 Autres motifs disponibles : '' (plein) '/' (diagonal 45°) '\\' (diagonal -45°) 'x' (croix) '-' (horizontal) '|' (vertical) '+' (croix pleine) '.' (points)
 
 # Création du graphique en barres interactif
 fig_IM2 = px.bar(
-    df_long,
+    df_long_filtre,
     x='Nickname',
     facet_row='lot_niveau_proche',
     y='Valeur',
@@ -926,7 +943,7 @@ fig_IM2 = px.bar(
         'U': 'royalblue',
         'limite_accept': 'red'
     },
-    title='Évolution de U et des limites acceptables par année, par analyseur et par Niveau de lot',
+    title=titre_graph,
     labels={'Annee': 'Année', 'Valeur': 'Valeur', 'Type': 'Type de mesure'},
     hover_data=['Nickname']
 )
