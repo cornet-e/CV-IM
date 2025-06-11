@@ -162,7 +162,7 @@ CIQ.rename(columns={'HGB(g/dL)': 'HGB(g/L)'}, inplace=True)
 # Modifier l'unité de la CCMH : g/dL => g/L
 CIQ['MCHC(g/dL)'] = pd.to_numeric(CIQ['MCHC(g/dL)'], errors='coerce') * 10
 # Renommer la colonne
-CIQ.rename(columns={'MCHC(g/dL)': 'MCHC(g/dL)'}, inplace=True)
+CIQ.rename(columns={'MCHC(g/dL)': 'MCHC(g/L)'}, inplace=True)
 
 # === Chargement de la liste des champs ===
 try:
