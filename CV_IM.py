@@ -848,7 +848,7 @@ df_long = df_plot.melt(
     value_name='Valeur'
 )
 
-st.dataframe(df_long)
+# st.dataframe(df_long)
 
 # Création du graphique en barres interactif
 fig_IM2 = px.bar(
@@ -861,7 +861,7 @@ fig_IM2 = px.bar(
     facet_col='Annee',
     facet_col_wrap=3,
     pattern_shape='Type',
-    title='Évolution de U et des limites acceptables par année, par nickname et par lot_niveau_proche',
+    title='Évolution de U et des limites acceptables par année, par analyseur et par Niveau de lot',
     labels={'Annee': 'Année', 'Valeur': 'Valeur', 'Type': 'Type de mesure'},
     hover_data=['Nickname']
 )
