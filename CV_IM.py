@@ -669,7 +669,7 @@ elif choix_eeq == "Utiliser un fichier EEQ par défaut":
     limites_en_pourcentage = {
     "WBC(10^3/uL)": 15.49,
     "RBC(10^6/uL)": 4.4,
-    "HGB(g/dL)": 4.19,
+    "HGB(g/L)": 4.19,
     "HCT(%)": 3.97,
     "PLT(10^3/uL)": 13.4,
     "[PLT-F(10^3/uL)]": 13.4,
@@ -726,7 +726,7 @@ elif choix_eeq == "Utiliser un fichier EEQ par défaut":
 
     # Liste par défaut
     params_visibles_par_défaut = [    
-        'WBC(10^3/uL)','RBC(10^6/uL)','HGB(g/dL)','HCT(%)','MCV(fL)','MCH(pg)','MCHC(g/dL)','PLT(10^3/uL)','[RBC-O(10^6/uL)]','[PLT-O(10^3/uL)]','[PLT-F(10^3/uL)]','IPF#(10^3/uL)','[HGB-O(g/dL)]'
+        'WBC(10^3/uL)','RBC(10^6/uL)','HGB(g/L)','HCT(%)','MCV(fL)','MCH(pg)','MCHC(g/L)','PLT(10^3/uL)','[RBC-O(10^6/uL)]','[PLT-O(10^3/uL)]','[PLT-F(10^3/uL)]','IPF#(10^3/uL)','[HGB-O(g/dL)]'
         ]
 
     # Choix des paramètres via menu déroulant
