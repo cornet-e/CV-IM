@@ -852,11 +852,11 @@ df_long = df_plot.melt(
 fig_IM2 = px.bar(
     df_long,
     x='Nickname',
-    facet_row='Annee',
+    facet_row='lot_niveau_proche',
     y='Valeur',
     color='Type',
     barmode='group',
-    facet_col='lot_niveau_proche',
+    facet_col='Annee',
     facet_col_wrap=3,
     pattern_shape='Type',
     title='Évolution de U et des limites acceptables par année, par nickname et par lot_niveau_proche',
