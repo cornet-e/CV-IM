@@ -530,30 +530,33 @@ elif choix_eeq == "Utiliser un fichier EEQ par défaut":
 
     # Ajouter variable selon Analyte (mapping R -> Python)
     analyte_map = {
-        "CCMH": "MCHC(g/dL)",
-        "Frac Plaq immatures (IPF)": "IPF(%)",
-        "Frac Réti immatures (IRF)": "IRF(%)",
-        "Hématies (impédance)": "RBC(10^6/uL)",
         "Hématies (optique)": "[RBC-O(10^6/uL)]",
+        "Hématies (impédance)": "RBC(10^6/uL)",
         "Hématocrite": "HCT(%)",
         "Hémoglobine": "HGB(g/L)",
         "IDR": "RDW-CV(%)",
-        "Leucocytes": "WBC(10^3/uL)",
-        "Lymphocytes": "LYMPH%(%)",
-        "Lymphocytes (abs)": "LYMPH#(10^3/uL)",
-        "Monocytes": "MONO%(%)",
-        "Monocytes (abs)": "MONO#(10^3/uL)",
+        "VGM": "MCV(fL)",
+        "CCMH": "MCHC(g/dL)",
+        "TGMH": "MCH(pg)",
         "Plaquettes (fluorescence)": "[PLT-F(10^3/uL)]",
         "Plaquettes (impédance)": "PLT(10^3/uL)",
         "Plaquettes (optique)": "[PLT-O(10^3/uL)]",
-        "Poly. Basophiles": "BASO%(%)",
-        "Poly. Basophiles (abs)": "BASO#(10^3/uL)",
-        "Poly. Eosinophiles": "EO%(%)",
-        "Poly. Eosinophiles (abs)": "EO#(10^3/uL)",
+        "VPM": "MPV(fL)",
+        "Frac Plaq immatures (IPF)": "IPF(%)",
+        "Frac Réti immatures (IRF)": "IRF(%)",
+        "R-MFV (Volume Erythro. le plus fréquent)": "R-MFV(fL)",
+        "Leucocytes": "WBC(10^3/uL)",
         "Poly. Neutrophiles": "NEUT%(%)",
         "Poly. Neutrophiles (abs)": "NEUT#(10^3/uL)",
-        "R-MFV (Volume Erythro. le plus fréquent)": "R-MFV(fL)"
-    }
+        "Poly. Eosinophiles": "EO%(%)",
+        "Poly. Eosinophiles (abs)": "EO#(10^3/uL)",
+        "Poly. Basophiles": "BASO%(%)",
+        "Poly. Basophiles (abs)": "BASO#(10^3/uL)",
+        "Lymphocytes": "LYMPH%(%)",
+        "Lymphocytes (abs)": "LYMPH#(10^3/uL)",
+        "Monocytes": "MONO%(%)",
+        "Monocytes (abs)": "MONO#(10^3/uL)"       
+        }
     EEQ['variable'] = EEQ['Analyte'].map(analyte_map)
 
     # Extraire Année
