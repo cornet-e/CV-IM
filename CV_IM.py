@@ -855,6 +855,13 @@ color_discrete_map = {
     'limite_accept': 'red'
 }
 
+pattern_shape='Type',
+pattern_shape_map={
+    'U': '',
+    'limite_accept': '/'
+}
+
+# 🎨 Autres motifs disponibles : '' (plein) '/' (diagonal 45°) '\\' (diagonal -45°) 'x' (croix) '-' (horizontal) '|' (vertical) '+' (croix pleine) '.' (points)
 
 # Création du graphique en barres interactif
 fig_IM2 = px.bar(
@@ -867,6 +874,10 @@ fig_IM2 = px.bar(
     facet_col='Annee',
     facet_col_wrap=3,
     pattern_shape='Type',
+    pattern_shape_map={
+        'U': '',
+        'limite_accept': '/'
+    },
     color_discrete_map={
         'U': 'royalblue',
         'limite_accept': 'red'
