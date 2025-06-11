@@ -175,13 +175,23 @@ if liste_champs_df.shape[1] == 1:
 else:
     colonnes_voulues = liste_champs_df.columns.astype(str).str.strip()
 
-colonnes_finales = [col for col in colonnes_voulues if col in CIQ.columns]
-if not colonnes_finales:
-    st.error("Aucune des colonnes attendues n'a été trouvée dans le fichier CIQ.")
-    st.stop()
+# colonnes_finales = [col for col in colonnes_voulues if col in CIQ.columns]
+#if not colonnes_finales:
+#    st.error("Aucune des colonnes attendues n'a été trouvée dans le fichier CIQ.")
+#   st.stop()
 
-CIQ = CIQ[colonnes_finales]
-st.success(f"{len(colonnes_finales)} colonnes conservées dans le fichier CIQ.")
+#CIQ = CIQ[colonnes_finales]
+# st.success(f"{len(colonnes_finales)} colonnes conservées dans le fichier CIQ.")
+
+# Ajoute les colonnes manquantes à CIQ avec des valeurs NaN
+for col in colonnes_voulues:
+    if col not in CIQ.columns:
+        CIQ[col] = np.nan  # ou pd.NA si tu préfères
+
+# Réorganise les colonnes dans l’ordre de liste_champs
+CIQ = CIQ[colonnes_voulues]
+
+st.success(f"{len(colonnes_voulues)} colonnes définies dans CIQ (y compris les colonnes absentes ajoutées avec NaN).")
 
 
 
