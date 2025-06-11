@@ -590,7 +590,7 @@ elif choix_eeq == "Utiliser un fichier EEQ par défaut":
         .str.replace(",", ".", regex=False)  # remplacer la virgule par un point
         .astype(float)                       # convertir en float
 )
-    st.dataframe(EEQ)
+    st.dataframe(EEQ.head())
  
 
 
