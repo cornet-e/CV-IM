@@ -799,7 +799,7 @@ import plotly.graph_objects as go
 
 
 # Inversion de l'indexation des facettes pour correspondre au vrai mapping
-facet_row_order_reversed = list(reversed(facet_row_order))  # 🔄 Inverse l'ordre des lignes
+# facet_row_order_reversed = list(reversed(facet_row_order))  # 🔄 Inverse l'ordre des lignes
 # st.write("Ordre des facettes  - lot_niveau_proche:", facet_row_order)
 # st.write("Ordre des facettes inversé - lot_niveau_proche:", facet_row_order_reversed)
 
@@ -822,8 +822,8 @@ facet_row_order_reversed = list(reversed(facet_row_order))  # 🔄 Inverse l'ord
         #)
 
 # Palette de couleurs (tu peux choisir d'autres couleurs ou symboles)
-colors = px.colors.qualitative.Plotly
-symbols = ["circle", "square", "diamond", "star", "triangle-up", "cross"]
+# colors = px.colors.qualitative.Plotly
+# symbols = ["circle", "square", "diamond", "star", "triangle-up", "cross"]
 
 nicknames = df_IM_filtré["Nickname"].unique()
 
