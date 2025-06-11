@@ -4,6 +4,8 @@ import streamlit as st
 import plotly.express as px
 from io import StringIO
 from datetime import datetime
+import glob
+import os
 
 # === Fonctions de calcul de CV ===
 def cv(x):
@@ -65,10 +67,6 @@ def trouver_lot_niveau_proche(row, ciq_moyennes):
 
     return candidats.loc[idx_min, "lot_niveau"]
 
-import streamlit as st
-import pandas as pd
-from io import StringIO
-
 def lire_CIQ_csv(fichier_path=None, contenu_brut=None, nom=""):
     """
     Traite un fichier CSV soit à partir d’un chemin local (fichier_path),
@@ -100,7 +98,10 @@ def lire_CIQ_csv(fichier_path=None, contenu_brut=None, nom=""):
 
 
 # === Choix de la source de données ===
-choix_source = st.radio("Choisissez la source des données :", ["Importer des fichiers CSV", "Utiliser les données par défaut"])
+choix_source = st.radio(
+    "Choisissez la source des données :",
+    ["Importer des fichiers CSV", "Utiliser les données par défaut", "Rechercher un fichier lot*.csv localement"]
+)
 
 if choix_source == "Importer des fichiers CSV":
     uploaded_files = st.file_uploader("Importer un ou plusieurs fichiers CSV", type=["csv"], accept_multiple_files=True)
@@ -129,6 +130,23 @@ elif choix_source == "Utiliser les données par défaut":
         st.success("Données par défaut chargées depuis `lot_default.csv`.")
         st.dataframe(CIQ.head())
     else:
+        st.warning("Impossible de charger `lot_default.csv`.")
+        st.stop()
+
+elif choix_source == "Rechercher un fichier lot*.csv localement":
+    fichiers = glob.glob("lot*.csv")  # Recherche dans le dossier de travail
+    if fichiers:
+        fichier_trouve = fichiers[0]  # On prend le premier trouvé
+        df = lire_CIQ_csv(fichier_path=fichier_trouve)
+        if df is not None:
+            CIQ = df
+            st.success(f"Fichier trouvé : `{fichier_trouve}` ({df.shape[0]} lignes).")
+            st.dataframe(CIQ.head())
+        else:
+            st.warning(f"Le fichier `{fichier_trouve}` n'a pas pu être lu correctement.")
+            st.stop()
+    else:
+        st.warning("Aucun fichier correspondant à `lot*.csv` trouvé dans le répertoire courant.")
         st.stop()
 
 
