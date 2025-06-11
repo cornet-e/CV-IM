@@ -848,6 +848,8 @@ df_long = df_plot.melt(
     value_name='Valeur'
 )
 
+st.dataframe(df_long)
+
 # Création du graphique en barres interactif
 fig_IM2 = px.bar(
     df_long,
