@@ -836,5 +836,5 @@ for lot in facet_row_order:
 
 
 
-else:
-    st.info("Importer le fichier EEQ pour démarrer.")
+#else:
+   # st.info("Importer le fichier EEQ pour démarrer.")
