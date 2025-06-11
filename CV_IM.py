@@ -134,16 +134,22 @@ elif choix_source == "Utiliser les données par défaut":
         st.stop()
 
 elif choix_source == "Rechercher un fichier lot*.csv localement":
-    fichiers = glob.glob("lot*.csv")  # Recherche dans le dossier de travail
+    fichiers = glob.glob("lot*.csv")  # Recherche dans le répertoire courant
+
     if fichiers:
-        fichier_trouve = fichiers[0]  # On prend le premier trouvé
-        df = lire_CIQ_csv(fichier_path=fichier_trouve)
-        if df is not None:
-            CIQ = df
-            st.success(f"Fichier trouvé : `{fichier_trouve}` ({df.shape[0]} lignes).")
-            st.dataframe(CIQ.head())
+        fichier_selectionne = st.selectbox("Sélectionnez un fichier parmi ceux trouvés :", fichiers)
+
+        if fichier_selectionne:
+            df = lire_CIQ_csv(fichier_path=fichier_selectionne)
+            if df is not None:
+                CIQ = df
+                st.success(f"Fichier sélectionné : `{fichier_selectionne}` ({df.shape[0]} lignes).")
+                st.dataframe(CIQ.head())
+            else:
+                st.warning(f"Le fichier `{fichier_selectionne}` n'a pas pu être lu correctement.")
+                st.stop()
         else:
-            st.warning(f"Le fichier `{fichier_trouve}` n'a pas pu être lu correctement.")
+            st.warning("Aucun fichier sélectionné.")
             st.stop()
     else:
         st.warning("Aucun fichier correspondant à `lot*.csv` trouvé dans le répertoire courant.")
