@@ -66,41 +66,59 @@ def trouver_lot_niveau_proche(row, ciq_moyennes):
 
     return candidats.loc[idx_min, "lot_niveau"]
 
-# === Chargement des fichiers ===
-uploaded_files = st.file_uploader("Importer un ou plusieurs fichiers CSV", type=["csv"], accept_multiple_files=True)
+import streamlit as st
+import pandas as pd
+from io import StringIO
 
-if uploaded_files:
-    list_df = []
-    for file in uploaded_files:
-        try:
-            content = file.read().decode('utf-8', errors='replace').splitlines()
-        except UnicodeDecodeError:
-            file.seek(0)
-            content = file.read().decode('cp1252', errors='replace').splitlines()
+# === Choix de la source de données ===
+choix_source = st.radio("Choisissez la source des données :", ["Importer des fichiers CSV", "Utiliser les données par défaut"])
 
-        if len(content) < 2:
-            st.warning(f"Le fichier {file.name} semble vide ou mal formaté.")
-            continue
+if choix_source == "Importer des fichiers CSV":
+    uploaded_files = st.file_uploader("Importer un ou plusieurs fichiers CSV", type=["csv"], accept_multiple_files=True)
 
-        lines = content[1:]  # on ignore la 1ère ligne
-        content_str = StringIO('\n'.join(lines))
+    if uploaded_files:
+        list_df = []
+        for file in uploaded_files:
+            try:
+                content = file.read().decode('utf-8', errors='replace').splitlines()
+            except UnicodeDecodeError:
+                file.seek(0)
+                content = file.read().decode('cp1252', errors='replace').splitlines()
 
-        try:
-            df = pd.read_csv(content_str, sep=',', on_bad_lines='skip')
-        except Exception as e:
-            st.error(f"Erreur lecture du fichier {file.name}: {e}")
-            continue
+            if len(content) < 2:
+                st.warning(f"Le fichier {file.name} semble vide ou mal formaté.")
+                continue
 
-        list_df.append(df)
+            lines = content[1:]  # on ignore la 1ère ligne
+            content_str = StringIO('\n'.join(lines))
 
-    if list_df:
-        CIQ = pd.concat(list_df, ignore_index=True)
-        st.success(f"{len(uploaded_files)} fichier(s) chargé(s), total : {CIQ.shape[0]} lignes.")
-        st.dataframe(CIQ.head())
+            try:
+                df = pd.read_csv(content_str, sep=',', on_bad_lines='skip')
+            except Exception as e:
+                st.error(f"Erreur lecture du fichier {file.name}: {e}")
+                continue
+
+            list_df.append(df)
+
+        if list_df:
+            CIQ = pd.concat(list_df, ignore_index=True)
+            st.success(f"{len(uploaded_files)} fichier(s) chargé(s), total : {CIQ.shape[0]} lignes.")
+            st.dataframe(CIQ.head())
+        else:
+            st.warning("Aucun fichier n'a pu être chargé correctement.")
+            st.stop()
     else:
-        st.warning("Aucun fichier n'a pu être chargé correctement.")
-else:
-    st.stop()
+        st.stop()
+
+elif choix_source == "Utiliser les données par défaut":
+    try:
+        CIQ = pd.read_csv("data/lot_default.csv")  # Remplace le chemin selon ton arborescence
+        st.success("Données par défaut chargées depuis `data/lot_default.csv`.")
+        st.dataframe(CIQ.head())
+    except Exception as e:
+        st.error(f"Erreur lors du chargement des données par défaut : {e}")
+        st.stop()
+
 
 # Modifier l'unité de l'Hb : g/dL => g/L
 CIQ['HGB(g/dL)'] = pd.to_numeric(CIQ['HGB(g/dL)'], errors='coerce') * 10
