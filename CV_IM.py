@@ -850,6 +850,12 @@ df_long = df_plot.melt(
 
 # st.dataframe(df_long)
 
+color_discrete_map = {
+    'U': 'royalblue',
+    'limite_accept': 'red'
+}
+
+
 # Création du graphique en barres interactif
 fig_IM2 = px.bar(
     df_long,
@@ -861,6 +867,10 @@ fig_IM2 = px.bar(
     facet_col='Annee',
     facet_col_wrap=3,
     pattern_shape='Type',
+    color_discrete_map={
+        'U': 'royalblue',
+        'limite_accept': 'red'
+    },
     title='Évolution de U et des limites acceptables par année, par analyseur et par Niveau de lot',
     labels={'Annee': 'Année', 'Valeur': 'Valeur', 'Type': 'Type de mesure'},
     hover_data=['Nickname']
