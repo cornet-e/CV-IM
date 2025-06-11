@@ -829,7 +829,7 @@ nicknames = df_IM_filtré["Nickname"].unique()
 #           )
 
     # fig_IM.update_layout(height=300 * len(param_selectionnes))
-    st.plotly_chart(fig_IM, use_container_width=True)
+st.plotly_chart(fig_IM, use_container_width=True)
 
 
 ### Méthode 2 pour graph ###
