@@ -216,8 +216,8 @@ if liste_champs_df.shape[1] == 1:
 else:
     colonnes_voulues = liste_champs_df.columns.astype(str).str.strip()
 
-st.write("Colonnes du fichier colonnes_voulues :")
-st.write(CIQ.columns.tolist())
+# st.write("Colonnes du fichier colonnes_voulues :")
+# st.write(CIQ.columns.tolist())
 
 # Ajoute les colonnes manquantes à CIQ avec des valeurs NaN
 for col in colonnes_voulues:
@@ -230,8 +230,8 @@ CIQ = CIQ[colonnes_voulues]
 st.success(f"{len(colonnes_voulues)} colonnes définies dans CIQ (y compris les colonnes absentes ajoutées avec NaN).")
 
 
-st.write("Colonnes du fichier CIQ :")
-st.write(CIQ.columns.tolist())
+# st.write("Colonnes du fichier CIQ :")
+# st.write(CIQ.columns.tolist())
 
 # === Détection automatique des colonnes automate et lot ===
 colonnes_automate = [col for col in CIQ.columns if 'nick' in col.lower()]
