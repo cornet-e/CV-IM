@@ -334,7 +334,7 @@ plot_cv("CV_MAD", f"{param} : CV MAD", "CV (%)")
 # ➕ Graphique Facets (CV_MAD par paramètre)
 # =======================
 
-st.subheader("Facets : CV MAD par paramètre (moyenne de tous les CIQ)")
+st.subheader("CV (méthode MAD) par paramètre (moyenne de tous les CIQ)")
 
 
 # Sélectionne les colonnes de l'index 8 à 125 pour permettre la conversion en numérique
@@ -435,7 +435,7 @@ st.plotly_chart(fig_facet)
 # ➕ Graphique Facets ( valeur paramètre) avec filtre année
 # =======================
 
-st.subheader("Facets : Distribution des valeurs de chaque paramètre")
+st.subheader("Distribution des valeurs de chaque paramètre")
 
     
 if len(params_selectionnés) == 0:
@@ -494,6 +494,8 @@ else:
 ### ---------------- #####
 ### EEQ => IM ###
 
+st.title("Incertitudes élargies")
+
 # === Fonction générique de lecture EEQ (sans ignorer la première ligne) ===
 def lire_fichier_eeq(fichier_path=None, contenu_brut=None, nom=""):
     """
@@ -520,9 +522,6 @@ def lire_fichier_eeq(fichier_path=None, contenu_brut=None, nom=""):
     except Exception as e:
         st.error(f"Erreur lecture du fichier {nom or fichier_path} : {e}")
         return None
-        
-# --- Chargement fichiers ---
-st.title("Incertitudes élargies")
 
 # === Choix de la source de données EEQ ===
 choix_eeq = st.radio("Source du fichier EEQ :", ["Importer un fichier EEQ", "Utiliser un fichier EEQ par défaut"])
