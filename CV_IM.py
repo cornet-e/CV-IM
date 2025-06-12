@@ -119,12 +119,6 @@ choix_source = st.radio(
     ["Importer des fichiers CSV", "Utiliser les données par défaut", "Rechercher un fichier lot*.csv localement"]
 )
 
-# === Choix de la source de données ===
-choix_source = st.radio(
-    "Choisissez la source des données :",
-    ["Importer des fichiers CSV", "Utiliser les données par défaut", "Rechercher un fichier lot*.csv localement"]
-)
-
 if choix_source == "Importer des fichiers CSV":
     uploaded_files = st.file_uploader("Importer un ou plusieurs fichiers CSV", type=["csv"], accept_multiple_files=True)
 
