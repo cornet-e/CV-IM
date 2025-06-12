@@ -278,7 +278,7 @@ CIQ['Annee'] = CIQ['Date'].dt.year.astype("Int64")
 
 
 
-st.subheader("Graphique par paramètre sélectionné (détail par année)")
+st.subheader("Calcul des CV robustes, par paramètre, par analyseur, par année")
 
 # === Choix du paramètre ===
 choix_param = CIQ.columns[8:]  # adapter si besoin
