@@ -186,7 +186,7 @@ st.write(f"Nombre de lignes après suppression des doublons : {len(CIQ_cleaned)}
 
 CIQ=CIQ_cleaned
 
-#st.dataframe(CIQ)
+st.dataframe(CIQ)
 
 # === Chargement de la liste des champs ===
 try:
@@ -202,14 +202,6 @@ if liste_champs_df.shape[1] == 1:
     colonnes_voulues = liste_champs_df.iloc[:, 0].dropna().astype(str).str.strip()
 else:
     colonnes_voulues = liste_champs_df.columns.astype(str).str.strip()
-
-# colonnes_finales = [col for col in colonnes_voulues if col in CIQ.columns]
-#if not colonnes_finales:
-#    st.error("Aucune des colonnes attendues n'a été trouvée dans le fichier CIQ.")
-#   st.stop()
-
-#CIQ = CIQ[colonnes_finales]
-# st.success(f"{len(colonnes_finales)} colonnes conservées dans le fichier CIQ.")
 
 st.write("Colonnes du fichier colonnes_voulues :")
 st.write(CIQ.columns.tolist())
