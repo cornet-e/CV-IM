@@ -135,21 +135,26 @@ elif choix_source == "Rechercher un fichier lot*.csv localement":
     fichiers = glob.glob("lot*.csv")  # Recherche dans le répertoire courant
 
     if fichiers:
-        fichier_selectionne = st.selectbox("Sélectionnez un fichier parmi ceux trouvés :", fichiers)
+        fichiers_selectionnes = st.multiselect("Sélectionnez un ou plusieurs fichiers :", fichiers)
 
-        if fichier_selectionne:
-            df = lire_CIQ_csv(fichier_path=fichier_selectionne)
-            if df is not None:
-                CIQ = df
-                st.success(f"Fichier sélectionné : `{fichier_selectionne}` ({df.shape[0]} lignes).")                
+        if fichiers_selectionnes:
+            list_df = []
+            for fichier in fichiers_selectionnes:
+                df = lire_CIQ_csv(fichier_path=fichier, nom=fichier)
+                if df is not None:
+                    list_df.append(df)
+
+            if list_df:
+                CIQ = pd.concat(list_df, ignore_index=True)
+                st.success(f"{len(list_df)} fichier(s) chargé(s), total : {CIQ.shape[0]} lignes.")                
             else:
-                st.warning(f"Le fichier `{fichier_selectionne}` n'a pas pu être lu correctement.")
+                st.warning("Aucun des fichiers sélectionnés n’a pu être chargé correctement.")
                 st.stop()
         else:
             st.warning("Aucun fichier sélectionné.")
             st.stop()
     else:
-        st.warning("Aucun fichier correspondant à `lot*.csv` trouvé dans le répertoire courant.")
+        st.warning("Aucun fichier `lot*.csv` trouvé dans le répertoire courant.")
         st.stop()
 
 st.dataframe(CIQ.head())
