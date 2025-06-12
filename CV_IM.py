@@ -191,6 +191,10 @@ try:
 except UnicodeDecodeError:
     liste_champs_df = pd.read_csv("liste_champs.csv", sep=',', encoding="cp1252")
 
+### renommer si unités différentes
+liste_champs_df.rename(columns=lambda col: col.replace('(10^3/uL)', '(10^9/L)') if '(10^3/uL)' in col else col, inplace=True)
+liste_champs_df.rename(columns=lambda col: col.replace('(10^6/uL)', '(10^12/L)') if '(10^6/uL)' in col else col, inplace=True)
+
 if liste_champs_df.shape[1] == 1:
     colonnes_voulues = liste_champs_df.iloc[:, 0].dropna().astype(str).str.strip()
 else:
@@ -204,9 +208,7 @@ else:
 #CIQ = CIQ[colonnes_finales]
 # st.success(f"{len(colonnes_finales)} colonnes conservées dans le fichier CIQ.")
 
-### renommer si unités différentes
-colonnes_voulues.rename(columns=lambda col: col.replace('(10^3/uL)', '(10^9/L)') if '(10^3/uL)' in col else col, inplace=True)
-colonnes_voulues.rename(columns=lambda col: col.replace('(10^6/uL)', '(10^12/L)') if '(10^6/uL)' in col else col, inplace=True)
+
 
 # Ajoute les colonnes manquantes à CIQ avec des valeurs NaN
 for col in colonnes_voulues:
