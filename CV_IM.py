@@ -15,8 +15,8 @@ def cv(x):
 
 def sd(x):
     x = pd.to_numeric(x, errors='coerce')
-    med = np.nanmedian(x)
-    return med
+    sd = np.nanstd(x)
+    return sd
 
 def cv_robuste_iqr(x):
     x = pd.to_numeric(x, errors='coerce')
