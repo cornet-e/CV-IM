@@ -13,11 +13,21 @@ def cv(x):
     m = np.nanmean(x)
     return np.nan if m == 0 or np.isnan(m) else (np.nanstd(x) / m) * 100
 
+def sd(x):
+    x = pd.to_numeric(x, errors='coerce')
+    med = np.nanmedian(x)
+    return med
+
 def cv_robuste_iqr(x):
     x = pd.to_numeric(x, errors='coerce')
     med = np.nanmedian(x)
     iqr = np.nanpercentile(x, 75) - np.nanpercentile(x, 25)
     return np.nan if med == 0 or np.isnan(med) else (iqr / med) * 100
+
+def sd_robuste_iqr(x):
+    x = pd.to_numeric(x, errors='coerce')
+    iqr = np.nanpercentile(x, 75) - np.nanpercentile(x, 25)
+    return iqr
 
 def cv_robuste_iqr2(x):
     x = pd.to_numeric(x, errors='coerce')
@@ -25,6 +35,12 @@ def cv_robuste_iqr2(x):
     iqr = np.nanpercentile(x, 75) - np.nanpercentile(x, 25)
     sigma_robuste = iqr / 1.349
     return np.nan if med == 0 or np.isnan(med) else (sigma_robuste / med) * 100
+
+def sd_robuste_iqr2(x):
+    x = pd.to_numeric(x, errors='coerce')
+    iqr = np.nanpercentile(x, 75) - np.nanpercentile(x, 25)
+    sigma_robuste = iqr / 1.349
+    return sigma_robuste
 
 def cv_robuste_mad(x):
     x = pd.to_numeric(x, errors='coerce')
@@ -703,6 +719,11 @@ elif choix_eeq == "Utiliser un fichier EEQ par défaut":
         Ecart_type=('Valeur', 'std'),
         N=('Valeur', 'count'),
         CV_classique=('Valeur',cv),
+        SD_classique=('Valeur',sd),
+        CV_IQR=('Valeur',cv_robuste_IQR),
+        SD_IQR=('Valeur',sd_robuste_IQR),
+        CV_IQR2=('Valeur',cv_robuste_IQR2),
+        SD_IQR2=('Valeur',sd_robuste_IQR2),
         CV_MAD=('Valeur',cv_robuste_mad),
         SD_MAD=('Valeur',mad)
         ).reset_index()
@@ -758,7 +779,20 @@ elif choix_eeq == "Utiliser un fichier EEQ par défaut":
     
     # st.dataframe(df_IM)
 
+    # Colonnes proposées
+    options_sd = ['SD_classique', 'SD_IQR', 'SD_IQR2', 'SD_MAD']
 
+    # Sélecteur unique
+    choix_sd = st.selectbox("Choisissez le type de CV pour calculer u_CIQ :", options_sd)
+
+    # Affecter la colonne choisie à u_CIQ si elle existe dans df_IM
+    if choix_sd in df_IM.columns:
+        df_IM['u_CIQ'] = df_IM[choix_sd]
+        st.write(f"Colonne `{choix_sd}` utilisée pour calculer 'u_CIQ'")
+        st.dataframe(df_IM[['u_CIQ']].head())
+    else:
+        st.warning(f"La colonne {choix_sd} n'existe pas dans les données.")
+    
     # Calcul incertitudes
     df_IM['u_biais'] = df_IM['sd_biais']
     df_IM['u_CIQ'] = df_IM['SD_MAD']
