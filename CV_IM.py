@@ -113,6 +113,8 @@ def nettoyer_colonnes(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+st.title("Analyse des coefficients de variation (CV)")
+
 # === Choix de la source de données ===
 choix_source = st.radio(
     "Choisissez la source des données :",
@@ -260,7 +262,7 @@ CIQ['Annee'] = CIQ['Date'].dt.year.astype("Int64")
 
 
 
-st.subheader("Graph par paramètre sélectionné (détail par année)")
+st.subheader("Graphique par paramètre sélectionné (détail par année)")
 
 # === Choix du paramètre ===
 choix_param = CIQ.columns[8:]  # adapter si besoin
