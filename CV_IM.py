@@ -455,58 +455,59 @@ st.plotly_chart(fig_facet)
 
 st.subheader("Distribution des valeurs de chaque paramètre")
 
+if st.button("Afficher la distribution des valeurs des paramètres"):
     
-if len(params_selectionnés) == 0:
-    st.warning("Veuillez sélectionner au moins un paramètre.")
-else:
-    df_facet = data_filtrée[[col_automate, 'lot_niveau','Annee'] + params_selectionnés].copy()
-    df_facet['lot_niveau'] = df_facet['lot_niveau'].astype(str)
+    if len(params_selectionnés) == 0:
+        st.warning("Veuillez sélectionner au moins un paramètre.")
+    else:
+        df_facet = data_filtrée[[col_automate, 'lot_niveau','Annee'] + params_selectionnés].copy()
+        df_facet['lot_niveau'] = df_facet['lot_niveau'].astype(str)
+        
     
-
-    df_melted = df_facet.melt(
-        id_vars=[col_automate, 'lot_niveau','Annee'],
-        value_vars=params_selectionnés,
-        var_name='paramètre',
-        value_name='valeur'
-    )
-
-    df_melted[col_automate] = df_melted[col_automate].astype(str)
-    df_melted['lot_niveau'] = df_melted['lot_niveau'].astype(str)
-    df_melted = df_melted.dropna()
-
+        df_melted = df_facet.melt(
+            id_vars=[col_automate, 'lot_niveau','Annee'],
+            value_vars=params_selectionnés,
+            var_name='paramètre',
+            value_name='valeur'
+        )
     
-
-    fig_facet = px.box(
-        df_melted,
-        x='lot_niveau',
-        y='valeur',
-        color=col_automate,
-        facet_col='paramètre',
-        facet_col_wrap=3,
-        title="Distribution des paramètres par niveau de lot",
-        facet_row_spacing=0.1,
-        facet_col_spacing=0.1,
-        height=1500,
-        labels={
-            'valeur': 'Valeur mesurée',
-            'lot_niveau': 'Niveau de lot'
-        }
-    )
-    fig_facet.update_yaxes(matches=None)
-
-    for axis in fig_facet.layout:
-        if axis.startswith("yaxis"):
-            fig_facet.layout[axis].showticklabels = True
-            fig_facet.layout[axis].title = dict(text="Valeur")
-
-    for axis_name in fig_facet.layout:
-        if axis_name.startswith("xaxis"):
-            axis = fig_facet.layout[axis_name]
-            axis.showticklabels = True
-            axis.title = dict(text="Niveau de lot")
-
-    fig_facet.update_layout(height=300 * ((len(params_selectionnés) - 1) // 3 + 1))  # ajuste la hauteur automatiquement
-    st.plotly_chart(fig_facet)
+        df_melted[col_automate] = df_melted[col_automate].astype(str)
+        df_melted['lot_niveau'] = df_melted['lot_niveau'].astype(str)
+        df_melted = df_melted.dropna()
+    
+        
+    
+        fig_facet = px.box(
+            df_melted,
+            x='lot_niveau',
+            y='valeur',
+            color=col_automate,
+            facet_col='paramètre',
+            facet_col_wrap=3,
+            title="Distribution des paramètres par niveau de lot",
+            facet_row_spacing=0.1,
+            facet_col_spacing=0.1,
+            height=1500,
+            labels={
+                'valeur': 'Valeur mesurée',
+                'lot_niveau': 'Niveau de lot'
+            }
+        )
+        fig_facet.update_yaxes(matches=None)
+    
+        for axis in fig_facet.layout:
+            if axis.startswith("yaxis"):
+                fig_facet.layout[axis].showticklabels = True
+                fig_facet.layout[axis].title = dict(text="Valeur")
+    
+        for axis_name in fig_facet.layout:
+            if axis_name.startswith("xaxis"):
+                axis = fig_facet.layout[axis_name]
+                axis.showticklabels = True
+                axis.title = dict(text="Niveau de lot")
+    
+        fig_facet.update_layout(height=300 * ((len(params_selectionnés) - 1) // 3 + 1))  # ajuste la hauteur automatiquement
+        st.plotly_chart(fig_facet)
 
 
 ### ---------------- #####
