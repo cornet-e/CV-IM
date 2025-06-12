@@ -171,6 +171,7 @@ CIQ.rename(columns={'MCHC(g/dL)': 'MCHC(g/L)'}, inplace=True)
 
 ### renommer si unités différentes
 CIQ.rename(columns=lambda col: col.replace('(10^3/uL)', '(10^9/L)') if '(10^3/uL)' in col else col, inplace=True)
+CIQ.rename(columns=lambda col: col.replace('(10^6/uL)', '(10^12/L)') if '(10^6/uL)' in col else col, inplace=True)
 
 
 ### Suppression des doublons éventuels sur Nickname/Date/Time/Sample No.
@@ -202,6 +203,10 @@ else:
 
 #CIQ = CIQ[colonnes_finales]
 # st.success(f"{len(colonnes_finales)} colonnes conservées dans le fichier CIQ.")
+
+### renommer si unités différentes
+colonnes_voulues.rename(columns=lambda col: col.replace('(10^3/uL)', '(10^9/L)') if '(10^3/uL)' in col else col, inplace=True)
+colonnes_voulues.rename(columns=lambda col: col.replace('(10^6/uL)', '(10^12/L)') if '(10^6/uL)' in col else col, inplace=True)
 
 # Ajoute les colonnes manquantes à CIQ avec des valeurs NaN
 for col in colonnes_voulues:
