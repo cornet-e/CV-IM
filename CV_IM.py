@@ -185,7 +185,7 @@ st.write(f"Nombre de lignes après suppression des doublons : {len(CIQ_cleaned)}
 
 CIQ=CIQ_cleaned
 
-st.dataframe(CIQ)
+#st.dataframe(CIQ)
 
 # === Chargement de la liste des champs ===
 try:
