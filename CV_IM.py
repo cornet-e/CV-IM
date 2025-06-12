@@ -949,7 +949,7 @@ pattern_shape_map = {
 }
 
 
-titre_graph = f"Évolution de {param_selectionnes} et des limites acceptables par année, par analyseur et par niveau de lot"
+titre_graph = f"Incertitudes de mesure (U) pour {param_selectionnes} et limites acceptables par année, par analyseur et par niveau de lot"
 
 # Sélection interactive des analyseurs
 analyseurs_disponibles = df_long['Analyseur'].unique()
