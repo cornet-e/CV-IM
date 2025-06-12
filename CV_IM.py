@@ -720,10 +720,10 @@ elif choix_eeq == "Utiliser un fichier EEQ par défaut":
         N=('Valeur', 'count'),
         CV_classique=('Valeur',cv),
         SD_classique=('Valeur',sd),
-        CV_IQR=('Valeur',cv_robuste_IQR),
-        SD_IQR=('Valeur',sd_robuste_IQR),
-        CV_IQR2=('Valeur',cv_robuste_IQR2),
-        SD_IQR2=('Valeur',sd_robuste_IQR2),
+        CV_IQR=('Valeur',cv_robuste_iqr),
+        SD_IQR=('Valeur',sd_robuste_iqr),
+        CV_IQR2=('Valeur',cv_robuste_iqr2),
+        SD_IQR2=('Valeur',sd_robuste_iqr2),
         CV_MAD=('Valeur',cv_robuste_mad),
         SD_MAD=('Valeur',mad)
         ).reset_index()
