@@ -780,7 +780,8 @@ elif choix_eeq == "Utiliser un fichier EEQ par défaut":
 
     
     # st.dataframe(df_IM)
-
+    
+# Calcul incertitudes
     # Colonnes proposées
     options_sd = ['SD_classique', 'SD_IQR', 'SD_IQR2', 'SD_MAD']
 
@@ -795,9 +796,8 @@ elif choix_eeq == "Utiliser un fichier EEQ par défaut":
     else:
         st.warning(f"La colonne {choix_sd} n'existe pas dans les données.")
     
-    # Calcul incertitudes
+    
     df_IM['u_biais'] = df_IM['sd_biais']
-    df_IM['u_CIQ'] = df_IM['SD_MAD']
     df_IM['u_total'] = np.sqrt(df_IM['u_biais']**2 + df_IM['u_CIQ']**2)
     df_IM['U'] = df_IM['u_total'] * 2  # élargie (k=2)
     df_IM['U%'] = 100 * df_IM['U'] / df_IM['Moyenne']
