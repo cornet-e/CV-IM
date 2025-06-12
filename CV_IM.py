@@ -212,7 +212,7 @@ else:
 #CIQ = CIQ[colonnes_finales]
 # st.success(f"{len(colonnes_finales)} colonnes conservées dans le fichier CIQ.")
 
-
+st.write(colonnes_voulues)
 
 # Ajoute les colonnes manquantes à CIQ avec des valeurs NaN
 for col in colonnes_voulues:
