@@ -245,7 +245,9 @@ if not colonnes_automate or not colonnes_lot:
 # col_automate = st.selectbox("Colonne automate :", colonnes_automate, key="automate")
 col_automate = colonnes_automate
 
-col_lot = st.selectbox("Colonne lot (sample no) :", colonnes_lot, key="lot")
+#col_lot = st.selectbox("Colonne lot (sample no) :", colonnes_lot, key="lot")
+col_lot = colonnes_lot
+
 CIQ[col_automate] = CIQ[col_automate].astype(str)
 
 
