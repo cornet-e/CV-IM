@@ -169,6 +169,12 @@ CIQ['MCHC(g/dL)'] = pd.to_numeric(CIQ['MCHC(g/dL)'], errors='coerce') * 10
 # Renommer la colonne
 CIQ.rename(columns={'MCHC(g/dL)': 'MCHC(g/L)'}, inplace=True)
 
+### renommer si unités différentes
+# renames = {'HGB(g/dL)': 'HGB(g/L)', 'RBC(10^6/uL)': 'RBC(10^12/L)'}
+# existing_renames = {old: new for old, new in renames.items() if old in CIQ.columns}
+# CIQ.rename(columns=existing_renames, inplace=True)
+
+
 ### Suppression des doublons éventuels sur Nickname/Date/Time/Sample No.
 
 # Supprimer les doublons sur les colonnes spécifiées
