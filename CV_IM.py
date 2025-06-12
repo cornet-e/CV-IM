@@ -790,7 +790,7 @@ elif choix_eeq == "Utiliser un fichier EEQ par défaut":
     if choix_sd in df_IM.columns:
         df_IM['u_CIQ'] = df_IM[choix_sd]
         st.write(f"Colonne `{choix_sd}` utilisée pour calculer 'u_CIQ'")
-        st.dataframe(df_IM[['u_CIQ']].head())
+        # st.dataframe(df_IM[['u_CIQ']].head())
     else:
         st.warning(f"La colonne {choix_sd} n'existe pas dans les données.")
     
