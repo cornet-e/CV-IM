@@ -234,16 +234,16 @@ st.success(f"{len(colonnes_voulues)} colonnes définies dans CIQ (y compris les 
 # st.write(CIQ.columns.tolist())
 
 # === Détection automatique des colonnes automate et lot ===
-col_automate = [col for col in CIQ.columns if 'nick' in col.lower()]
-col_lot = [col for col in CIQ.columns if 'sample' in col.lower() and 'no' in col.lower()]
+colonnes_automate = [col for col in CIQ.columns if 'nick' in col.lower()]
+colonnes_lot = [col for col in CIQ.columns if 'sample' in col.lower() and 'no' in col.lower()]
 
-if not col_automate or not col_lot:
+if not colonnes_automate or not colonnes_lot:
     st.error("Colonnes 'automate' ou 'lot' non trouvées automatiquement.")
     st.write("Colonnes disponibles :", CIQ.columns.tolist())
     st.stop()
 
-# col_automate = st.selectbox("Colonne automate :", colonnes_automate, key="automate")
-# col_lot = st.selectbox("Colonne lot (sample no) :", colonnes_lot, key="lot")
+col_automate = st.selectbox("Colonne automate :", colonnes_automate, key="automate")
+col_lot = st.selectbox("Colonne lot (sample no) :", colonnes_lot, key="lot")
 CIQ[col_automate] = CIQ[col_automate].astype(str)
 
 
