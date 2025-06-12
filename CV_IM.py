@@ -173,7 +173,7 @@ CIQ.rename(columns={'MCHC(g/dL)': 'MCHC(g/L)'}, inplace=True)
 CIQ.rename(columns=lambda col: col.replace('(10^3/uL)', '(10^9/L)') if '(10^3/uL)' in col else col, inplace=True)
 CIQ.rename(columns=lambda col: col.replace('(10^6/uL)', '(10^12/L)') if '(10^6/uL)' in col else col, inplace=True)
 
-st.write(CIQ)
+st.write(CIQ[col])
 
 ### Suppression des doublons éventuels sur Nickname/Date/Time/Sample No.
 
