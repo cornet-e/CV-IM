@@ -237,7 +237,7 @@ st.success(f"{len(colonnes_voulues)} colonnes définies dans CIQ (y compris les 
 col_automate = [col for col in CIQ.columns if 'nick' in col.lower()]
 col_lot = [col for col in CIQ.columns if 'sample' in col.lower() and 'no' in col.lower()]
 
-if not colonnes_automate or not colonnes_lot:
+if not col_automate or not col_lot:
     st.error("Colonnes 'automate' ou 'lot' non trouvées automatiquement.")
     st.write("Colonnes disponibles :", CIQ.columns.tolist())
     st.stop()
