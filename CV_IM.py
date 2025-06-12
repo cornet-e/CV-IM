@@ -173,7 +173,7 @@ CIQ.rename(columns={'MCHC(g/dL)': 'MCHC(g/L)'}, inplace=True)
 CIQ.rename(columns=lambda col: col.replace('(10^3/uL)', '(10^9/L)') if '(10^3/uL)' in col else col, inplace=True)
 CIQ.rename(columns=lambda col: col.replace('(10^6/uL)', '(10^12/L)') if '(10^6/uL)' in col else col, inplace=True)
 
-
+st.write(CIQ)
 
 ### Suppression des doublons éventuels sur Nickname/Date/Time/Sample No.
 
@@ -196,8 +196,6 @@ except UnicodeDecodeError:
 ### renommer si unités différentes
 liste_champs_df.rename(columns=lambda col: col.replace('(10^3/uL)', '(10^9/L)') if '(10^3/uL)' in col else col, inplace=True)
 liste_champs_df.rename(columns=lambda col: col.replace('(10^6/uL)', '(10^12/L)') if '(10^6/uL)' in col else col, inplace=True)
-
-st.dataframe(liste_champs_df)
 
 if liste_champs_df.shape[1] == 1:
     colonnes_voulues = liste_champs_df.iloc[:, 0].dropna().astype(str).str.strip()
