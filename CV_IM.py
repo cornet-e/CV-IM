@@ -582,17 +582,17 @@ elif choix_eeq == "Utiliser un fichier EEQ par défaut":
 
     # Ajouter variable selon Analyte (mapping R -> Python)
     analyte_map = {
-        "Hématies (optique)": "[RBC-O(10^6/uL)]",
-        "Hématies (impédance)": "RBC(10^6/uL)",
+        "Hématies (optique)": "[RBC-O(10^12/L)]",
+        "Hématies (impédance)": "RBC(10^12/L)",
         "Hématocrite": "HCT(%)",
         "Hémoglobine": "HGB(g/L)",
         "IDR": "RDW-CV(%)",
         "VGM": "MCV(fL)",
         "CCMH": "MCHC(g/dL)",
         "TGMH": "MCH(pg)",
-        "Plaquettes (fluorescence)": "[PLT-F(10^3/uL)]",
-        "Plaquettes (impédance)": "PLT(10^3/uL)",
-        "Plaquettes (optique)": "[PLT-O(10^3/uL)]",
+        "Plaquettes (fluorescence)": "[PLT-F(10^9/L)]",
+        "Plaquettes (impédance)": "PLT(10^9/L)",
+        "Plaquettes (optique)": "[PLT-O(10^9/L)]",
         "VPM": "MPV(fL)",
         "Frac Plaq immatures (IPF)": "IPF(%)",
         "Réticulocytes": "RET%(%)",
@@ -601,17 +601,17 @@ elif choix_eeq == "Utiliser un fichier EEQ par défaut":
         "Frac Réti immatures (IRF)": "IRF(%)",
         "TGMH optique (GR-He)": "RBC-He(pg)",
         "R-MFV (Volume Erythro. le plus fréquent)": "R-MFV(fL)",
-        "Leucocytes": "WBC(10^3/uL)",
+        "Leucocytes": "WBC(10^9/L)",
         "Poly. Neutrophiles": "NEUT%(%)",
-        "Poly. Neutrophiles (abs)": "NEUT#(10^3/uL)",
+        "Poly. Neutrophiles (abs)": "NEUT#(10^9/L)",
         "Poly. Eosinophiles": "EO%(%)",
-        "Poly. Eosinophiles (abs)": "EO#(10^3/uL)",
+        "Poly. Eosinophiles (abs)": "EO#(10^9/L)",
         "Poly. Basophiles": "BASO%(%)",
-        "Poly. Basophiles (abs)": "BASO#(10^3/uL)",
+        "Poly. Basophiles (abs)": "BASO#(10^9/L)",
         "Lymphocytes": "LYMPH%(%)",
-        "Lymphocytes (abs)": "LYMPH#(10^3/uL)",
+        "Lymphocytes (abs)": "LYMPH#(10^9/L)",
         "Monocytes": "MONO%(%)",
-        "Monocytes (abs)": "MONO#(10^3/uL)"       
+        "Monocytes (abs)": "MONO#(10^9/L)"       
         }
     EEQ['variable'] = EEQ['Analyte'].map(analyte_map)
 
