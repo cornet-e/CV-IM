@@ -318,6 +318,7 @@ grouped = data_filtrée.groupby([col_automate, 'lot_niveau','Annee'])[param].agg
     CV_MAD=cv_robuste_mad
 ).reset_index()
 
+st.subheader("Tableau des CV (CV classique / CV IQR / CV IQR robuste / CV MAD)")
 st.dataframe(grouped)
 
 grouped['lot_annee'] = grouped['lot_niveau'].astype(str) + " (" + grouped['Annee'].astype(str) + ")"
@@ -356,7 +357,7 @@ st.subheader("CV (méthode MAD) par paramètre (moyenne de tous les CIQ)")
 
 
 # Sélectionne les colonnes de l'index 8 à 125 pour permettre la conversion en numérique
-st.dataframe(CIQ.head())
+# st.dataframe(CIQ.head())
 colonnes_numeriques = CIQ.columns[8:125]
 
 # Nettoyage et conversion en float
