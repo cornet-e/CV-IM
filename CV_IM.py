@@ -164,6 +164,19 @@ CIQ['MCHC(g/dL)'] = pd.to_numeric(CIQ['MCHC(g/dL)'], errors='coerce') * 10
 # Renommer la colonne
 CIQ.rename(columns={'MCHC(g/dL)': 'MCHC(g/L)'}, inplace=True)
 
+### Suppression des doublons éventuels sur Nickname/Date/Time/Sample No.
+
+# Supprimer les doublons sur les colonnes spécifiées
+CIQ = CIQ.drop_duplicates(subset=["Nickname", "Date", "Time", "Sample No."])
+
+# Sauvegarder le fichier nettoyé
+# df_cleaned.to_csv("lot3282_cleaned.csv", index=False)
+
+print(f"Nombre de lignes initiales : {len(df)}")
+print(f"Nombre de lignes après suppression des doublons : {len(df_cleaned)}")
+
+
+
 # === Chargement de la liste des champs ===
 try:
     liste_champs_df = pd.read_csv("liste_champs.csv", sep=',', encoding="utf-8")
