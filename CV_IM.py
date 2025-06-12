@@ -107,26 +107,62 @@ if choix_source == "Importer des fichiers CSV":
     uploaded_files = st.file_uploader("Importer un ou plusieurs fichiers CSV", type=["csv"], accept_multiple_files=True)
 
     if uploaded_files:
-        list_df = []
-        for file in uploaded_files:
-            df = lire_CIQ_csv(contenu_brut=file.read(), nom=file.name)
-            if df is not None:
-                list_df.append(df)
+    list_df = []
+    for file in uploaded_files:
+        df = lire_CIQ_csv(contenu_brut=file.read(), nom=file.name)
 
-        if list_df:
-            CIQ = pd.concat(list_df, ignore_index=True)
-            st.success(f"{len(list_df)} fichier(s) chargé(s), total : {CIQ.shape[0]} lignes.")            
-        else:
-            st.warning("Aucun fichier n'a pu être chargé correctement.")
+        if df is not None:
+            # === Conversion et renommage des colonnes dans CHAQUE fichier ===
+            if 'HGB(g/dL)' in df.columns:
+                df['HGB(g/dL)'] = pd.to_numeric(df['HGB(g/dL)'], errors='coerce') * 10
+                df.rename(columns={'HGB(g/dL)': 'HGB(g/L)'}, inplace=True)
+
+            if 'MCHC(g/dL)' in df.columns:
+                df['MCHC(g/dL)'] = pd.to_numeric(df['MCHC(g/dL)'], errors='coerce') * 10
+                df.rename(columns={'MCHC(g/dL)': 'MCHC(g/L)'}, inplace=True)
+
+            df.rename(columns=lambda col: col.replace('(10^3/uL)', '(10^9/L)') if '(10^3/uL)' in col else col, inplace=True)
+            df.rename(columns=lambda col: col.replace('(10^6/uL)', '(10^12/L)') if '(10^6/uL)' in col else col, inplace=True)
+
+            list_df.append(df)
+
+    if list_df:
+        CIQ = pd.concat(list_df, ignore_index=True)
+
+        # Vérification et traitement des colonnes dupliquées
+        colonnes_dupliquees = CIQ.columns[CIQ.columns.duplicated()].tolist()
+        if colonnes_dupliquees:
+            st.error(f"Doublons de colonnes détectés : {colonnes_dupliquees}")
             st.stop()
+
+        st.success(f"{len(list_df)} fichier(s) chargé(s), total : {CIQ.shape[0]} lignes.")
     else:
+        st.warning("Aucun fichier n'a pu être chargé correctement.")
         st.stop()
 
 elif choix_source == "Utiliser les données par défaut":
     df = lire_CIQ_csv(fichier_path="lot_default.csv")
     if df is not None:
+        # === Conversion et renommage des colonnes ===
+        if 'HGB(g/dL)' in df.columns:
+            df['HGB(g/dL)'] = pd.to_numeric(df['HGB(g/dL)'], errors='coerce') * 10
+            df.rename(columns={'HGB(g/dL)': 'HGB(g/L)'}, inplace=True)
+
+        if 'MCHC(g/dL)' in df.columns:
+            df['MCHC(g/dL)'] = pd.to_numeric(df['MCHC(g/dL)'], errors='coerce') * 10
+            df.rename(columns={'MCHC(g/dL)': 'MCHC(g/L)'}, inplace=True)
+
+        df.rename(columns=lambda col: col.replace('(10^3/uL)', '(10^9/L)') if '(10^3/uL)' in col else col, inplace=True)
+        df.rename(columns=lambda col: col.replace('(10^6/uL)', '(10^12/L)') if '(10^6/uL)' in col else col, inplace=True)
+
+        # Vérification des colonnes dupliquées
+        colonnes_dupliquees = df.columns[df.columns.duplicated()].tolist()
+        if colonnes_dupliquees:
+            st.error(f"Doublons de colonnes détectés : {colonnes_dupliquees}")
+            st.stop()
+
         CIQ = df
-        st.success("Données par défaut chargées depuis `lot_default.csv`.")        
+        st.success("Données par défaut chargées depuis `lot_default.csv`.")
     else:
         st.warning("Impossible de charger `lot_default.csv`.")
         st.stop()
@@ -141,12 +177,32 @@ elif choix_source == "Rechercher un fichier lot*.csv localement":
             list_df = []
             for fichier in fichiers_selectionnes:
                 df = lire_CIQ_csv(fichier_path=fichier, nom=fichier)
+
                 if df is not None:
+                    # === Conversion et renommage des colonnes dans CHAQUE fichier ===
+                    if 'HGB(g/dL)' in df.columns:
+                        df['HGB(g/dL)'] = pd.to_numeric(df['HGB(g/dL)'], errors='coerce') * 10
+                        df.rename(columns={'HGB(g/dL)': 'HGB(g/L)'}, inplace=True)
+
+                    if 'MCHC(g/dL)' in df.columns:
+                        df['MCHC(g/dL)'] = pd.to_numeric(df['MCHC(g/dL)'], errors='coerce') * 10
+                        df.rename(columns={'MCHC(g/dL)': 'MCHC(g/L)'}, inplace=True)
+
+                    df.rename(columns=lambda col: col.replace('(10^3/uL)', '(10^9/L)') if '(10^3/uL)' in col else col, inplace=True)
+                    df.rename(columns=lambda col: col.replace('(10^6/uL)', '(10^12/L)') if '(10^6/uL)' in col else col, inplace=True)
+
                     list_df.append(df)
 
             if list_df:
                 CIQ = pd.concat(list_df, ignore_index=True)
-                st.success(f"{len(list_df)} fichier(s) chargé(s), total : {CIQ.shape[0]} lignes.")                
+
+                # Vérification des colonnes dupliquées
+                colonnes_dupliquees = CIQ.columns[CIQ.columns.duplicated()].tolist()
+                if colonnes_dupliquees:
+                    st.error(f"Doublons de colonnes détectés : {colonnes_dupliquees}")
+                    st.stop()
+
+                st.success(f"{len(list_df)} fichier(s) chargé(s), total : {CIQ.shape[0]} lignes.")
             else:
                 st.warning("Aucun des fichiers sélectionnés n’a pu être chargé correctement.")
                 st.stop()
@@ -157,24 +213,8 @@ elif choix_source == "Rechercher un fichier lot*.csv localement":
         st.warning("Aucun fichier `lot*.csv` trouvé dans le répertoire courant.")
         st.stop()
 
+
 st.dataframe(CIQ.head())
-
-# Modifier l'unité de l'Hb : g/dL => g/L
-CIQ['HGB(g/dL)'] = pd.to_numeric(CIQ['HGB(g/dL)'], errors='coerce') * 10
-# Renommer la colonne
-CIQ.rename(columns={'HGB(g/dL)': 'HGB(g/L)'}, inplace=True)
-
-# Modifier l'unité de la CCMH : g/dL => g/L
-CIQ['MCHC(g/dL)'] = pd.to_numeric(CIQ['MCHC(g/dL)'], errors='coerce') * 10
-# Renommer la colonne
-CIQ.rename(columns={'MCHC(g/dL)': 'MCHC(g/L)'}, inplace=True)
-
-### renommer si unités différentes
-CIQ.rename(columns=lambda col: col.replace('(10^3/uL)', '(10^9/L)') if '(10^3/uL)' in col else col, inplace=True)
-CIQ.rename(columns=lambda col: col.replace('(10^6/uL)', '(10^12/L)') if '(10^6/uL)' in col else col, inplace=True)
-
-#st.write("Colonnes du fichier CIQ :")
-#st.write(CIQ.columns.tolist())
 
 ### Suppression des doublons éventuels sur Nickname/Date/Time/Sample No.
 
@@ -186,7 +226,7 @@ st.write(f"Nombre de lignes après suppression des doublons : {len(CIQ_cleaned)}
 
 CIQ=CIQ_cleaned
 
-st.dataframe(CIQ)
+# st.dataframe(CIQ)
 
 # === Chargement de la liste des champs ===
 try:
