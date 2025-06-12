@@ -169,8 +169,8 @@ CIQ.rename(columns={'MCHC(g/dL)': 'MCHC(g/L)'}, inplace=True)
 # Supprimer les doublons sur les colonnes spécifiées
 CIQ_cleaned = CIQ.drop_duplicates(subset=["Nickname", "Date", "Time", "Sample No."])
 
-st.print(f"Nombre de lignes initiales : {len(CIQ)}")
-st.print(f"Nombre de lignes après suppression des doublons : {len(CIQ_cleaned)}")
+st.write(f"Nombre de lignes initiales : {len(CIQ)}")
+st.write(f"Nombre de lignes après suppression des doublons : {len(CIQ_cleaned)}")
 
 CIQ=CIQ_cleaned
 
