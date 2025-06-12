@@ -242,8 +242,8 @@ if not colonnes_automate or not colonnes_lot:
     st.write("Colonnes disponibles :", CIQ.columns.tolist())
     st.stop()
 
-# col_automate = st.selectbox("Colonne automate :", colonnes_automate, key="automate")
-col_automate = colonnes_automate
+col_automate = st.selectbox("Colonne automate :", colonnes_automate, key="automate")
+# col_automate = colonnes_automate
 
 col_lot = st.selectbox("Colonne lot (sample no) :", colonnes_lot, key="lot")
 # col_lot = colonnes_lot
