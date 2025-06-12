@@ -714,19 +714,19 @@ elif choix_eeq == "Utiliser un fichier EEQ par défaut":
     # how="inner"  # ou "left", "right", "outer" selon ton besoin
 # )
     limites_en_pourcentage = {
-    "WBC(10^3/uL)": 15.49,
-    "RBC(10^6/uL)": 4.4,
+    "WBC(10^9/L)": 15.49,
+    "RBC(10^12/L)": 4.4,
     "HGB(g/L)": 4.19,
     "HCT(%)": 3.97,
-    "PLT(10^3/uL)": 13.4,
-    "[PLT-F(10^3/uL)]": 13.4,
-    "RET#(10^3/uL)": 16.8,
+    "PLT(10^9/L)": 13.4,
+    "[PLT-F(10^9/L)]": 13.4,
+    "RET#(10^9/L)": 16.8,
     "MCV(fL)": 2.42,
-    "LYMPH#(10^3/uL)": 17.6,
-    "MONO#(10^3/uL)": 27.9,
-    "BASO#(10^3/uL)": 38.5,
-    "EO#(10^3/uL)": 37.1,
-    "NEUT#(10^3/uL)": 23.35
+    "LYMPH#(10^9/L)": 17.6,
+    "MONO#(10^9/L)": 27.9,
+    "BASO#(10^9/L)": 38.5,
+    "EO#(10^9/L)": 37.1,
+    "NEUT#(10^9/L)": 23.35
     }
     
     df_IM = pd.merge(
