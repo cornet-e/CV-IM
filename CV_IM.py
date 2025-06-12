@@ -167,14 +167,12 @@ CIQ.rename(columns={'MCHC(g/dL)': 'MCHC(g/L)'}, inplace=True)
 ### Suppression des doublons éventuels sur Nickname/Date/Time/Sample No.
 
 # Supprimer les doublons sur les colonnes spécifiées
-CIQ = CIQ.drop_duplicates(subset=["Nickname", "Date", "Time", "Sample No."])
+CIQ_cleaned = CIQ.drop_duplicates(subset=["Nickname", "Date", "Time", "Sample No."])
 
-# Sauvegarder le fichier nettoyé
-# df_cleaned.to_csv("lot3282_cleaned.csv", index=False)
+print(f"Nombre de lignes initiales : {len(CIQ)}")
+print(f"Nombre de lignes après suppression des doublons : {len(CIQ_cleaned)}")
 
-print(f"Nombre de lignes initiales : {len(df)}")
-print(f"Nombre de lignes après suppression des doublons : {len(df_cleaned)}")
-
+CIQ=CIQ_cleaned
 
 
 # === Chargement de la liste des champs ===
