@@ -83,7 +83,7 @@ def trouver_lot_niveau_proche(row, ciq_moyennes):
 
     return candidats.loc[idx_min, "lot_niveau"]
 
-def lire_CIQ_csv_bak(fichier_path=None, contenu_brut=None, nom=""):
+def lire_CIQ_csv(fichier_path=None, contenu_brut=None, nom=""):
     """
     Traite un fichier CSV soit à partir d’un chemin local (fichier_path),
     soit à partir d’un contenu brut (contenu_brut).
@@ -106,32 +106,6 @@ def lire_CIQ_csv_bak(fichier_path=None, contenu_brut=None, nom=""):
         content_str = StringIO('\n'.join(lines))
 
         df = pd.read_csv(content_str, sep=',', on_bad_lines='skip')
-        return df
-
-    except Exception as e:
-        st.error(f"Erreur lecture du fichier {nom or fichier_path} : {e}")
-        return None
-
-def lire_CIQ_csv(fichier_path=None, contenu_brut=None, nom=""):
-    """
-    Traite un fichier CSV soit à partir d’un chemin local (fichier_path),
-    soit à partir d’un contenu brut (contenu_brut).
-    Ignore la première ligne, utilise ',' comme séparateur.
-    """
-    try:
-        if fichier_path:
-            with open(fichier_path, 'r', encoding='utf-8', errors='replace') as f:
-                df = pd.read_csv(f, sep=',', skiprows=1, on_bad_lines='skip')
-        elif contenu_brut:
-            content_str = StringIO(contenu_brut.decode('utf-8', errors='replace'))
-            df = pd.read_csv(content_str, sep=',', skiprows=1, on_bad_lines='skip')
-        else:
-            return None
-
-        if df.empty:
-            st.warning(f"Le fichier {nom} semble vide ou mal formaté.")
-            return None
-
         return df
 
     except Exception as e:
