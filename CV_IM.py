@@ -288,14 +288,15 @@ param = st.selectbox("Choisissez le paramètre à étudier", choix_param)
 
 filt_automate = st.multiselect("Automate(s)", sorted(CIQ[col_automate].dropna().unique()), default=None)
 
-# Extraire les niveaux disponibles dans les données
-niveaux_disponibles = sorted(CIQ['lot_niveau'].dropna().unique())
-# Définir les niveaux souhaités par défaut
+# Forcer tout en chaînes pour uniformiser les types
+niveaux_disponibles = sorted(CIQ['lot_niveau'].dropna().astype(str).unique())
+# Définir les niveaux souhaités par défaut (aussi en str)
 niveaux_defaut_souhaites = ['1101', '1102', '1103']
-# Ne garder que les niveaux par défaut qui existent réellement
+# Ne garder que les niveaux par défaut présents dans les options
 niveaux_defaut_valides = [niveau for niveau in niveaux_defaut_souhaites if niveau in niveaux_disponibles]
-# Afficher le widget avec des valeurs par défaut filtrées
+# Affichage du multiselect sécurisé
 filt_niveau = st.multiselect("Niveau(x) de lot", niveaux_disponibles, default=niveaux_defaut_valides)
+
 
 filt_annee = st.multiselect("Année(s)", sorted(CIQ['Annee'].dropna().unique()), default=None)
 
