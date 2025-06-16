@@ -120,7 +120,8 @@ def lire_CIQ_csv(fichier_path=None, contenu_brut=None, nom=""):
     """
     try:
         if fichier_path:
-            df = pd.read_csv(fichier_path, sep=',', encoding='utf-8', errors='replace', skiprows=1, on_bad_lines='skip')
+            with open(fichier_path, 'r', encoding='utf-8', errors='replace') as f:
+                df = pd.read_csv(f, sep=',', skiprows=1, on_bad_lines='skip')
         elif contenu_brut:
             content_str = StringIO(contenu_brut.decode('utf-8', errors='replace'))
             df = pd.read_csv(content_str, sep=',', skiprows=1, on_bad_lines='skip')
