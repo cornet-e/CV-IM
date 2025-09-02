@@ -297,6 +297,9 @@ niveaux_defaut_valides = [niveau for niveau in niveaux_defaut_souhaites if nivea
 # Affichage du multiselect sécurisé
 filt_niveau = st.multiselect("Niveau(x) de lot", niveaux_disponibles, default=niveaux_defaut_valides)
 
+lots_disponibles = sorted(CIQ['lot_num'].dropna().astype(str).unique())
+
+filt_lot = st.multiselect("Numéro(s) de lot", lots_disponibles, default=)
 
 filt_annee = st.multiselect("Année(s)", sorted(CIQ['Annee'].dropna().unique()), default=None)
 
@@ -307,6 +310,8 @@ if filt_automate:
     data_filtrée = data_filtrée[data_filtrée[col_automate].isin(filt_automate)]
 if filt_niveau:
     data_filtrée = data_filtrée[data_filtrée['lot_niveau'].isin(filt_niveau)]
+if filt_lotnum:
+    data_filtrée = data_filtrée[data_filtrée['lot_num'].isin(filt_lotnum)]
 if filt_annee:
     data_filtrée = data_filtrée[data_filtrée['Annee'].isin(filt_annee)]
 
