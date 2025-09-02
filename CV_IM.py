@@ -310,8 +310,8 @@ if filt_automate:
     data_filtrée = data_filtrée[data_filtrée[col_automate].isin(filt_automate)]
 if filt_niveau:
     data_filtrée = data_filtrée[data_filtrée['lot_niveau'].isin(filt_niveau)]
-if filt_lotnum:
-    data_filtrée = data_filtrée[data_filtrée['lot_num'].isin(filt_lotnum)]
+if filt_lot:
+    data_filtrée = data_filtrée[data_filtrée['lot_num'].isin(filt_lot)]
 if filt_annee:
     data_filtrée = data_filtrée[data_filtrée['Annee'].isin(filt_annee)]
 
@@ -338,6 +338,22 @@ st.dataframe(grouped)
 
 grouped['lot_annee'] = grouped['lot_niveau'].astype(str) + " (" + grouped['Annee'].astype(str) + ")"
 
+# Agrégation par automate, lot_num et niveau
+grouped2 = data_filtrée.groupby([col_automate, 'lot_num','lot_niveau','Annee'])[param].agg(
+    n='count',
+    Moyenne='mean',
+    Mediane='median',
+    Ecart_type='std',
+    CV=cv,
+    CV_IQR=cv_robuste_iqr,
+    CV_IQR2=cv_robuste_iqr2,
+    CV_MAD=cv_robuste_mad
+).reset_index()
+
+st.subheader("Tableau (2) des CV (CV classique / CV IQR / CV IQR robuste / CV MAD)")
+st.dataframe(grouped2)
+
+grouped2['lot_num2'] = grouped2['lot_num'].astype(str) + " (" + grouped2['lot_niveau'].astype(str) + ")"
 
 # Graphs interactifs
 #def plot_cv(y, title, ylabel):
@@ -363,6 +379,22 @@ plot_cv("CV", f"{param} : CV classique", "CV (%)")
 plot_cv("CV_IQR", f"{param} : CV IQR", "CV (%)")
 plot_cv("CV_IQR2", f"{param} : CV IQR robuste", "CV (%)")
 plot_cv("CV_MAD", f"{param} : CV MAD", "CV (%)")
+
+def plot_cv2(y, title, ylabel):
+    fig = px.bar(grouped2, x='lot_num2', y=y, color=col_automate,
+                 barmode='group',
+                 hover_data=['n', 'lot_num2','lot_niveau'],
+                 title=title,
+                 labels={y: ylabel, 'lot_num2':'Numéro de lot (Niveau)'}
+                )
+    st.plotly_chart(fig)
+
+
+st.subheader("Graphiques (2) des CV")
+plot_cv2("CV", f"{param} : CV classique", "CV (%)")
+plot_cv2("CV_IQR", f"{param} : CV IQR", "CV (%)")
+plot_cv2("CV_IQR2", f"{param} : CV IQR robuste", "CV (%)")
+plot_cv2("CV_MAD", f"{param} : CV MAD", "CV (%)")
 
 # =======================
 # ➕ Graphique Facets (CV_MAD par paramètre)
