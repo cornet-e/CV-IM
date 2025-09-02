@@ -299,7 +299,7 @@ filt_niveau = st.multiselect("Niveau(x) de lot", niveaux_disponibles, default=ni
 
 lots_disponibles = sorted(CIQ['lot_num'].dropna().astype(str).unique())
 
-filt_lot = st.multiselect("Numéro(s) de lot", lots_disponibles, default=)
+filt_lot = st.multiselect("Numéro(s) de lot", lots_disponibles)
 
 filt_annee = st.multiselect("Année(s)", sorted(CIQ['Annee'].dropna().unique()), default=None)
 
