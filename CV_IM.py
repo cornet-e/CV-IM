@@ -349,11 +349,13 @@ grouped2 = data_filtrée.groupby([col_automate, 'lot_num','lot_niveau','Annee'])
     CV_MAD=cv_robuste_mad
 ).reset_index()
 
-st.subheader("Tableau (2) des CV (CV classique / CV IQR / CV IQR robuste / CV MAD)")
+st.subheader("Tableau des CV (CV classique / CV IQR / CV IQR robuste / CV MAD) par Lot")
 st.dataframe(grouped2)
 
 # Affichage des CV de tous les paramètres par analyseur et par niveau / avec filtre analyseur, lot_num, année
-st.dataframe(data_filtrée)
+# st.dataframe(data_filtrée)
+
+st.subheader("Tableau des CV (CV classique / CV IQR / CV IQR robuste / CV MAD) par analyseur et niveau de lot")
 
 # Sélectionne les colonnes de l'index 8 à 125 pour permettre la conversion en numérique
 # st.dataframe(CIQ.head())
@@ -388,6 +390,8 @@ params_all_selectionnés = st.multiselect(
     default=[p for p in params_all_visibles_par_défaut if p in params_all_numeriques]
 )
 
+st.write(f"Liste des lots de CIQ inclus: ('lot_num')")
+
 # Mise en long format : chaque ligne = une mesure pour un paramètre donné
 data_long = data_filtrée.melt(
     id_vars=['Nickname', 'lot_num', 'lot_niveau', 'Annee'],
@@ -401,7 +405,7 @@ data_long["valeur"] = pd.to_numeric(data_long["valeur"], errors="coerce")
 
 grouped3 = (
     data_long
-    .groupby(['paramètre','Nickname','lot_num','lot_niveau','Annee'])
+    .groupby(['paramètre','Nickname','lot_niveau','Annee'])
     .apply(lambda g: pd.Series({
         "n": g["valeur"].count(),
         "Moyenne": g["valeur"].mean(),
@@ -416,7 +420,6 @@ grouped3 = (
 )
 
 
-st.subheader("Tableau des CV (CV classique / CV IQR / CV IQR robuste / CV MAD) par analyseur et niveau de lot")
 st.dataframe(grouped3)
 
 # Graphs interactifs
