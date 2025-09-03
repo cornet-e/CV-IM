@@ -391,7 +391,7 @@ params_all_selectionnés = st.multiselect(
     #default=[p for p in params_all_numériques if p != "Annee"] # ✅ tous sauf 'Annee'
 )
 
-st.write(f"Liste des lots de CIQ inclus:", lots_disponibles)
+st.write(f"Liste des lots de CIQ inclus:", 'lot_num')
 
 # Mise en long format : chaque ligne = une mesure pour un paramètre donné
 data_long = data_filtrée.melt(
