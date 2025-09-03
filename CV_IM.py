@@ -396,6 +396,9 @@ data_long = data_filtrée.melt(
     value_name='valeur'
 )
 
+# Conversion explicite en numérique
+data_long["valeur"] = pd.to_numeric(data_long["valeur"], errors="coerce")
+
 grouped3 = (
     data_long
     .groupby(['paramètre','Nickname','lot_num','lot_niveau','Annee'])
