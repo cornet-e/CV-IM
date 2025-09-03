@@ -353,7 +353,7 @@ st.subheader("Tableau des CV (CV classique / CV IQR / CV IQR robuste / CV MAD) p
 st.dataframe(grouped2)
 
 # Affichage des CV de tous les paramètres par analyseur et par niveau / avec filtre analyseur, lot_num, année
-# st.dataframe(data_filtrée)
+st.dataframe(data_filtrée)
 
 st.subheader("Tableau des CV (CV classique / CV IQR / CV IQR robuste / CV MAD) par analyseur et niveau de lot")
 
