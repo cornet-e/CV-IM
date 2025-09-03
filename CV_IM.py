@@ -355,6 +355,21 @@ st.dataframe(grouped2)
 # Affichage des CV de tous les paramètres par analyseur et par niveau / avec filtre analyseur, lot_num, année
 st.dataframe(data_filtrée)
 
+# Sélectionne les colonnes de l'index 8 à 125 pour permettre la conversion en numérique
+# st.dataframe(CIQ.head())
+colonnes_numeriques = CIQ.columns[8:125]
+
+# Nettoyage et conversion en float
+for col in colonnes_numeriques:
+    CIQ[col] = (
+        CIQ[col]
+        .astype(str)
+        .str.replace(',', '.', regex=False)
+        .str.replace(r'[<>]', '', regex=True)
+        .str.strip()
+    )
+    CIQ[col] = pd.to_numeric(CIQ[col], errors='coerce')
+
 # Détection des colonnes numériques uniquement
 params_all_numeriques = CIQ.select_dtypes(include=[np.number]).columns.tolist()
 
@@ -368,7 +383,7 @@ params_all_visibles_par_défaut = [
 
 # Sélecteur des paramètres à inclure dans les facets
 params_all_selectionnés = st.multiselect(
-    "Paramètres à afficher en facets",
+    "Paramètres à afficher",
     options=params_all_numeriques,
     default=[p for p in params_all_visibles_par_défaut if p in params_all_numeriques]
 )
