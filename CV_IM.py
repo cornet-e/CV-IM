@@ -400,10 +400,10 @@ st.success(f"Liste des lots de CIQ inclus : {lots_str}")
 # import fichier excel CV max sysmex / CV max recommandé
 
 # Charger le fichier Excel fourni par l'utilisateur
-file_path = "CV_max_reco.xlsx"
+file_cv_max = "CV_max_reco.xlsx"
 
 # Charger la première feuille en DataFrame
-df_cv_max = pd.read_excel(file_path, sheet_name=0, usecols=range(5))
+df_cv_max = pd.read_excel("CV_max_reco.xlsx", sheet_name=0, usecols=range(5))
 
 # Afficher un aperçu du DataFrame
 df_cv_max.head()
