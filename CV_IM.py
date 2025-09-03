@@ -381,14 +381,22 @@ params_all_visibles_par_défaut = [
     'WBC(10^9/L)','RBC(10^12/L)','HGB(g/L)','HCT(%)','MCV(fL)','MCH(pg)','MCHC(g/L)','PLT(10^9/L)','[RBC-O(10^12/L)]','[PLT-O(10^9/L)]','[PLT-F(10^9/L)]','IPF#(10^9/L)','[HGB-O(g/dL)]'
     ]
 
-# Sélecteur des paramètres à inclure dans les facets
+# Sélecteur des paramètres à inclure
 params_all_selectionnés = st.multiselect(
     "Paramètres à afficher",
     options=params_all_numeriques,
     default=[p for p in params_all_visibles_par_défaut if p in params_all_numeriques]
 )
 
-grouped3 = data_filtrée.groupby(['Nickname','lot_niveau','Annee'])[params_all_selectionnés].agg(
+# Mise en long format : chaque ligne = une mesure pour un paramètre donné
+data_long = data_filtrée.melt(
+    id_vars=['Nickname', 'lot_num', 'lot_niveau', 'Annee'],
+    value_vars=params_all_selectionnés,
+    var_name='paramètre',
+    value_name='valeur'
+)
+
+grouped3 = data_long.groupby(['paramètre','Nickname','lot_num','lot_niveau','Annee']).agg(
     n='count',
     Moyenne='mean',
     Mediane='median',
