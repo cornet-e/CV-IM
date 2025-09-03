@@ -396,16 +396,22 @@ data_long = data_filtrée.melt(
     value_name='valeur'
 )
 
-grouped3 = data_long.groupby(['paramètre','Nickname','lot_num','lot_niveau','Annee']).agg(
-    n=('valeur','count'),
-    Moyenne=('valeur','mean'),
-    Mediane=('valeur','median'),
-    Ecart_type=('valeur','std'),
-    CV=('valeur', cv),
-    CV_IQR=('valeur', cv_robuste_iqr),
-    CV_IQR2=('valeur', cv_robuste_iqr2),
-    CV_MAD=('valeur', cv_robuste_mad)
-).reset_index()
+grouped3 = (
+    data_long
+    .groupby(['paramètre','Nickname','lot_num','lot_niveau','Annee'])
+    .apply(lambda g: pd.Series({
+        "n": g["valeur"].count(),
+        "Moyenne": g["valeur"].mean(),
+        "Mediane": g["valeur"].median(),
+        "Ecart_type": g["valeur"].std(),
+        "CV": cv(g["valeur"].dropna()),
+        "CV_IQR": cv_robuste_iqr(g["valeur"].dropna()),
+        "CV_IQR2": cv_robuste_iqr2(g["valeur"].dropna()),
+        "CV_MAD": cv_robuste_mad(g["valeur"].dropna())
+    }))
+    .reset_index()
+)
+
 
 st.subheader("Tableau des CV (CV classique / CV IQR / CV IQR robuste / CV MAD) par analyseur et niveau de lot")
 st.dataframe(grouped3)
