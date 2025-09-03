@@ -397,14 +397,14 @@ data_long = data_filtrée.melt(
 )
 
 grouped3 = data_long.groupby(['paramètre','Nickname','lot_num','lot_niveau','Annee']).agg(
-    n='count',
-    Moyenne='mean',
-    Mediane='median',
-    Ecart_type='std',
-    CV=cv,
-    CV_IQR=cv_robuste_iqr,
-    CV_IQR2=cv_robuste_iqr2,
-    CV_MAD=cv_robuste_mad
+    n=('valeur','count'),
+    Moyenne=('valeur','mean'),
+    Mediane=('valeur','median'),
+    Ecart_type=('valeur','std'),
+    CV=('valeur', cv),
+    CV_IQR=('valeur', cv_robuste_iqr),
+    CV_IQR2=('valeur', cv_robuste_iqr2),
+    CV_MAD=('valeur', cv_robuste_mad)
 ).reset_index()
 
 st.subheader("Tableau des CV (CV classique / CV IQR / CV IQR robuste / CV MAD) par analyseur et niveau de lot")
