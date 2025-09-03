@@ -354,7 +354,7 @@ st.dataframe(grouped2)
 
 # Affichage des CV de tous les paramètres par analyseur et par niveau / avec filtre analyseur, lot_num, année
 
-grouped3 = data_filtrée.groupby([param,'lot_niveau','Annee'])['lot_num'].agg(
+grouped3 = data_filtrée.groupby([param,'lot_niveau','Annee'])[param].agg(
     n='count',
     Moyenne='mean',
     Mediane='median',
