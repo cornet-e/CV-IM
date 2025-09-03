@@ -391,7 +391,10 @@ params_all_selectionnés = st.multiselect(
     #default=[p for p in params_all_numériques if p != "Annee"] # ✅ tous sauf 'Annee'
 )
 
-st.success(f"Liste des lots de CIQ inclus:", data_filtrée["lot_num"].dropna().unique())
+lots_uniques = data_filtrée["lot_num"].dropna().unique()
+lots_str = ", ".join(map(str, sorted(lots_uniques)))
+
+st.success(f"Liste des lots de CIQ inclus : {lots_str}")
 
 # Mise en long format : chaque ligne = une mesure pour un paramètre donné
 data_long = data_filtrée.melt(
