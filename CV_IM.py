@@ -336,7 +336,6 @@ grouped = data_filtrée.groupby([col_automate, 'lot_niveau','Annee'])[param].agg
 st.subheader("Tableau des CV (CV classique / CV IQR / CV IQR robuste / CV MAD)")
 st.dataframe(grouped)
 
-grouped['lot_annee'] = grouped['lot_niveau'].astype(str) + " (" + grouped['Annee'].astype(str) + ")"
 
 # Agrégation par automate, lot_num et niveau
 grouped2 = data_filtrée.groupby([col_automate, 'lot_num','lot_niveau','Annee'])[param].agg(
@@ -353,7 +352,21 @@ grouped2 = data_filtrée.groupby([col_automate, 'lot_num','lot_niveau','Annee'])
 st.subheader("Tableau (2) des CV (CV classique / CV IQR / CV IQR robuste / CV MAD)")
 st.dataframe(grouped2)
 
-grouped2['lot_num2'] = grouped2['lot_num'].astype(str) + " (" + grouped2['lot_niveau'].astype(str) + ")"
+# Affichage des CV de tous les paramètres par analyseur et par niveau / avec filtre analyseur, lot_num, année
+
+grouped3 = data_filtrée.groupby([param,'lot_niveau','Annee'])['lot_num'].agg(
+    n='count',
+    Moyenne='mean',
+    Mediane='median',
+    Ecart_type='std',
+    CV=cv,
+    CV_IQR=cv_robuste_iqr,
+    CV_IQR2=cv_robuste_iqr2,
+    CV_MAD=cv_robuste_mad
+).reset_index()
+
+st.subheader("Tableau des CV (CV classique / CV IQR / CV IQR robuste / CV MAD) par analyseur et niveau de lot")
+st.dataframe(grouped3)
 
 # Graphs interactifs
 #def plot_cv(y, title, ylabel):
@@ -363,6 +376,8 @@ grouped2['lot_num2'] = grouped2['lot_num'].astype(str) + " (" + grouped2['lot_ni
 #                 title=title,
 #                 labels={y: ylabel, 'lot_niveau': 'Niveau de lot'})
 #    st.plotly_chart(fig)
+
+grouped['lot_annee'] = grouped['lot_niveau'].astype(str) + " (" + grouped['Annee'].astype(str) + ")"
 
 def plot_cv(y, title, ylabel):
     fig = px.bar(grouped, x='lot_annee', y=y, color=col_automate,
@@ -380,6 +395,8 @@ plot_cv("CV_IQR", f"{param} : CV IQR", "CV (%)")
 plot_cv("CV_IQR2", f"{param} : CV IQR robuste", "CV (%)")
 plot_cv("CV_MAD", f"{param} : CV MAD", "CV (%)")
 
+grouped2['lot_num2'] = grouped2['lot_num'].astype(str) + " (" + grouped2['lot_niveau'].astype(str) + ")"
+
 def plot_cv2(y, title, ylabel):
     fig = px.bar(grouped2, x='lot_num2', y=y, color=col_automate,
                  barmode='group',
@@ -395,6 +412,10 @@ plot_cv2("CV", f"{param} : CV classique", "CV (%)")
 plot_cv2("CV_IQR", f"{param} : CV IQR", "CV (%)")
 plot_cv2("CV_IQR2", f"{param} : CV IQR robuste", "CV (%)")
 plot_cv2("CV_MAD", f"{param} : CV MAD", "CV (%)")
+
+
+
+
 
 # =======================
 # ➕ Graphique Facets (CV_MAD par paramètre)
