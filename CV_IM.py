@@ -396,6 +396,18 @@ lots_str = ", ".join(map(str, sorted(lots_uniques)))
 
 st.success(f"Liste des lots de CIQ inclus : {lots_str}")
 
+
+# import fichier excel CV max sysmex / CV max recommandé
+
+# Charger le fichier Excel fourni par l'utilisateur
+file_path = "CV_max_reco.xlsx"
+
+# Charger la première feuille en DataFrame
+df_cv_max = pd.read_excel(file_path, sheet_name=0, usecols=range(5))
+
+# Afficher un aperçu du DataFrame
+df_cv_max.head()
+
 # Mise en long format : chaque ligne = une mesure pour un paramètre donné
 data_long = data_filtrée.melt(
     id_vars=['Nickname', 'lot_num', 'lot_niveau', 'Annee'],
