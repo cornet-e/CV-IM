@@ -379,16 +379,15 @@ params_all_numeriques = CIQ.select_dtypes(include=[np.number]).columns.tolist()
 params_all_numeriques = [col for col in params_all_numeriques if col not in ['n']]
 
 # Liste par défaut
-params_all_visibles_par_défaut = [    
-    'WBC(10^9/L)','RBC(10^12/L)','HGB(g/L)','HCT(%)','MCV(fL)','MCH(pg)','MCHC(g/L)','PLT(10^9/L)','[RBC-O(10^12/L)]','[PLT-O(10^9/L)]','[PLT-F(10^9/L)]','IPF#(10^9/L)','[HGB-O(g/dL)]'
-    ]
+#params_all_visibles_par_défaut = [    
+#    'WBC(10^9/L)','RBC(10^12/L)','HGB(g/L)','HCT(%)','MCV(fL)','MCH(pg)','MCHC(g/L)','PLT(10^9/L)','[RBC-O(10^12/L)]','[PLT-O(10^9/L)]','[PLT-F(10^9/L)]','IPF#(10^9/L)','[HGB-O(g/dL)]'
+#    ]
 
 # Sélecteur des paramètres à inclure
 params_all_selectionnés = st.multiselect(
     "Paramètres à afficher",
     options=params_all_numeriques,
-    default=[p for p in params_all_visibles_par_défaut if p in params_all_numeriques]
-)
+    default=[p for p in params_all_visibles_par_défaut if p != "Annee"] # ✅ tous sauf 'Annee'
 
 st.write(f"Liste des lots de CIQ inclus:", lots_disponibles)
 
