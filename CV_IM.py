@@ -333,7 +333,7 @@ grouped = data_filtrée.groupby([col_automate, 'lot_niveau','Annee'])[param].agg
     CV_MAD=cv_robuste_mad
 ).reset_index()
 
-st.subheader("Tableau des CV (CV classique / CV IQR / CV IQR robuste / CV MAD)")
+st.subheader(f"Tableau des CV (CV classique / CV IQR / CV IQR robuste / CV MAD) pour {param}")
 st.dataframe(grouped)
 
 
@@ -349,11 +349,11 @@ grouped2 = data_filtrée.groupby([col_automate, 'lot_num','lot_niveau','Annee'])
     CV_MAD=cv_robuste_mad
 ).reset_index()
 
-st.subheader("Tableau des CV (CV classique / CV IQR / CV IQR robuste / CV MAD) par Lot")
+st.subheader(f"Tableau des CV (CV classique / CV IQR / CV IQR robuste / CV MAD) par Lot pour {param}")
 st.dataframe(grouped2)
 
 # Affichage des CV de tous les paramètres par analyseur et par niveau / avec filtre analyseur, lot_num, année
-st.dataframe(data_filtrée)
+# st.dataframe(data_filtrée)
 
 st.subheader("Tableau des CV (CV classique / CV IQR / CV IQR robuste / CV MAD) par analyseur et niveau de lot")
 
