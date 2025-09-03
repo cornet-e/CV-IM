@@ -390,7 +390,7 @@ params_all_selectionnés = st.multiselect(
     default=[p for p in params_all_visibles_par_défaut if p in params_all_numeriques]
 )
 
-st.write(f"Liste des lots de CIQ inclus: ('lot_num')")
+st.write(f"Liste des lots de CIQ inclus:", lots_disponibles)
 
 # Mise en long format : chaque ligne = une mesure pour un paramètre donné
 data_long = data_filtrée.melt(
