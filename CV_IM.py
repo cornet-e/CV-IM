@@ -354,7 +354,26 @@ st.dataframe(grouped2)
 
 # Affichage des CV de tous les paramètres par analyseur et par niveau / avec filtre analyseur, lot_num, année
 st.dataframe(data_filtrée)
-grouped3 = data_filtrée.groupby(['Nickname','lot_niveau','Annee'])[param].agg(
+
+# Détection des colonnes numériques uniquement
+params_all_numeriques = CIQ.select_dtypes(include=[np.number]).columns.tolist()
+
+# Exclure les colonnes de comptage ou de type ID si nécessaire
+params_all_numeriques = [col for col in params_all_numeriques if col not in ['n']]
+
+# Liste par défaut
+params_all_visibles_par_défaut = [    
+    'WBC(10^9/L)','RBC(10^12/L)','HGB(g/L)','HCT(%)','MCV(fL)','MCH(pg)','MCHC(g/L)','PLT(10^9/L)','[RBC-O(10^12/L)]','[PLT-O(10^9/L)]','[PLT-F(10^9/L)]','IPF#(10^9/L)','[HGB-O(g/dL)]'
+    ]
+
+# Sélecteur des paramètres à inclure dans les facets
+params_all_selectionnés = st.multiselect(
+    "Paramètres à afficher en facets",
+    options=params_all_numeriques,
+    default=[p for p in params_all_visibles_par_défaut if p in params_all_numeriques]
+)
+
+grouped3 = data_filtrée.groupby(['Nickname','lot_niveau','Annee'])[params_all_selectionnés].agg(
     n='count',
     Moyenne='mean',
     Mediane='median',
