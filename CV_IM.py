@@ -387,7 +387,7 @@ params_all_numeriques = [col for col in params_all_numeriques if col not in ['n'
 params_all_selectionnés = st.multiselect(
     "Paramètres à afficher",
     options=params_all_numeriques,
-    default=params_all_numériques
+    default=params_all_numeriques
     #default=[p for p in params_all_numériques if p != "Annee"] # ✅ tous sauf 'Annee'
 )
 
