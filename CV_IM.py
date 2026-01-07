@@ -714,42 +714,42 @@ fig_facet.update_layout(
 
 st.plotly_chart(fig_facet, width='stretch')
 
-# Graphique facets avec Plotly Express
-fig_facet2 = px.bar(
-    df_facet,
-    x='lot_niveau',
-    y='CV',
-    color=col_automate,
-    barmode='group',
-    facet_col='paramètre',
-    facet_col_wrap=3,  # Nombre de colonnes dans la grille
-    title='CV MAD par paramètre et par niveau de lot',
-    facet_row_spacing=0.1,
-    facet_col_spacing=0.1,
-    height=1500,  # Plus grand pour laisser de la place
-    labels={'CV': 'CV MAD (%)', 'lot_niveau': 'Niveau de lot'}
-)
+# # Graphique facets avec Plotly Express
+# fig_facet2 = px.bar(
+#     df_facet,
+#     x='lot_niveau',
+#     y='CV',
+#     color=col_automate,
+#     barmode='group',
+#     facet_col='paramètre',
+#     facet_col_wrap=3,  # Nombre de colonnes dans la grille
+#     title='CV MAD par paramètre et par niveau de lot',
+#     facet_row_spacing=0.1,
+#     facet_col_spacing=0.1,
+#     height=1500,  # Plus grand pour laisser de la place
+#     labels={'CV': 'CV MAD (%)', 'lot_niveau': 'Niveau de lot'}
+# )
 
-fig_facet2.update_yaxes(matches=None)  # axes Y indépendants
-
-
-# Affiche tous les labels d’axe Y
-for axis in fig_facet2.layout:
-    if axis.startswith("yaxis"):
-        fig_facet2.layout[axis].showticklabels = True
-        fig_facet2.layout[axis].title = dict(text="CV MAD (%)")
+# fig_facet2.update_yaxes(matches=None)  # axes Y indépendants
 
 
-# Forcer l’affichage de l’axe X et du titre sur chaque subplot
-for axis_name in fig_facet2.layout:
-    if axis_name.startswith("xaxis"):
-        axis = fig_facet2.layout[axis_name]
-        axis.showticklabels = True  # Affiche les ticks
-        axis.title = dict(text="Niveau de lot")  # Titre de l'axe X
+# # Affiche tous les labels d’axe Y
+# for axis in fig_facet2.layout:
+#     if axis.startswith("yaxis"):
+#         fig_facet2.layout[axis].showticklabels = True
+#         fig_facet2.layout[axis].title = dict(text="CV MAD (%)")
 
 
-fig_facet2.update_layout(height=300 * ((len(params_selectionnés) - 1) // 3 + 1))  # ajuste la hauteur automatiquement
-st.plotly_chart(fig_facet2)
+# # Forcer l’affichage de l’axe X et du titre sur chaque subplot
+# for axis_name in fig_facet2.layout:
+#     if axis_name.startswith("xaxis"):
+#         axis = fig_facet2.layout[axis_name]
+#         axis.showticklabels = True  # Affiche les ticks
+#         axis.title = dict(text="Niveau de lot")  # Titre de l'axe X
+
+
+# fig_facet2.update_layout(height=300 * ((len(params_selectionnés) - 1) // 3 + 1))  # ajuste la hauteur automatiquement
+# st.plotly_chart(fig_facet2)
 
 
 
@@ -848,16 +848,15 @@ def lire_fichier_eeq(fichier_path=None, contenu_brut=None, nom=""):
         return None
 
 # === Choix de la source de données EEQ ===
-choix_eeq = st.radio("Source du fichier EEQ :", ["Importer un fichier EEQ", "Utiliser un fichier EEQ par défaut"])
+options = ["Importer un fichier EEQ", "Utiliser un fichier EEQ par défaut", "Rechercher un fichier EEQ en local"]
+choix_eeq = st.radio("Source du fichier EEQ :", options)
 
 if choix_eeq == "Importer un fichier EEQ":
-    uploaded_eeq = st.file_uploader("Importer fichier EEQ (exportEEQ1952.csv)", type=["csv"])
-    
+    uploaded_eeq = st.file_uploader("Importer fichier EEQ", type=["csv"])
     if uploaded_eeq:
         EEQ = lire_fichier_eeq(contenu_brut=uploaded_eeq.read(), nom=uploaded_eeq.name)
         if EEQ is not None:
-            st.success(f"Fichier EEQ importé avec succès : {uploaded_eeq.name}")
-            # st.dataframe(EEQ.head())
+            st.success(f"Fichier importé : {uploaded_eeq.name}")
         else:
             st.stop()
     else:
@@ -866,9 +865,21 @@ if choix_eeq == "Importer un fichier EEQ":
 elif choix_eeq == "Utiliser un fichier EEQ par défaut":
     EEQ = lire_fichier_eeq(fichier_path="exportEEQ1952.csv")
     if EEQ is not None:
-        st.success("Fichier EEQ par défaut chargé depuis `exportEEQ1952.csv`.")
-        # st.dataframe(EEQ.head())
+        st.success("Fichier par défaut chargé.")
     else:
+        st.stop()
+
+elif choix_eeq == "Rechercher un fichier EEQ en local":
+    # On liste les fichiers CSV du dossier actuel (ou un chemin spécifique)
+    fichiers_locaux = [f for f in os.listdir('.') if f.endswith('.csv') and 'EEQ' in f.upper()]
+    
+    if fichiers_locaux:
+        fichier_choisi = st.selectbox("Sélectionnez un fichier EEQ trouvé en local :", fichiers_locaux)
+        if fichier_choisi:
+            EEQ = lire_fichier_eeq(fichier_path=fichier_choisi)
+            st.success(f"Fichier local chargé : {fichier_choisi}")
+    else:
+        st.error("Aucun fichier contenant 'EEQ' n'a été trouvé dans le dossier local.")
         st.stop()
    
     # === Traitement données EEQ ===
@@ -903,7 +914,7 @@ elif choix_eeq == "Utiliser un fichier EEQ par défaut":
             if a == "1952": return "XR-ISIS-A"
             elif a == "1952A": return "XR-OSIRIS-A"
             elif a == "1952B": return "XR-ANUBIS-A"
-            elif a == "1952C": return "XN-1000-1-A"
+            elif a == "1952Z": return "XN-1000-1-A"
         return np.nan
 
     EEQ['Nickname'] = EEQ.apply(assign_nickname, axis=1)
@@ -1189,9 +1200,6 @@ elif choix_eeq == "Utiliser un fichier EEQ par défaut":
     #    height=max(300, 250 * nb_lots * nb_params),  # Ajustement plus fin si tu veux
     )
 
-import plotly.graph_objects as go
-# 📌 Récupérer l'ordre des facettes **tel que Plotly Express les affiche**
-
 
 # Inversion de l'indexation des facettes pour correspondre au vrai mapping
 # facet_row_order_reversed = list(reversed(facet_row_order))  # 🔄 Inverse l'ordre des lignes
@@ -1257,7 +1265,7 @@ nicknames = df_IM_filtré["Nickname"].unique()
 #           )
 
     # fig_IM.update_layout(height=300 * len(param_selectionnes))
-st.plotly_chart(fig_IM, use_container_width=True)
+st.plotly_chart(fig_IM, width='stretch')
 
 
 ### Méthode 2 pour graph ###
@@ -1334,4 +1342,4 @@ fig_IM2 = px.bar(
 
 fig_IM2.update_layout(height=600, legend_title_text='Type')
 #fig_IM2.update_traces(mode="lines+markers")
-st.plotly_chart(fig_IM2, use_container_width=True)
+st.plotly_chart(fig_IM2, width='stretch')
