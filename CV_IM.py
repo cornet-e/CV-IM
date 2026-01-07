@@ -882,9 +882,9 @@ elif choix_eeq == "Utiliser un fichier EEQ par défaut":
         st.error("Colonne 'Date' introuvable dans EEQ.")
         st.stop()
     
-    # Filtrer app NK9 (exemple)
-    EEQ = EEQ[EEQ['App'] == 'NK9']
-    
+    # Filtrer app NK9 ou NKR (après mi 2025)
+    EEQ = EEQ[EEQ['App'].isin(['NK9', 'NKR'])]   
+
     # Ajouter Nickname en fonction date et Anonymat (adaptation directe de R -> Python)
     def assign_nickname(row):
         d = row['Date']
