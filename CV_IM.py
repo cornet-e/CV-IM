@@ -903,6 +903,7 @@ elif choix_eeq == "Utiliser un fichier EEQ par défaut":
             if a == "1952": return "XR-ISIS-A"
             elif a == "1952A": return "XR-OSIRIS-A"
             elif a == "1952B": return "XR-ANUBIS-A"
+            elif a == "1952C": return "XN-1000-1-A"
         return np.nan
 
     EEQ['Nickname'] = EEQ.apply(assign_nickname, axis=1)
