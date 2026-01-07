@@ -9,7 +9,7 @@ import os
 import plotly.graph_objects as go
 import math
 
-# === Fonctions de calcul de CV ===
+# === Fonctions de calcul de CV intra-lot ===
 def cv(x):
     x = pd.to_numeric(x, errors='coerce')
     m = np.nanmean(x)
@@ -54,6 +54,26 @@ def mad(x):
     x = pd.to_numeric(x, errors='coerce')
     med = np.nanmedian(x)
     return np.nanmedian(np.abs(x - med)) * 1.4826
+
+# === Fonctions de calcul des LT-CV
+
+def cv_long_terme_mad(x):
+    """
+    Calcule le CV Long Terme (LT-CV) de manière robuste.
+    Prend l'ensemble des points d'un niveau (tous lots confondus).
+    """
+    x = pd.to_numeric(x, errors='coerce').dropna()
+    if len(x) < 2: return np.nan
+    
+    med_globale = np.nanmedian(x)
+    if med_globale == 0: return np.nan
+    
+    # On calcule la MAD sur la totalité des données du niveau
+    mad_totale = np.nanmedian(np.abs(x - med_globale)) * 1.4826
+    
+    return (mad_totale / med_globale) * 100
+
+# Trouver le niveau de lot le plus proche
 
 def trouver_lot_niveau_proche(row, ciq_moyennes):
     # Filtrer sur les clés, par exemple Nickname, Paramètre, Annee
@@ -459,14 +479,12 @@ grouped3 = (
     data_long
     .groupby(['paramètre','Nickname','lot_niveau','Annee'])
     .apply(lambda g: pd.Series({
-        "n": g["valeur"].count(),
+        "n_total": g["valeur"].count(),
+        "n_lots": g["lot_num"].nunique(), # Nombre de lots différents détectés
         "Moyenne": g["valeur"].mean(),
-        "Mediane": g["valeur"].median(),
-        "Ecart_type": g["valeur"].std(),
-        "CV": cv(g["valeur"].dropna()),
-        "CV_IQR": cv_robuste_iqr(g["valeur"].dropna()),
-        "CV_IQR2": cv_robuste_iqr2(g["valeur"].dropna()),
-        "CV_MAD": cv_robuste_mad(g["valeur"].dropna())
+        "CV_Intra_MAD": cv_robuste_mad(g["valeur"]), # Variabilité courte durée
+        "LT_CV_MAD": cv_long_terme_mad(g["valeur"]), # Variabilité longue durée (inclut changements de lots)
+        "CV_max_reco": g["CV_max_reco"].iloc[0] if "CV_max_reco" in g.columns else np.nan
     }))
     .reset_index()
 )
