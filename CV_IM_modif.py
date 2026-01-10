@@ -1257,6 +1257,9 @@ with tab_IM:
     # Extraire Année
     EEQ['Annee'] = EEQ['Date'].dt.year
 
+    #### Choix des lots de CIQ pour calcul des IM #####
+    ## choix sur année et/ou numéro de lot
+
     # Joindre CIQ et EEQ pour la même variable, Nickname (automate), année
     # Dans CIQ, on doit avoir colonne Année à créer (par exemple date d’analyse)
     # Ici on suppose CIQ a une colonne date, sinon on crée Année manuellement (à adapter)
@@ -1277,7 +1280,7 @@ with tab_IM:
         EEQ["Biais |c| pairs"]
         .str.replace(",", ".", regex=False)  # remplacer la virgule par un point
         .astype(float)                       # convertir en float
-)
+        )
     st.dataframe(EEQ.head())
 
 
@@ -1285,11 +1288,11 @@ with tab_IM:
 
     # st.dataframe(CIQ)
 
-    colonnes_valeurs = CIQ.columns[8:125]  
+    colonnes_valeurs_IM = CIQ.columns[8:125]  
     
     CIQ_long = CIQ.melt(
         id_vars=["Nickname", "lot_niveau", "Annee"],
-        value_vars=colonnes_valeurs,
+        value_vars=colonnes_valeurs_IM,
         var_name="Paramètre",
         value_name="Valeur"
     )
@@ -1392,6 +1395,22 @@ with tab_IM:
         else:
             return np.nan
 
+    def highlight_status(row):
+        styles = [''] * len(row)
+        u_idx = row.index.get_loc('U')
+        statut_idx = row.index.get_loc('Statut')
+        parametre_idx = row.index.get_loc('Paramètre')
+        nickname_idx = row.index.get_loc('Nickname')
+        
+        if row['Statut'] == "❌ Non Conforme":
+            color = 'background-color: #FF4B4B; color: white; font-weight: bold'
+            styles[u_idx] = color
+            styles[statut_idx] = color
+            styles[parametre_idx] = color
+            styles[nickname_idx] = color
+            
+        return styles
+
     df_IM['limite_accept'] = df_IM.apply(calculer_limite_absolue, axis=1)
 
     
@@ -1418,8 +1437,24 @@ with tab_IM:
     df_IM['U'] = df_IM['u_total'] * 2  # élargie (k=2)
     df_IM['U%'] = 100 * df_IM['U'] / df_IM['Moyenne']
 
-    st.dataframe(df_IM)
+    # 1. Création de la colonne de conformité
+    # On vérifie si U est supérieur à la limite_accept
+    df_IM['Statut'] = np.where(
+        df_IM['U'] > df_IM['limite_accept'], 
+        "❌ Non Conforme", 
+        "✅ Conforme"
+    )
+
+    # Optionnel : Gérer les cas où les données sont manquantes (NaN)
+    df_IM.loc[df_IM['U'].isnull() | df_IM['limite_accept'].isnull(), 'Statut'] = "Incomplet"
+
+    # st.dataframe(df_IM)
     
+    # Application du style
+    styled_df = df_IM.style.apply(highlight_status, axis=1)
+
+    # Affichage dans Streamlit
+    st.dataframe(styled_df)
 
 
     # =======================
