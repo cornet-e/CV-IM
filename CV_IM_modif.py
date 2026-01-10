@@ -360,8 +360,229 @@ CIQ['Date'] = pd.to_datetime(CIQ['Date'], errors='coerce')
 CIQ['Annee'] = CIQ['Date'].dt.year.astype("Int64")
 
 with tab_data:
-    st.title("Analyse des coefficients de variation (CV)")
+    st.title("Data brutes")
     st.dataframe(CIQ)
+
+   # == Choix du numéro de lot ===
+
+    st.subheader("Lots présents dans le jeu de données")
+
+    # Tableau récapitulatif par lot
+    table_lots_brut = (
+        CIQ
+        .dropna(subset=['lot_num', 'Date'])
+        .groupby('lot_num', as_index=False)
+        .agg(
+            Date_min=('Date', 'min'),
+            Date_max=('Date', 'max'),
+            Nb_mesures=('Date', 'count')
+        )
+        .sort_values('Date_min')
+    )
+
+    # Format des dates pour l'affichage
+    table_lots_brut['Date_min'] = table_lots_brut['Date_min'].dt.strftime('%Y-%m-%d')
+    table_lots_brut['Date_max'] = table_lots_brut['Date_max'].dt.strftime('%Y-%m-%d')
+
+    st.dataframe(
+        table_lots_brut,
+        width='stretch'
+    )
+
+
+    # lots_disponibles = sorted(CIQ['lot_num'].dropna().astype(str).unique())
+    lots_disponibles_brut = CIQ['lot_num'].astype(str).unique()
+    filt_lot_brut = st.selectbox("Numéro(s) de lot (raw data)", lots_disponibles_brut)
+
+    # === Choix analyseurs ===
+
+    filt_automate_brut = st.multiselect("Automate(s) (raw data)", sorted(CIQ[col_automate].dropna().unique()), default=None)
+
+    # === Choix niveau de lot ===
+    # Forcer tout en chaînes pour uniformiser les types
+    niveaux_disponibles_brut = sorted(CIQ['lot_niveau'].dropna().astype(str).unique())
+    # Définir les niveaux souhaités par défaut (aussi en str)
+    niveaux_defaut_souhaites_brut = ['1101', '1102', '1103']
+    # Ne garder que les niveaux par défaut présents dans les options
+    niveaux_defaut_valides_brut = [niveau for niveau in niveaux_defaut_souhaites_brut if niveau in niveaux_disponibles_brut]
+    # Affichage du multiselect sécurisé
+    filt_niveau_brut = st.multiselect("Niveau(x) de lot (raw data)", niveaux_disponibles_brut, default=niveaux_defaut_valides_brut)
+
+
+
+    filt_annee_brut = st.multiselect("Année(s) (raw data)", sorted(CIQ['Annee'].dropna().unique()), default=None)
+
+
+    # Filtrage des données
+    data_filtrée_brut = CIQ.copy()
+    if filt_automate_brut:
+        data_filtrée_brut = data_filtrée_brut[data_filtrée_brut[col_automate].isin(filt_automate_brut)]
+    if filt_niveau_brut:
+        data_filtrée_brut = data_filtrée_brut[data_filtrée_brut['lot_niveau'].isin(filt_niveau_brut)]
+    if filt_lot_brut:
+        data_filtrée_brut = data_filtrée_brut[data_filtrée_brut['lot_num'] == filt_lot_brut]
+    if filt_annee_brut:
+        data_filtrée_brut = data_filtrée_brut[data_filtrée_brut['Annee'].isin(filt_annee_brut)]
+
+    st.subheader(f"Choix du paramètre à étudier pour le lot {filt_lot_brut}")
+
+    # === Choix du paramètre ===
+    choix_param_brut = CIQ.columns[8:]  # adapter si besoin
+    param_brut = st.selectbox("Choisissez le paramètre à étudier (raw data)", choix_param_brut)
+
+    # Conversion du paramètre sélectionné en float
+    data_filtrée_brut[param_brut] = pd.to_numeric(data_filtrée_brut[param_brut], errors='coerce')
+
+    # Agrégation par automate et niveau
+    grouped_brut = data_filtrée_brut.groupby([col_automate, 'lot_niveau','Annee'])[param_brut].agg(
+        n='count',
+        Moyenne='mean',
+        Mediane='median',
+        Ecart_type='std',
+        CV=cv,
+        CV_IQR=cv_robuste_iqr,
+        CV_IQR2=cv_robuste_iqr2,
+        CV_MAD=cv_robuste_mad
+    ).reset_index()
+
+    grouped_brut['paramètre'] = param_brut
+    
+    # st.dataframe(grouped_brut)
+    # st.dataframe(data_filtrée_brut)
+
+    # Sélecteurs pour le graphique
+    st.subheader("Visualisation de la carte de contrôle (Levey-Jennings)")
+    # On n'a plus besoin de choisir le paramètre (il est déjà dans param_brut)
+    # Mais on doit choisir l'Automate et le Niveau si plusieurs sont présents dans les données filtrées
+    col1, col2 = st.columns(2)
+    with col1:
+        # On choisit l'automate (Nickname) parmi ceux restants après filtrage
+        automate_choisi = st.selectbox("Automate à visualiser :", data_filtrée_brut[col_automate].unique())
+    with col2:
+        # On choisit le niveau parmi ceux restants
+        niveau_choisi = st.selectbox("Niveau à visualiser :", data_filtrée_brut['lot_niveau'].unique())
+
+    # --- FILTRAGE DES DONNÉES ---
+    # On prend les lignes correspondant à l'automate et au niveau
+    df_plot_brut = data_filtrée_brut[
+        (data_filtrée_brut[col_automate] == automate_choisi) & 
+        (data_filtrée_brut['lot_niveau'] == niveau_choisi)
+    ].copy()
+
+    # --- RÉCUPÉRATION DES STATS ---
+    # Attention : on filtre grouped_brut sur l'automate et le niveau pour avoir la moyenne/SD
+    stats_selection = grouped_brut[
+        (grouped_brut[col_automate] == automate_choisi) & 
+        (grouped_brut['lot_niveau'] == niveau_choisi)
+    ]
+
+    if not stats_selection.empty:
+        stats = stats_selection.iloc[0]
+        moy_brut = stats['Moyenne']
+        sd_brut = stats['Ecart_type']
+        cv_brut = stats['CV']
+        
+        # Appel de la fonction de graphique (en utilisant df_plot_brut[param_brut])
+        # st.plotly_chart(plot_levey_jennings(df_plot_brut, moy_brut, sd_brut, param_brut))
+    else:
+        st.warning("Pas de statistiques calculées pour cette sélection.")
+
+    def generer_levey_jennings(df, param_nom, moyenne, sd):
+        # Tri par date pour un tracé chronologique
+        df = df.sort_values('Date')
+        
+        fig = go.Figure()
+
+        # Définition des zones de contrôle (±1SD, ±2SD, ±3SD)
+        limites = {
+            'Moyenne': {'val': moyenne, 'color': 'green', 'dash': 'solid'},
+            '+1 SD': {'val': moyenne + sd, 'color': 'orange', 'dash': 'dot'},
+            '-1 SD': {'val': moyenne - sd, 'color': 'orange', 'dash': 'dot'},
+            '+2 SD': {'val': moyenne + 2*sd, 'color': 'red', 'dash': 'dash'},
+            '-2 SD': {'val': moyenne - 2*sd, 'color': 'red', 'dash': 'dash'},
+            '+3 SD': {'val': moyenne + 3*sd, 'color': 'darkred', 'dash': 'dashdot'},
+            '-3 SD': {'val': moyenne - 3*sd, 'color': 'darkred', 'dash': 'dashdot'},
+        }
+
+        for label, config in limites.items():
+            fig.add_hline(y=config['val'], 
+                        line=dict(color=config['color'], dash=config['dash'], width=1),
+                        annotation_text=label, 
+                        annotation_position="top right")
+
+        # Ajout des points de mesure
+        # On colorie les points dynamiquement selon leur éloignement
+        colors = []
+        for val in df[param_nom]:
+            if abs(val - moyenne) > 3 * sd: colors.append('darkred')
+            elif abs(val - moyenne) > 2 * sd: colors.append('red')
+            else: colors.append('blue')
+
+        fig.add_trace(go.Scatter(
+            x=df['Date'],
+            y=df[param_nom],
+            mode='lines+markers',
+            name=param_nom,
+            line=dict(color='lightgray', width=1),
+            marker=dict(size=10, color=colors, symbol='circle')
+        ))
+
+        fig.update_layout(
+            title=f"Levey-Jennings : {param_nom} (Lot: {df['lot_num'].iloc[0]})",
+            xaxis_title="Date d'analyse",
+            yaxis_title="Valeur mesurée",
+            template="plotly_white",
+            height=600
+        )
+        
+        return fig
+
+# --- SELECTION POUR LE GRAPHIQUE ---
+
+    if not data_filtrée_brut.empty:
+        col_g1, col_g2 = st.columns(2)
+        
+        # with col_g1:
+        #     # On choisit l'automate parmi ceux présents dans les données filtrées
+        #     automate_choisi = st.selectbox("Sélectionner l'automate :", data_filtrée_brut[col_automate].unique())
+        
+        # with col_g2:
+        #     # On choisit le niveau
+        #     niveau_choisi = st.selectbox("Sélectionner le niveau :", data_filtrée_brut['lot_niveau'].unique())
+
+        # --- FILTRAGE FINAL POUR LE GRAPH ---
+        df_plot_brut = data_filtrée_brut[
+            (data_filtrée_brut[col_automate] == automate_choisi) & 
+            (data_filtrée_brut['lot_niveau'] == niveau_choisi)
+        ].copy()
+
+        # Récupération des stats calculées précédemment dans grouped_brut
+        # Rappel : grouped_brut contient une ligne par (Automate, Niveau, Annee)
+        stats_select = grouped_brut[
+            (grouped_brut[col_automate] == automate_choisi) & 
+            (grouped_brut['lot_niveau'] == niveau_choisi)
+        ]
+
+        if not stats_select.empty and not df_plot_brut.empty:
+            # On prend les stats de la première ligne correspondante
+            s = stats_select.iloc[0]
+            
+            # Génération du graphique
+            fig_lj = generer_levey_jennings(
+                df_plot_brut, 
+                param_brut,      # Le nom de la colonne choisie plus haut
+                s['Moyenne'], 
+                s['Ecart_type']
+            )
+            
+            st.plotly_chart(fig_lj, use_container_width=True)
+            
+            # Petit récapitulatif sous le graph
+            st.info(f"**Statistiques pour ce graphique :** n={s['n']} | Moyenne={s['Moyenne']:.3f} | SD={s['Ecart_type']:.3f} | CV={s['CV']:.3f}")
+        else:
+            st.warning("Données insuffisantes pour générer le graphique sur cette sélection.")
+    else:
+        st.error("Le jeu de données filtré est vide.")
 
 with tab_CV_intralot:
 
@@ -1257,19 +1478,6 @@ with tab_IM:
     # Extraire Année
     EEQ['Annee'] = EEQ['Date'].dt.year
 
-    #### Choix des lots de CIQ pour calcul des IM #####
-    ## choix sur année et/ou numéro de lot
-
-    # Joindre CIQ et EEQ pour la même variable, Nickname (automate), année
-    # Dans CIQ, on doit avoir colonne Année à créer (par exemple date d’analyse)
-    # Ici on suppose CIQ a une colonne date, sinon on crée Année manuellement (à adapter)
-    if 'Date' in CIQ.columns:
-        CIQ['Date'] = pd.to_datetime(CIQ['Date'], errors='coerce')
-        CIQ['Annee'] = CIQ['Date'].dt.year
-    else:
-        st.warning("Pas de colonne Date dans CIQ : Année non disponible.")
-        CIQ['Annee'] = 0  # placeholder
-    
     # Calcul du biais moyen absolu par groupe
     # st.dataframe(EEQ.head())
 
@@ -1284,27 +1492,102 @@ with tab_IM:
     st.dataframe(EEQ.head())
 
 
+    #### Choix des lots de CIQ pour calcul des IM #####
+    ## choix sur année et/ou numéro de lot
+    st.subheader('Choix des lots de CIQ à utiliser pour le calcul des IM')
+    # Tableau récapitulatif par lot
+    table_lots_IM = (
+        CIQ
+        .dropna(subset=['lot_num', 'Date'])
+        .groupby('lot_num', as_index=False)
+        .agg(
+            Date_min=('Date', 'min'),
+            Date_max=('Date', 'max'),
+            Nb_mesures=('Date', 'count')
+        )
+        .sort_values('Date_min')
+    )
+
+    # Format des dates pour l'affichage
+    table_lots_IM['Date_min'] = table_lots_IM['Date_min'].dt.strftime('%Y-%m-%d')
+    table_lots_IM['Date_max'] = table_lots_IM['Date_max'].dt.strftime('%Y-%m-%d')
+
+    st.dataframe(
+        table_lots_IM,
+        width='stretch'
+    )
 
 
-    # st.dataframe(CIQ)
+    lots_disponibles_IM = sorted(CIQ['lot_num'].dropna().astype(str).unique())
+    filt_lot_IM = st.multiselect("Numéro(s) de lot (IM)", lots_disponibles_IM)
 
-    colonnes_valeurs_IM = CIQ.columns[8:125]  
+    # === Choix analyseurs ===
+
+    filt_automate_IM = st.multiselect("Automate(s) (IM)", sorted(CIQ[col_automate].dropna().unique()), default=None)
+
+    # === Choix niveau de lot ===
+    # Forcer tout en chaînes pour uniformiser les types
+    niveaux_disponibles_IM = sorted(CIQ['lot_niveau'].dropna().astype(str).unique())
+    # Définir les niveaux souhaités par défaut (aussi en str)
+    niveaux_defaut_souhaites_IM = ['1101', '1102', '1103']
+    # Ne garder que les niveaux par défaut présents dans les options
+    niveaux_defaut_valides_IM = [niveau for niveau in niveaux_defaut_souhaites_IM if niveau in niveaux_disponibles_IM]
+    # Affichage du multiselect sécurisé
+    filt_niveau_IM = st.multiselect("Niveau(x) de lot (IM)", niveaux_disponibles_IM, default=niveaux_defaut_valides_IM)
+
+    filt_annee_IM = st.multiselect("Année(s) (IM)", sorted(CIQ['Annee'].dropna().unique()), default=None)
+
+    # Filtrage des données
+    data_filtrée_IM = CIQ.copy()
+    if filt_automate_IM:
+        data_filtrée_IM = data_filtrée_IM[data_filtrée_IM[col_automate].isin(filt_automate_IM)]
+    if filt_niveau_IM:
+        data_filtrée_IM = data_filtrée_IM[data_filtrée_IM['lot_niveau'].isin(filt_niveau_IM)]
+    if filt_lot_IM:
+        data_filtrée_IM = data_filtrée_IM[data_filtrée_IM['lot_num'].isin(filt_lot_IM)]
+    if filt_annee_IM:
+        data_filtrée_IM = data_filtrée_IM[data_filtrée_IM['Annee'].isin(filt_annee_IM)]
+
+    # Joindre CIQ et EEQ pour la même variable, Nickname (automate), année
+    # Dans CIQ, on doit avoir colonne Année à créer (par exemple date d’analyse)
+    # Ici on suppose CIQ a une colonne date, sinon on crée Année manuellement (à adapter)
+    if 'Date' in data_filtrée_IM.columns:
+        data_filtrée_IM['Date'] = pd.to_datetime(data_filtrée_IM['Date'], errors='coerce')
+        data_filtrée_IM['Annee'] = data_filtrée_IM['Date'].dt.year
+    else:
+        st.warning("Pas de colonne Date dans CIQ : Année non disponible.")
+        data_filtrée_IM['Annee'] = 0  # placeholder
     
-    CIQ_long = CIQ.melt(
+
+
+
+
+    # st.dataframe(data_filtrée_IM)
+
+    colonnes_valeurs_IM = data_filtrée_IM.columns[8:125]  
+    
+    data_filtrée_IM_long = data_filtrée_IM.melt(
         id_vars=["Nickname", "lot_niveau", "Annee"],
         value_vars=colonnes_valeurs_IM,
         var_name="Paramètre",
         value_name="Valeur"
     )
-    # st.dataframe(CIQ_long.head())
+
+    # 1. Convertir la colonne Valeur en numérique (force les erreurs en NaN)
+    data_filtrée_IM_long['Valeur'] = pd.to_numeric(data_filtrée_IM_long['Valeur'], errors='coerce')
+
+    # 2. Supprimer les lignes où la Valeur est NaN (très important pour le groupby)
+    data_filtrée_IM_long = data_filtrée_IM_long.dropna(subset=['Valeur'])
+
+    # st.dataframe(data_filtrée_IM_long.head())
     
-    CIQ_moyennes = (
-    CIQ_long.groupby(["Nickname", "Paramètre", "lot_niveau", "Annee"])
+    data_filtrée_IM_moyennes = (
+    data_filtrée_IM_long.groupby(["Nickname", "Paramètre", "lot_niveau", "Annee"])
     .agg(moy_valeur=("Valeur", lambda x: pd.to_numeric(x, errors="coerce").mean()))
     .reset_index()
     )
 
-    # st.dataframe(CIQ_moyennes.head())
+    # st.dataframe(data_filtrée_IM_moyennes.head())
     
     EEQ["Resultat"] = (
         EEQ["Resultat"]
@@ -1313,10 +1596,10 @@ with tab_IM:
     )
 
     EEQ["Resultat"] = pd.to_numeric(EEQ["Resultat"], errors="coerce")
-    CIQ_moyennes["moy_valeur"] = pd.to_numeric(CIQ_moyennes["moy_valeur"], errors="coerce")
+    data_filtrée_IM_moyennes["moy_valeur"] = pd.to_numeric(data_filtrée_IM_moyennes["moy_valeur"], errors="coerce")
 
     # Application sur ton DataFrame EEQ
-    EEQ["lot_niveau_proche"] = EEQ.apply(lambda row: trouver_lot_niveau_proche(row, CIQ_moyennes), axis=1)
+    EEQ["lot_niveau_proche"] = EEQ.apply(lambda row: trouver_lot_niveau_proche(row, data_filtrée_IM_moyennes), axis=1)
 
     # st.dataframe(EEQ)
 
@@ -1334,7 +1617,7 @@ with tab_IM:
     # st.dataframe(biais_moyen.head())
     
     
-    CIQ_grouped = CIQ_long.groupby(["Nickname", "lot_niveau", "Annee", "Paramètre"]).agg(
+    data_filtrée_IM_grouped = data_filtrée_IM_long.groupby(["Nickname", "lot_niveau", "Annee", "Paramètre"]).agg(
         Moyenne=('Valeur', 'mean'),
         Médiane=('Valeur', 'median'),
         Ecart_type=('Valeur', 'std'),
@@ -1349,10 +1632,8 @@ with tab_IM:
         SD_MAD=('Valeur',mad)
         ).reset_index()
 
-    # st.dataframe(CIQ_grouped)
+    # st.dataframe(data_filtrée_IM_grouped, hide_index = True)
     
-    # CIQ_grouped_1102 = CIQ_grouped[CIQ_grouped["lot_niveau"] == "1102"]
-    # st.dataframe(CIQ_grouped_1102)
     
     # df_IM = pd.merge(
     # biais_moyen,
@@ -1378,7 +1659,7 @@ with tab_IM:
     
     df_IM = pd.merge(
         biais_moyen,
-        CIQ_grouped,
+        data_filtrée_IM_grouped,
         left_on=["Nickname", "Paramètre", "Annee", "lot_niveau_proche"],
         right_on=["Nickname", "Paramètre", "Annee", "lot_niveau"],
         how="inner"  # ou "left", "right", "outer" selon ton besoin
@@ -1394,6 +1675,9 @@ with tab_IM:
             return moyenne * limites_en_pourcentage[param] / 100
         else:
             return np.nan
+
+    df_IM['limite_accept'] = df_IM.apply(calculer_limite_absolue, axis=1)
+
 
     def highlight_status(row):
         styles = [''] * len(row)
@@ -1411,9 +1695,7 @@ with tab_IM:
             
         return styles
 
-    df_IM['limite_accept'] = df_IM.apply(calculer_limite_absolue, axis=1)
-
-    
+        
     # st.dataframe(df_IM)
         
     # Calcul incertitudes
