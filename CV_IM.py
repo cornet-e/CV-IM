@@ -9,81 +9,18 @@ import os
 import plotly.graph_objects as go
 import math
 
-# === Fonctions de calcul de CV ===
-def cv(x):
-    x = pd.to_numeric(x, errors='coerce')
-    m = np.nanmean(x)
-    return np.nan if m == 0 or np.isnan(m) else (np.nanstd(x) / m) * 100
+st.set_page_config(
+    layout="wide"
+)
 
-def sd(x):
-    x = pd.to_numeric(x, errors='coerce')
-    sd = np.nanstd(x)
-    return sd
+st.sidebar.header("Data source")
 
-def cv_robuste_iqr(x):
-    x = pd.to_numeric(x, errors='coerce')
-    med = np.nanmedian(x)
-    iqr = np.nanpercentile(x, 75) - np.nanpercentile(x, 25)
-    return np.nan if med == 0 or np.isnan(med) else (iqr / med) * 100
+tab_CV_intralot, tab_CV_interlot, tab_CVref, tab_IM , tab_data= st.tabs(
+    ["📊 Tableaux/Graphiques CV intra-lot", "📊 Tableaux/Graphiques CV inter-lot", "📈 Calcul CV robuste (CV référence)", "📈 Calcul des incertitudes de mesures (IM)","Data source"]
+)
 
-def sd_robuste_iqr(x):
-    x = pd.to_numeric(x, errors='coerce')
-    iqr = np.nanpercentile(x, 75) - np.nanpercentile(x, 25)
-    return iqr
 
-def cv_robuste_iqr2(x):
-    x = pd.to_numeric(x, errors='coerce')
-    med = np.nanmedian(x)
-    iqr = np.nanpercentile(x, 75) - np.nanpercentile(x, 25)
-    sigma_robuste = iqr / 1.349
-    return np.nan if med == 0 or np.isnan(med) else (sigma_robuste / med) * 100
-
-def sd_robuste_iqr2(x):
-    x = pd.to_numeric(x, errors='coerce')
-    iqr = np.nanpercentile(x, 75) - np.nanpercentile(x, 25)
-    sigma_robuste = iqr / 1.349
-    return sigma_robuste
-
-def cv_robuste_mad(x):
-    x = pd.to_numeric(x, errors='coerce')
-    med = np.nanmedian(x)
-    mad = np.nanmedian(np.abs(x - med)) * 1.4826
-    return np.nan if med == 0 or np.isnan(med) else (mad / med) * 100
-
-def mad(x):
-    x = pd.to_numeric(x, errors='coerce')
-    med = np.nanmedian(x)
-    return np.nanmedian(np.abs(x - med)) * 1.4826
-
-def trouver_lot_niveau_proche(row, ciq_moyennes):
-    # Filtrer sur les clés, par exemple Nickname, Paramètre, Annee
-    filtres = (
-        (ciq_moyennes["Nickname"] == row["Nickname"]) &
-        (ciq_moyennes["Paramètre"] == row["Paramètre"]) &
-        (ciq_moyennes["Annee"] == row["Annee"])
-    )
-    candidats = ciq_moyennes.loc[filtres].copy()
-
-    # Si pas de correspondance, retourner NaN
-    if candidats.empty:
-        return np.nan
-
-    resultat = row.get("Resultat", np.nan)
-    if pd.isna(resultat):
-        return np.nan
-
-    # S'assurer que la colonne de comparaison est numérique
-    candidats["moy_valeur"] = pd.to_numeric(candidats["moy_valeur"], errors="coerce")
-    candidats = candidats.dropna(subset=["moy_valeur"])
-
-    if candidats.empty:
-        return np.nan
-
-    # Calculer la différence absolue et trouver la plus proche
-    candidats["ecart"] = (candidats["moy_valeur"] - resultat).abs()
-    idx_min = candidats["ecart"].idxmin()
-
-    return candidats.loc[idx_min, "lot_niveau"]
+# === Def import CIQ csv ===
 
 def lire_CIQ_csv(fichier_path=None, contenu_brut=None, nom=""):
     """
@@ -130,17 +67,161 @@ def nettoyer_colonnes(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+# === Fonctions de calcul de CV ===
+def cv(x):
+    x = pd.to_numeric(x, errors='coerce')
+    m = np.nanmean(x)
+    return np.nan if m == 0 or np.isnan(m) else (np.nanstd(x) / m) * 100
 
-st.title("Analyse des coefficients de variation (CV)")
+def sd(x):
+    x = pd.to_numeric(x, errors='coerce')
+    sd = np.nanstd(x)
+    return sd
+
+def cv_robuste_iqr(x):
+    x = pd.to_numeric(x, errors='coerce')
+    med = np.nanmedian(x)
+    iqr = np.nanpercentile(x, 75) - np.nanpercentile(x, 25)
+    return np.nan if med == 0 or np.isnan(med) else (iqr / med) * 100
+
+def sd_robuste_iqr(x):
+    x = pd.to_numeric(x, errors='coerce')
+    iqr = np.nanpercentile(x, 75) - np.nanpercentile(x, 25)
+    return iqr
+
+def cv_robuste_iqr2(x):
+    x = pd.to_numeric(x, errors='coerce')
+    med = np.nanmedian(x)
+    iqr = np.nanpercentile(x, 75) - np.nanpercentile(x, 25)
+    sigma_robuste = iqr / 1.349
+    return np.nan if med == 0 or np.isnan(med) else (sigma_robuste / med) * 100
+
+def sd_robuste_iqr2(x):
+    x = pd.to_numeric(x, errors='coerce')
+    iqr = np.nanpercentile(x, 75) - np.nanpercentile(x, 25)
+    sigma_robuste = iqr / 1.349
+    return sigma_robuste
+
+def cv_robuste_mad(x):
+    x = pd.to_numeric(x, errors='coerce')
+    med = np.nanmedian(x)
+    mad = np.nanmedian(np.abs(x - med)) * 1.4826
+    return np.nan if med == 0 or np.isnan(med) else (mad / med) * 100
+
+def mad(x):
+    x = pd.to_numeric(x, errors='coerce')
+    med = np.nanmedian(x)
+    return np.nanmedian(np.abs(x - med)) * 1.4826
+
+# === Fonctions de calcul des LT-CV
+
+def cv_long_terme_mad(x):
+    """
+    Calcule le CV Long Terme (LT-CV) de manière robuste.
+    Prend l'ensemble des points d'un niveau (tous lots confondus).
+    """
+    x = pd.to_numeric(x, errors='coerce').dropna()
+    if len(x) < 2: return np.nan
+    
+    med_globale = np.nanmedian(x)
+    if med_globale == 0: return np.nan
+    
+    # On calcule la MAD sur la totalité des données du niveau
+    mad_totale = np.nanmedian(np.abs(x - med_globale)) * 1.4826
+    
+    return (mad_totale / med_globale) * 100
+
+
+# def Trouver le niveau de lot le plus proche
+
+def trouver_lot_niveau_proche(row, ciq_moyennes):
+    # Filtrer sur les clés, par exemple Nickname, Paramètre, Annee
+    filtres = (
+        (ciq_moyennes["Nickname"] == row["Nickname"]) &
+        (ciq_moyennes["Paramètre"] == row["Paramètre"]) &
+        (ciq_moyennes["Annee"] == row["Annee"])
+    )
+    candidats = ciq_moyennes.loc[filtres].copy()
+
+    # Si pas de correspondance, retourner NaN
+    if candidats.empty:
+        return np.nan
+
+    resultat = row.get("Resultat", np.nan)
+    if pd.isna(resultat):
+        return np.nan
+
+    # S'assurer que la colonne de comparaison est numérique
+    candidats["moy_valeur"] = pd.to_numeric(candidats["moy_valeur"], errors="coerce")
+    candidats = candidats.dropna(subset=["moy_valeur"])
+
+    if candidats.empty:
+        return np.nan
+
+    # Calculer la différence absolue et trouver la plus proche
+    candidats["ecart"] = (candidats["moy_valeur"] - resultat).abs()
+    idx_min = candidats["ecart"].idxmin()
+
+    return candidats.loc[idx_min, "lot_niveau"]
+
+# === def Graphiques CV intra-lot ===
+
+def plot_cv(y, title, ylabel):
+    fig = px.bar(grouped, x='lot_niveau', y=y, color=col_automate,
+                 barmode='group',
+                 hover_data=['n', 'Annee', 'lot_niveau'],
+                 title=title,
+                 labels={y: ylabel, 'lot_niveau': 'Niveau de lot'}
+                )
+    # Ajouter les lignes de seuil rouge
+    # On ajoute une trace de type "scatter" (points reliés) pour le CV_max
+    fig.add_scatter(
+        x=grouped['lot_niveau'], 
+        y=grouped['CV_max_reco'], 
+        name="CV Max recommandé",
+        mode='markers', # 'markers' pour des points ou 'lines' si vous voulez relier
+        marker=dict(color='red', symbol='line-ew', size=20, line_width=2),
+        showlegend=True            
+                )
+    ordre_niveaux = sorted(grouped['lot_niveau'].unique())
+
+    fig.update_xaxes(
+        type='category',
+        categoryorder='array',
+        categoryarray=ordre_niveaux
+    )
+    st.plotly_chart(fig)
+
+def plot_cvinter(y, title, ylabel):
+    fig = px.bar(grouped_cvinter, x='lot_num2', y=y, color=col_automate,
+                barmode='group',
+                hover_data=['n', 'lot_num2','lot_niveau'],
+                title=title,
+                labels={y: ylabel, 'lot_num2':'Numéro de lot (Niveau)'}
+                )
+
+    # Ajouter les lignes de seuil rouge
+    # On ajoute une trace de type "scatter" (points reliés) pour le CV_max
+    fig.add_scatter(
+        x=grouped_cvinter['lot_niveau'], 
+        y=grouped_cvinter['CV_max_reco'], 
+        name="CV Max recommandé",
+        mode='markers', # 'markers' pour des points ou 'lines' si vous voulez relier
+        marker=dict(color='red', symbol='line-ew', size=20, line_width=2),
+        showlegend=True            
+                )
+
+    st.plotly_chart(fig)
+
 
 # === Choix de la source de données ===
-choix_source = st.radio(
-    "Choisissez la source des données :",
+choix_source = st.sidebar.radio(
+    "Choisissez la source des données de CIQ (csv au format sysmex):",
     ["Importer des fichiers CSV", "Utiliser les données par défaut", "Rechercher un fichier lot*.csv localement"]
 )
 
 if choix_source == "Importer des fichiers CSV":
-    uploaded_files = st.file_uploader("Importer un ou plusieurs fichiers CSV", type=["csv"], accept_multiple_files=True)
+    uploaded_files = st.sidebar.file_uploader("Importer un ou plusieurs fichiers CSV", type=["csv"], accept_multiple_files=True)
 
     if uploaded_files:
         list_df = []
@@ -154,11 +235,11 @@ if choix_source == "Importer des fichiers CSV":
             CIQ = pd.concat(list_df, ignore_index=True)
             colonnes_dupliquees = CIQ.columns[CIQ.columns.duplicated()].tolist()
             if colonnes_dupliquees:
-                st.error(f"Doublons de colonnes détectés : {colonnes_dupliquees}")
+                st.sidebar.error(f"Doublons de colonnes détectés : {colonnes_dupliquees}")
                 st.stop()
-            st.success(f"{len(list_df)} fichier(s) chargé(s), total : {CIQ.shape[0]} lignes.")
+            st.sidebar.success(f"{len(list_df)} fichier(s) chargé(s), total : {CIQ.shape[0]} lignes.")
         else:
-            st.warning("Aucun fichier n'a pu être chargé correctement.")
+            st.sidebar.warning("Aucun fichier n'a pu être chargé correctement.")
             st.stop()
     else:
         st.stop()
@@ -169,18 +250,18 @@ elif choix_source == "Utiliser les données par défaut":
         df = nettoyer_colonnes(df)
         colonnes_dupliquees = df.columns[df.columns.duplicated()].tolist()
         if colonnes_dupliquees:
-            st.error(f"Doublons de colonnes détectés : {colonnes_dupliquees}")
+            st.sidebar.error(f"Doublons de colonnes détectés : {colonnes_dupliquees}")
             st.stop()
         CIQ = df
-        st.success("Données par défaut chargées depuis `lot_default.csv`.")
+        st.sidebar.success("Données par défaut chargées depuis `lot_default.csv`.")
     else:
-        st.warning("Impossible de charger `lot_default.csv`.")
+        st.sidebar.warning("Impossible de charger `lot_default.csv`.")
         st.stop()
 
 elif choix_source == "Rechercher un fichier lot*.csv localement":
     fichiers = glob.glob("lot*.csv")
     if fichiers:
-        fichiers_selectionnes = st.multiselect("Sélectionnez un ou plusieurs fichiers :", fichiers)
+        fichiers_selectionnes = st.sidebar.multiselect("Sélectionnez un ou plusieurs fichiers :", fichiers)
         if fichiers_selectionnes:
             list_df = []
             for fichier in fichiers_selectionnes:
@@ -193,29 +274,29 @@ elif choix_source == "Rechercher un fichier lot*.csv localement":
                 CIQ = pd.concat(list_df, ignore_index=True)
                 colonnes_dupliquees = CIQ.columns[CIQ.columns.duplicated()].tolist()
                 if colonnes_dupliquees:
-                    st.error(f"Doublons de colonnes détectés : {colonnes_dupliquees}")
+                    st.sidebar.error(f"Doublons de colonnes détectés : {colonnes_dupliquees}")
                     st.stop()
-                st.success(f"{len(list_df)} fichier(s) chargé(s), total : {CIQ.shape[0]} lignes.")
+                st.sidebar.success(f"{len(list_df)} fichier(s) chargé(s), total : {CIQ.shape[0]} lignes.")
             else:
-                st.warning("Aucun des fichiers sélectionnés n’a pu être chargé correctement.")
+                st.sidebar.warning("Aucun des fichiers sélectionnés n’a pu être chargé correctement.")
                 st.stop()
         else:
-            st.warning("Aucun fichier sélectionné.")
+            st.sidebar.warning("Aucun fichier sélectionné.")
             st.stop()
     else:
-        st.warning("Aucun fichier `lot*.csv` trouvé dans le répertoire courant.")
+        st.sidebar.warning("Aucun fichier `lot*.csv` trouvé dans le répertoire courant.")
         st.stop()
 
 
-st.dataframe(CIQ.head())
+# st.dataframe(CIQ.head())
 
 ### Suppression des doublons éventuels sur Nickname/Date/Time/Sample No.
 
 # Supprimer les doublons sur les colonnes spécifiées
 CIQ_cleaned = CIQ.drop_duplicates(subset=["Nickname", "Date", "Time", "Sample No."])
 
-st.write(f"Nombre de lignes initiales : {len(CIQ)}")
-st.write(f"Nombre de lignes après suppression des doublons : {len(CIQ_cleaned)}")
+st.sidebar.write(f"Nombre de lignes initiales : {len(CIQ)}")
+st.sidebar.write(f"Nombre de lignes après suppression des doublons : {len(CIQ_cleaned)}")
 
 CIQ=CIQ_cleaned
 
@@ -247,7 +328,7 @@ for col in colonnes_voulues:
 # Réorganise les colonnes dans l’ordre de liste_champs
 CIQ = CIQ[colonnes_voulues]
 
-st.success(f"{len(colonnes_voulues)} colonnes définies dans CIQ (y compris les colonnes absentes ajoutées avec NaN).")
+#  st.success(f"{len(colonnes_voulues)} colonnes définies dans CIQ.")
 
 
 # st.write("Colonnes du fichier CIQ :")
@@ -278,610 +359,1050 @@ CIQ['lot_niveau'] = CIQ[col_lot].astype(str).str[18:22]
 CIQ['Date'] = pd.to_datetime(CIQ['Date'], errors='coerce')
 CIQ['Annee'] = CIQ['Date'].dt.year.astype("Int64")
 
-st.write(CIQ)
+with tab_data:
+    st.title("Data brutes")
+    st.dataframe(CIQ)
 
-st.subheader("Calcul des CV robustes, par paramètre, par analyseur, par année")
+   # == Choix du numéro de lot ===
 
-# === Choix du paramètre ===
-choix_param = CIQ.columns[8:]  # adapter si besoin
-param = st.selectbox("Choisissez le paramètre à étudier", choix_param)
+    st.subheader("Lots présents dans le jeu de données")
 
-# Sélection dynamique des critères
-
-filt_automate = st.multiselect("Automate(s)", sorted(CIQ[col_automate].dropna().unique()), default=None)
-
-# Forcer tout en chaînes pour uniformiser les types
-niveaux_disponibles = sorted(CIQ['lot_niveau'].dropna().astype(str).unique())
-# Définir les niveaux souhaités par défaut (aussi en str)
-niveaux_defaut_souhaites = ['1101', '1102', '1103']
-# Ne garder que les niveaux par défaut présents dans les options
-niveaux_defaut_valides = [niveau for niveau in niveaux_defaut_souhaites if niveau in niveaux_disponibles]
-# Affichage du multiselect sécurisé
-filt_niveau = st.multiselect("Niveau(x) de lot", niveaux_disponibles, default=niveaux_defaut_valides)
-
-lots_disponibles = sorted(CIQ['lot_num'].dropna().astype(str).unique())
-
-filt_lot = st.multiselect("Numéro(s) de lot", lots_disponibles)
-
-filt_annee = st.multiselect("Année(s)", sorted(CIQ['Annee'].dropna().unique()), default=None)
-
-
-# Filtrage des données
-data_filtrée = CIQ.copy()
-if filt_automate:
-    data_filtrée = data_filtrée[data_filtrée[col_automate].isin(filt_automate)]
-if filt_niveau:
-    data_filtrée = data_filtrée[data_filtrée['lot_niveau'].isin(filt_niveau)]
-if filt_lot:
-    data_filtrée = data_filtrée[data_filtrée['lot_num'].isin(filt_lot)]
-if filt_annee:
-    data_filtrée = data_filtrée[data_filtrée['Annee'].isin(filt_annee)]
-
-# Conversion du paramètre sélectionné en float
-data_filtrée[param] = pd.to_numeric(data_filtrée[param], errors='coerce')
-
-
-# st.dataframe(data_filtrée)
-
-# import fichier excel CV max sysmex / CV max recommandé
-
-
-# Charger la première feuille en DataFrame
-df_cv_max = pd.read_excel("CV_max_reco.xlsx", sheet_name=0, usecols=range(5))
-
-# Afficher un aperçu du DataFrame
-st.dataframe(df_cv_max)
-
-
-# Agrégation par automate et niveau
-grouped = data_filtrée.groupby([col_automate, 'lot_niveau','Annee'])[param].agg(
-    n='count',
-    Moyenne='mean',
-    Mediane='median',
-    Ecart_type='std',
-    CV=cv,
-    CV_IQR=cv_robuste_iqr,
-    CV_IQR2=cv_robuste_iqr2,
-    CV_MAD=cv_robuste_mad
-).reset_index()
-
-st.dataframe(grouped)
-
-grouped['paramètre'] = param
-
-# 1. Conversion forcée en string pour garantir la correspondance
-grouped['lot_niveau'] = grouped['lot_niveau'].astype(str).str.strip()
-df_cv_max['lot_niveau'] = df_cv_max['lot_niveau'].astype(str).str.strip()
-
-# 2. On fait de même pour la colonne 'paramètre' par sécurité
-grouped['paramètre'] = grouped['paramètre'].astype(str).str.strip()
-df_cv_max['paramètre'] = df_cv_max['paramètre'].astype(str).str.strip()
-
-# 3. Maintenant le merge fonctionnera
-grouped = grouped.merge(
-    df_cv_max[['paramètre', 'lot_niveau', 'CV_max_reco']], 
-    on=['paramètre', 'lot_niveau'], 
-    how='left'
-)
-
-st.subheader(f"Tableau des CV (CV classique / CV IQR / CV IQR robuste / CV MAD) pour {param}")
-st.dataframe(grouped)
-
-
-# Agrégation par automate, lot_num et niveau
-grouped2 = data_filtrée.groupby([col_automate, 'lot_num','lot_niveau','Annee'])[param].agg(
-    n='count',
-    Moyenne='mean',
-    Mediane='median',
-    Ecart_type='std',
-    CV=cv,
-    CV_IQR=cv_robuste_iqr,
-    CV_IQR2=cv_robuste_iqr2,
-    CV_MAD=cv_robuste_mad
-).reset_index()
-
-grouped2['paramètre'] = param
-
-# 1. Conversion forcée en string pour garantir la correspondance
-grouped2['lot_niveau'] = grouped2['lot_niveau'].astype(str).str.strip()
-df_cv_max['lot_niveau'] = df_cv_max['lot_niveau'].astype(str).str.strip()
-
-# 2. On fait de même pour la colonne 'paramètre' par sécurité
-grouped2['paramètre'] = grouped2['paramètre'].astype(str).str.strip()
-df_cv_max['paramètre'] = df_cv_max['paramètre'].astype(str).str.strip()
-
-# 3. Maintenant le merge fonctionnera
-grouped2 = grouped2.merge(
-    df_cv_max[['paramètre', 'lot_niveau', 'CV_max_reco']], 
-    on=['paramètre', 'lot_niveau'], 
-    how='left'
-)
-
-st.subheader(f"Tableau des CV (CV classique / CV IQR / CV IQR robuste / CV MAD) par Lot pour {param}")
-st.dataframe(grouped2)
-
-# Affichage des CV de tous les paramètres par analyseur et par niveau / avec filtre analyseur, lot_num, année
-# st.dataframe(data_filtrée)
-
-st.subheader("Tableau des CV (CV classique / CV IQR / CV IQR robuste / CV MAD) par analyseur et niveau de lot")
-
-# Sélectionne les colonnes de l'index 8 à 125 pour permettre la conversion en numérique
-# st.dataframe(CIQ.head())
-colonnes_numeriques = CIQ.columns[8:125]
-
-# Nettoyage et conversion en float
-for col in colonnes_numeriques:
-    CIQ[col] = (
-        CIQ[col]
-        .astype(str)
-        .str.replace(',', '.', regex=False)
-        .str.replace(r'[<>]', '', regex=True)
-        .str.strip()
+    # Tableau récapitulatif par lot
+    table_lots_brut = (
+        CIQ
+        .dropna(subset=['lot_num', 'Date'])
+        .groupby('lot_num', as_index=False)
+        .agg(
+            Date_min=('Date', 'min'),
+            Date_max=('Date', 'max'),
+            Nb_mesures=('Date', 'count')
+        )
+        .sort_values('Date_min')
     )
-    CIQ[col] = pd.to_numeric(CIQ[col], errors='coerce')
 
-# Détection des colonnes numériques uniquement
-params_all_numeriques = CIQ.select_dtypes(include=[np.number]).columns.tolist()
+    # Format des dates pour l'affichage
+    table_lots_brut['Date_min'] = table_lots_brut['Date_min'].dt.strftime('%Y-%m-%d')
+    table_lots_brut['Date_max'] = table_lots_brut['Date_max'].dt.strftime('%Y-%m-%d')
 
-# Exclure les colonnes de comptage ou de type ID si nécessaire
-params_all_numeriques = [col for col in params_all_numeriques if col not in ['n']]
-
-# Liste par défaut
-#params_all_visibles_par_défaut = [    
-#    'WBC(10^9/L)','RBC(10^12/L)','HGB(g/L)','HCT(%)','MCV(fL)','MCH(pg)','MCHC(g/L)','PLT(10^9/L)','[RBC-O(10^12/L)]','[PLT-O(10^9/L)]','[PLT-F(10^9/L)]','IPF#(10^9/L)','[HGB-O(g/dL)]'
-#    ]
-
-# Sélecteur des paramètres à inclure
-params_all_selectionnés = st.multiselect(
-    "Paramètres à afficher",
-    options=params_all_numeriques,
-    default=params_all_numeriques
-    #default=[p for p in params_all_numériques if p != "Annee"] # ✅ tous sauf 'Annee'
-)
-
-lots_uniques = data_filtrée["lot_num"].dropna().unique()
-lots_str = ", ".join(map(str, sorted(lots_uniques)))
-
-st.success(f"Liste des lots de CIQ inclus : {lots_str}")
-
-# Mise en long format : chaque ligne = une mesure pour un paramètre donné
-data_long = data_filtrée.melt(
-    id_vars=['Nickname', 'lot_num', 'lot_niveau', 'Annee'],
-    value_vars=params_all_selectionnés,
-    var_name='paramètre',
-    value_name='valeur'
-)
-
-# Conversion explicite en numérique
-data_long["valeur"] = pd.to_numeric(data_long["valeur"], errors="coerce")
-
-grouped3 = (
-    data_long
-    .groupby(['paramètre','Nickname','lot_niveau','Annee'])
-    .apply(lambda g: pd.Series({
-        "n": g["valeur"].count(),
-        "Moyenne": g["valeur"].mean(),
-        "Mediane": g["valeur"].median(),
-        "Ecart_type": g["valeur"].std(),
-        "CV": cv(g["valeur"].dropna()),
-        "CV_IQR": cv_robuste_iqr(g["valeur"].dropna()),
-        "CV_IQR2": cv_robuste_iqr2(g["valeur"].dropna()),
-        "CV_MAD": cv_robuste_mad(g["valeur"].dropna())
-    }))
-    .reset_index()
-)
-
-# 1. Conversion forcée en string pour garantir la correspondance
-grouped3['lot_niveau'] = grouped3['lot_niveau'].astype(str).str.strip()
-df_cv_max['lot_niveau'] = df_cv_max['lot_niveau'].astype(str).str.strip()
-
-# 2. On fait de même pour la colonne 'paramètre' par sécurité
-grouped3['paramètre'] = grouped3['paramètre'].astype(str).str.strip()
-df_cv_max['paramètre'] = df_cv_max['paramètre'].astype(str).str.strip()
-
-# 3. Maintenant le merge fonctionnera
-grouped3 = grouped3.merge(
-    df_cv_max[['paramètre', 'lot_niveau', 'CV_max_reco']], 
-    on=['paramètre', 'lot_niveau'], 
-    how='left'
-)
-
-
-st.dataframe(grouped3)
-
-# Graphs interactifs
-#def plot_cv(y, title, ylabel):
-#    fig = px.bar(grouped, x='lot_niveau', y=y, color=col_automate,
-#                 barmode='group',
-#                 hover_data=['n'],
-#                 title=title,
-#                 labels={y: ylabel, 'lot_niveau': 'Niveau de lot'})
-#    st.plotly_chart(fig)
-
-grouped['lot_annee'] = grouped['lot_niveau'].astype(str) + " (" + grouped['Annee'].astype(str) + ")"
-
-def plot_cv(y, title, ylabel):
-    fig = px.bar(grouped, x='lot_annee', y=y, color=col_automate,
-                 barmode='group',
-                 hover_data=['n', 'Annee', 'lot_niveau'],
-                 title=title,
-                 labels={y: ylabel, 'lot_annee': 'Niveau de lot (Année)'}
-                )
-    # Ajouter les lignes de seuil rouge
-    # On ajoute une trace de type "scatter" (points reliés) pour le CV_max
-    fig.add_scatter(
-        x=grouped['lot_annee'], 
-        y=grouped['CV_max_reco'], 
-        name="CV Max recommandé",
-        mode='markers', # 'markers' pour des points ou 'lines' si vous voulez relier
-        marker=dict(color='red', symbol='line-ew', size=20, line_width=2),
-        showlegend=True            
-                )
-    st.plotly_chart(fig)
-
-
-st.subheader("Graphiques des CV")
-plot_cv("CV", f"{param} : CV classique", "CV (%)")
-plot_cv("CV_IQR", f"{param} : CV IQR", "CV (%)")
-plot_cv("CV_IQR2", f"{param} : CV IQR robuste", "CV (%)")
-plot_cv("CV_MAD", f"{param} : CV MAD", "CV (%)")
-
-grouped2['lot_num2'] = grouped2['lot_num'].astype(str) + " (" + grouped2['lot_niveau'].astype(str) + ")"
-
-def plot_cv2(y, title, ylabel):
-    fig = px.bar(grouped2, x='lot_num2', y=y, color=col_automate,
-                 barmode='group',
-                 hover_data=['n', 'lot_num2','lot_niveau'],
-                 title=title,
-                 labels={y: ylabel, 'lot_num2':'Numéro de lot (Niveau)'}
-                )
-
-    # Ajouter les lignes de seuil rouge
-    # On ajoute une trace de type "scatter" (points reliés) pour le CV_max
-    fig.add_scatter(
-        x=grouped2['lot_niveau'], 
-        y=grouped2['CV_max_reco'], 
-        name="CV Max recommandé",
-        mode='markers', # 'markers' pour des points ou 'lines' si vous voulez relier
-        marker=dict(color='red', symbol='line-ew', size=20, line_width=2),
-        showlegend=True            
-                )
-
-    st.plotly_chart(fig)
-
-
-st.subheader("Graphiques (2) des CV")
-plot_cv2("CV", f"{param} : CV classique", "CV (%)")
-plot_cv2("CV_IQR", f"{param} : CV IQR", "CV (%)")
-plot_cv2("CV_IQR2", f"{param} : CV IQR robuste", "CV (%)")
-plot_cv2("CV_MAD", f"{param} : CV MAD", "CV (%)")
-
-
-
-
-
-# =======================
-# ➕ Graphique Facets (CV_MAD par paramètre)
-# =======================
-
-st.subheader("CV (méthode MAD) par paramètre (moyenne de tous les CIQ)")
-
-
-# Sélectionne les colonnes de l'index 8 à 125 pour permettre la conversion en numérique
-# st.dataframe(CIQ.head())
-colonnes_numeriques = CIQ.columns[8:125]
-
-# Nettoyage et conversion en float
-for col in colonnes_numeriques:
-    CIQ[col] = (
-        CIQ[col]
-        .astype(str)
-        .str.replace(',', '.', regex=False)
-        .str.replace(r'[<>]', '', regex=True)
-        .str.strip()
+    st.dataframe(
+        table_lots_brut,
+        width='stretch'
     )
-    CIQ[col] = pd.to_numeric(CIQ[col], errors='coerce')
-    
-# st.write(CIQ.iloc[:, 8:125].dtypes)
-# st.dataframe(CIQ.head())
 
-# Détection des colonnes numériques uniquement
-params_numeriques = CIQ.select_dtypes(include=[np.number]).columns.tolist()
 
-# Exclure les colonnes de comptage ou de type ID si nécessaire
-params_numeriques = [col for col in params_numeriques if col not in ['n']]
+    # lots_disponibles = sorted(CIQ['lot_num'].dropna().astype(str).unique())
+    lots_disponibles_brut = CIQ['lot_num'].astype(str).unique()
+    filt_lot_brut = st.selectbox("Numéro(s) de lot (raw data)", lots_disponibles_brut)
 
-# Liste par défaut
-params_visibles_par_défaut = [    
-    'WBC(10^9/L)','RBC(10^12/L)','HGB(g/L)','HCT(%)','MCV(fL)','MCH(pg)','MCHC(g/L)','PLT(10^9/L)','[RBC-O(10^12/L)]','[PLT-O(10^9/L)]','[PLT-F(10^9/L)]','IPF#(10^9/L)','[HGB-O(g/dL)]'
-    ]
+    # === Choix analyseurs ===
 
-# Sélecteur des paramètres à inclure dans les facets
-params_selectionnés = st.multiselect(
-    "Paramètres à afficher en facets",
-    options=params_numeriques,
-    default=[p for p in params_visibles_par_défaut if p in params_numeriques]
-)
+    filt_automate_brut = st.multiselect("Automate(s) (raw data)", sorted(CIQ[col_automate].dropna().unique()), default=None)
 
-#st.write("Paramètres dans Excel :", df_cv_max['paramètre'].unique())
-#st.write("Paramètres dans vos données :", params_selectionnés)
+    # === Choix niveau de lot ===
+    # Forcer tout en chaînes pour uniformiser les types
+    niveaux_disponibles_brut = sorted(CIQ['lot_niveau'].dropna().astype(str).unique())
+    # Définir les niveaux souhaités par défaut (aussi en str)
+    niveaux_defaut_souhaites_brut = ['1101', '1102', '1103']
+    # Ne garder que les niveaux par défaut présents dans les options
+    niveaux_defaut_valides_brut = [niveau for niveau in niveaux_defaut_souhaites_brut if niveau in niveaux_disponibles_brut]
+    # Affichage du multiselect sécurisé
+    filt_niveau_brut = st.multiselect("Niveau(x) de lot (raw data)", niveaux_disponibles_brut, default=niveaux_defaut_valides_brut)
 
-# Compilation des CV_MAD pour chaque paramètre
-liste_dfs = []
 
-for p in params_selectionnés:
-    df_tmp = data_filtrée.groupby([col_automate, 'lot_niveau'])[p].agg(
+
+    filt_annee_brut = st.multiselect("Année(s) (raw data)", sorted(CIQ['Annee'].dropna().unique()), default=None)
+
+
+    # Filtrage des données
+    data_filtrée_brut = CIQ.copy()
+    if filt_automate_brut:
+        data_filtrée_brut = data_filtrée_brut[data_filtrée_brut[col_automate].isin(filt_automate_brut)]
+    if filt_niveau_brut:
+        data_filtrée_brut = data_filtrée_brut[data_filtrée_brut['lot_niveau'].isin(filt_niveau_brut)]
+    if filt_lot_brut:
+        data_filtrée_brut = data_filtrée_brut[data_filtrée_brut['lot_num'] == filt_lot_brut]
+    if filt_annee_brut:
+        data_filtrée_brut = data_filtrée_brut[data_filtrée_brut['Annee'].isin(filt_annee_brut)]
+
+    st.subheader(f"Choix du paramètre à étudier pour le lot {filt_lot_brut}")
+
+    # === Choix du paramètre ===
+    choix_param_brut = CIQ.columns[8:]  # adapter si besoin
+    param_brut = st.selectbox("Choisissez le paramètre à étudier (raw data)", choix_param_brut)
+
+    # Conversion du paramètre sélectionné en float
+    data_filtrée_brut[param_brut] = pd.to_numeric(data_filtrée_brut[param_brut], errors='coerce')
+
+    # Agrégation par automate et niveau
+    grouped_brut = data_filtrée_brut.groupby([col_automate, 'lot_niveau','Annee'])[param_brut].agg(
         n='count',
+        Moyenne='mean',
+        Mediane='median',
+        Ecart_type='std',
+        CV=cv,
+        CV_IQR=cv_robuste_iqr,
+        CV_IQR2=cv_robuste_iqr2,
         CV_MAD=cv_robuste_mad
     ).reset_index()
+
+    grouped_brut['paramètre'] = param_brut
     
-    # On ajoute le nom du paramètre pour pouvoir faire le merge
-    df_tmp['paramètre'] = p
-    df_tmp.rename(columns={'CV_MAD': 'CV'}, inplace=True)
-    
-    # Nettoyage des types avant le merge
-    df_tmp['lot_niveau'] = df_tmp['lot_niveau'].astype(str).str.strip()
-    df_tmp['paramètre'] = df_tmp['paramètre'].astype(str).str.strip()
-    
-    # Merge individuel pour récupérer le CV_max de ce paramètre
-    df_tmp = df_tmp.merge(
+    # st.dataframe(grouped_brut)
+    # st.dataframe(data_filtrée_brut)
+
+    # Sélecteurs pour le graphique
+    st.subheader("Visualisation de la carte de contrôle (Levey-Jennings)")
+    # On n'a plus besoin de choisir le paramètre (il est déjà dans param_brut)
+    # Mais on doit choisir l'Automate et le Niveau si plusieurs sont présents dans les données filtrées
+    col1, col2 = st.columns(2)
+    with col1:
+        # On choisit l'automate (Nickname) parmi ceux restants après filtrage
+        automate_choisi = st.selectbox("Automate à visualiser :", data_filtrée_brut[col_automate].unique())
+    with col2:
+        # On choisit le niveau parmi ceux restants
+        niveau_choisi = st.selectbox("Niveau à visualiser :", data_filtrée_brut['lot_niveau'].unique())
+
+    # --- FILTRAGE DES DONNÉES ---
+    # On prend les lignes correspondant à l'automate et au niveau
+    df_plot_brut = data_filtrée_brut[
+        (data_filtrée_brut[col_automate] == automate_choisi) & 
+        (data_filtrée_brut['lot_niveau'] == niveau_choisi)
+    ].copy()
+
+    # --- RÉCUPÉRATION DES STATS ---
+    # Attention : on filtre grouped_brut sur l'automate et le niveau pour avoir la moyenne/SD
+    stats_selection = grouped_brut[
+        (grouped_brut[col_automate] == automate_choisi) & 
+        (grouped_brut['lot_niveau'] == niveau_choisi)
+    ]
+
+    if not stats_selection.empty:
+        stats = stats_selection.iloc[0]
+        moy_brut = stats['Moyenne']
+        sd_brut = stats['Ecart_type']
+        cv_brut = stats['CV']
+        
+        # Appel de la fonction de graphique (en utilisant df_plot_brut[param_brut])
+        # st.plotly_chart(plot_levey_jennings(df_plot_brut, moy_brut, sd_brut, param_brut))
+    else:
+        st.warning("Pas de statistiques calculées pour cette sélection.")
+
+    def generer_levey_jennings(df, param_nom, moyenne, sd):
+        # Tri par date pour un tracé chronologique
+        df = df.sort_values('Date')
+        
+        fig = go.Figure()
+
+        # Définition des zones de contrôle (±1SD, ±2SD, ±3SD)
+        limites = {
+            'Moyenne': {'val': moyenne, 'color': 'green', 'dash': 'solid'},
+            '+1 SD': {'val': moyenne + sd, 'color': 'orange', 'dash': 'dot'},
+            '-1 SD': {'val': moyenne - sd, 'color': 'orange', 'dash': 'dot'},
+            '+2 SD': {'val': moyenne + 2*sd, 'color': 'red', 'dash': 'dash'},
+            '-2 SD': {'val': moyenne - 2*sd, 'color': 'red', 'dash': 'dash'},
+            '+3 SD': {'val': moyenne + 3*sd, 'color': 'darkred', 'dash': 'dashdot'},
+            '-3 SD': {'val': moyenne - 3*sd, 'color': 'darkred', 'dash': 'dashdot'},
+        }
+
+        for label, config in limites.items():
+            fig.add_hline(y=config['val'], 
+                        line=dict(color=config['color'], dash=config['dash'], width=1),
+                        annotation_text=label, 
+                        annotation_position="top right")
+
+        # Ajout des points de mesure
+        # On colorie les points dynamiquement selon leur éloignement
+        colors = []
+        for val in df[param_nom]:
+            if abs(val - moyenne) > 3 * sd: colors.append('darkred')
+            elif abs(val - moyenne) > 2 * sd: colors.append('red')
+            else: colors.append('blue')
+
+        fig.add_trace(go.Scatter(
+            x=df['Date'],
+            y=df[param_nom],
+            mode='lines+markers',
+            name=param_nom,
+            line=dict(color='lightgray', width=1),
+            marker=dict(size=10, color=colors, symbol='circle')
+        ))
+
+        fig.update_layout(
+            title=f"Levey-Jennings : {param_nom} (Lot: {df['lot_num'].iloc[0]})",
+            xaxis_title="Date d'analyse",
+            yaxis_title="Valeur mesurée",
+            template="plotly_white",
+            height=600
+        )
+        
+        return fig
+
+# --- SELECTION POUR LE GRAPHIQUE ---
+
+    if not data_filtrée_brut.empty:
+        col_g1, col_g2 = st.columns(2)
+        
+        # with col_g1:
+        #     # On choisit l'automate parmi ceux présents dans les données filtrées
+        #     automate_choisi = st.selectbox("Sélectionner l'automate :", data_filtrée_brut[col_automate].unique())
+        
+        # with col_g2:
+        #     # On choisit le niveau
+        #     niveau_choisi = st.selectbox("Sélectionner le niveau :", data_filtrée_brut['lot_niveau'].unique())
+
+        # --- FILTRAGE FINAL POUR LE GRAPH ---
+        df_plot_brut = data_filtrée_brut[
+            (data_filtrée_brut[col_automate] == automate_choisi) & 
+            (data_filtrée_brut['lot_niveau'] == niveau_choisi)
+        ].copy()
+
+        # Récupération des stats calculées précédemment dans grouped_brut
+        # Rappel : grouped_brut contient une ligne par (Automate, Niveau, Annee)
+        stats_select = grouped_brut[
+            (grouped_brut[col_automate] == automate_choisi) & 
+            (grouped_brut['lot_niveau'] == niveau_choisi)
+        ]
+
+        if not stats_select.empty and not df_plot_brut.empty:
+            # On prend les stats de la première ligne correspondante
+            s = stats_select.iloc[0]
+            
+            # Génération du graphique
+            fig_lj = generer_levey_jennings(
+                df_plot_brut, 
+                param_brut,      # Le nom de la colonne choisie plus haut
+                s['Moyenne'], 
+                s['Ecart_type']
+            )
+            
+            st.plotly_chart(fig_lj, use_container_width=True)
+            
+            # Petit récapitulatif sous le graph
+            st.info(f"**Statistiques pour ce graphique :** n={s['n']} | Moyenne={s['Moyenne']:.3f} | SD={s['Ecart_type']:.3f} | CV={s['CV']:.3f}")
+        else:
+            st.warning("Données insuffisantes pour générer le graphique sur cette sélection.")
+    else:
+        st.error("Le jeu de données filtré est vide.")
+
+with tab_CV_intralot:
+
+    st.subheader("Calcul des CV intra-lot, par paramètre, par analyseur, par niveau de lot")
+
+    st.subheader("CV max - Fournisseur / Recommandé ")
+    # === import fichier excel CV max sysmex / CV max recommandé ===
+    # Charger la première feuille en DataFrame
+    df_cv_max = pd.read_excel("CV_max_reco.xlsx", sheet_name=0, usecols=range(5))
+
+    # Afficher un aperçu du DataFrame
+    st.dataframe(df_cv_max)
+
+    # == Choix du numéro de lot ===
+
+    st.subheader("Lots présents dans le jeu de données")
+
+    # Tableau récapitulatif par lot
+    table_lots = (
+        CIQ
+        .dropna(subset=['lot_num', 'Date'])
+        .groupby('lot_num', as_index=False)
+        .agg(
+            Date_min=('Date', 'min'),
+            Date_max=('Date', 'max'),
+            Nb_mesures=('Date', 'count')
+        )
+        .sort_values('Date_min')
+    )
+
+    # Format des dates pour l'affichage
+    table_lots['Date_min'] = table_lots['Date_min'].dt.strftime('%Y-%m-%d')
+    table_lots['Date_max'] = table_lots['Date_max'].dt.strftime('%Y-%m-%d')
+
+    st.dataframe(
+        table_lots,
+        width='stretch'
+    )
+
+
+    # lots_disponibles = sorted(CIQ['lot_num'].dropna().astype(str).unique())
+    lots_disponibles = CIQ['lot_num'].astype(str).unique()
+    filt_lot = st.selectbox("Numéro(s) de lot", lots_disponibles)
+
+    # === Choix analyseurs ===
+
+    filt_automate = st.multiselect("Automate(s)", sorted(CIQ[col_automate].dropna().unique()), default=None)
+
+    # === Choix niveau de lot ===
+    # Forcer tout en chaînes pour uniformiser les types
+    niveaux_disponibles = sorted(CIQ['lot_niveau'].dropna().astype(str).unique())
+    # Définir les niveaux souhaités par défaut (aussi en str)
+    niveaux_defaut_souhaites = ['1101', '1102', '1103']
+    # Ne garder que les niveaux par défaut présents dans les options
+    niveaux_defaut_valides = [niveau for niveau in niveaux_defaut_souhaites if niveau in niveaux_disponibles]
+    # Affichage du multiselect sécurisé
+    filt_niveau = st.multiselect("Niveau(x) de lot", niveaux_disponibles, default=niveaux_defaut_valides)
+
+
+
+    filt_annee = st.multiselect("Année(s)", sorted(CIQ['Annee'].dropna().unique()), default=None)
+
+
+    # Filtrage des données
+    data_filtrée = CIQ.copy()
+    if filt_automate:
+        data_filtrée = data_filtrée[data_filtrée[col_automate].isin(filt_automate)]
+    if filt_niveau:
+        data_filtrée = data_filtrée[data_filtrée['lot_niveau'].isin(filt_niveau)]
+    if filt_lot:
+        data_filtrée = data_filtrée[data_filtrée['lot_num'] == filt_lot]
+    if filt_annee:
+        data_filtrée = data_filtrée[data_filtrée['Annee'].isin(filt_annee)]
+
+    st.subheader(f"Choix du paramètre à étudier pour le lot {filt_lot}")
+
+    # === Choix du paramètre ===
+    choix_param = CIQ.columns[8:]  # adapter si besoin
+    param = st.selectbox("Choisissez le paramètre à étudier", choix_param)
+
+    # Conversion du paramètre sélectionné en float
+    data_filtrée[param] = pd.to_numeric(data_filtrée[param], errors='coerce')
+
+    st.subheader(f"Tableau des CV intra-lot (CV classique / CV IQR / CV IQR robuste / CV MAD) pour {param} (lot {filt_lot})")
+
+    # Agrégation par automate et niveau
+    grouped = data_filtrée.groupby([col_automate, 'lot_niveau','Annee'])[param].agg(
+        n='count',
+        Moyenne='mean',
+        Mediane='median',
+        Ecart_type='std',
+        CV=cv,
+        CV_IQR=cv_robuste_iqr,
+        CV_IQR2=cv_robuste_iqr2,
+        CV_MAD=cv_robuste_mad
+    ).reset_index()
+
+    # st.dataframe(grouped)
+
+    grouped['paramètre'] = param
+
+    # 1. Conversion forcée en string pour garantir la correspondance
+    grouped['lot_niveau'] = grouped['lot_niveau'].astype(str).str.strip()
+    df_cv_max['lot_niveau'] = df_cv_max['lot_niveau'].astype(str).str.strip()
+
+    # 2. On fait de même pour la colonne 'paramètre' par sécurité
+    grouped['paramètre'] = grouped['paramètre'].astype(str).str.strip()
+    df_cv_max['paramètre'] = df_cv_max['paramètre'].astype(str).str.strip()
+
+    # 3. Maintenant le merge fonctionnera
+    grouped = grouped.merge(
         df_cv_max[['paramètre', 'lot_niveau', 'CV_max_reco']], 
         on=['paramètre', 'lot_niveau'], 
         how='left'
     )
-    
-    liste_dfs.append(df_tmp)
 
 
+    st.dataframe(grouped)
 
-# Fusion de tous les DataFrames
-df_facet = pd.concat(liste_dfs, ignore_index=True)
+    # Graphs des CV intra-lot
+    st.subheader(f"Graphiques des CV pour le lot {filt_lot}")
+    plot_cv("CV", f"{param} : CV classique", "CV (%)")
+    plot_cv("CV_IQR", f"{param} : CV IQR", "CV (%)")
+    plot_cv("CV_IQR2", f"{param} : CV IQR robuste", "CV (%)")
+    plot_cv("CV_MAD", f"{param} : CV MAD", "CV (%)")
 
-# On s'assure que le DataFrame est propre
-df_facet['lot_niveau'] = df_facet['lot_niveau'].astype(str)
 
-# 1. On définit le nombre de colonnes
-n_cols = 3
-n_params = len(params_selectionnés)
-n_rows = math.ceil(n_params / n_cols)
+    # =======================
+    # ➕ Graphique Facets (CV_MAD par paramètre)
+    # =======================
 
-# 2. Création du graphique en forçant l'ordre
-fig_facet = px.bar(
-    df_facet,
-    x='lot_niveau',
-    y='CV',
-    color=col_automate,
-    barmode='group',
-    facet_col='paramètre',
-    facet_col_wrap=n_cols,
-    # Espacement horizontal (entre 0 et 1, par défaut très faible)
-    facet_col_spacing=0.08, 
-    # Espacement vertical (entre 0 et 1)
-    facet_row_spacing=0.06,
-    category_orders={
-        "paramètre": params_selectionnés, # Ordre strict
-        "lot_niveau": sorted(df_facet['lot_niveau'].unique().tolist())
-    },
-    title='CV MAD avec CV Max recommandés'
-)
 
-# 3. Ajout des seuils avec inversion de l'index des lignes
-# Plotly Express place l'index 0 en BAS à GAUCHE.
-for i, p in enumerate(params_selectionnés):
-    sub_df = df_facet[df_facet['paramètre'] == p].drop_duplicates(subset=['lot_niveau'])
-    sub_df = sub_df.dropna(subset=['CV_max_reco'])
-    
-    if not sub_df.empty:
-        # CALCUL DE POSITION SPÉCIFIQUE PLOTLY
-        # La colonne est simple :
-        col_pos = (i % n_cols) + 1
+    st.subheader(f"Comparaison des CV intra-lot (méthode MAD) pour les paramètres du lot {filt_lot}")
+
+
+    # Sélectionne les colonnes de l'index 8 à 125 pour permettre la conversion en numérique
+    # st.dataframe(CIQ.head())
+    colonnes_numeriques = CIQ.columns[8:125]
+
+    # Nettoyage et conversion en float
+    for col in colonnes_numeriques:
+        CIQ[col] = (
+            CIQ[col]
+            .astype(str)
+            .str.replace(',', '.', regex=False)
+            .str.replace(r'[<>]', '', regex=True)
+            .str.strip()
+        )
+        CIQ[col] = pd.to_numeric(CIQ[col], errors='coerce')
         
-        # La ligne doit être inversée car Plotly compte depuis le bas
-        # Row 1 est en bas, Row N est en haut
-        current_row_from_top = (i // n_cols)
-        row_pos = n_rows - current_row_from_top
+    # st.write(CIQ.iloc[:, 8:125].dtypes)
+    # st.dataframe(CIQ.head())
+
+    # Détection des colonnes numériques uniquement
+    params_numeriques = CIQ.select_dtypes(include=[np.number]).columns.tolist()
+
+    # Exclure les colonnes de comptage ou de type ID si nécessaire
+    params_numeriques = [col for col in params_numeriques if col not in ['n']]
+
+    # Liste par défaut
+    params_visibles_par_défaut = [    
+        'WBC(10^9/L)','RBC(10^12/L)','HGB(g/L)','HCT(%)','MCV(fL)','MCH(pg)','MCHC(g/L)','PLT(10^9/L)','[RBC-O(10^12/L)]','[PLT-O(10^9/L)]','[PLT-F(10^9/L)]','IPF#(10^9/L)','[HGB-O(g/dL)]'
+        ]
+
+    # Sélecteur des paramètres à inclure dans les facets
+    params_selectionnés = st.multiselect(
+        "Paramètres à afficher",
+        options=params_numeriques,
+        default=[p for p in params_visibles_par_défaut if p in params_numeriques]
+    )
+
+    #st.write("Paramètres dans Excel :", df_cv_max['paramètre'].unique())
+    #st.write("Paramètres dans vos données :", params_selectionnés)
+
+    # Compilation des CV_MAD pour chaque paramètre
+    liste_dfs = []
+
+    for p in params_selectionnés:
+        df_tmp = data_filtrée.groupby([col_automate, 'lot_niveau'])[p].agg(
+            n='count',
+            CV_MAD=cv_robuste_mad
+        ).reset_index()
         
-        fig_facet.add_trace(
-            go.Scatter(
-                x=sub_df['lot_niveau'],
-                y=sub_df['CV_max_reco'],
-                mode='markers',
-                marker=dict(
-                    symbol='line-ew', 
-                    size=40, 
-                    line=dict(width=3, color='red')
+        # On ajoute le nom du paramètre pour pouvoir faire le merge
+        df_tmp['paramètre'] = p
+        df_tmp.rename(columns={'CV_MAD': 'CV'}, inplace=True)
+        
+        # Nettoyage des types avant le merge
+        df_tmp['lot_niveau'] = df_tmp['lot_niveau'].astype(str).str.strip()
+        df_tmp['paramètre'] = df_tmp['paramètre'].astype(str).str.strip()
+        
+        # Merge individuel pour récupérer le CV_max de ce paramètre
+        df_tmp = df_tmp.merge(
+            df_cv_max[['paramètre', 'lot_niveau', 'CV_max_reco']], 
+            on=['paramètre', 'lot_niveau'], 
+            how='left'
+        )
+        
+        liste_dfs.append(df_tmp)
+
+
+
+    # Fusion de tous les DataFrames
+    df_facet = pd.concat(liste_dfs, ignore_index=True)
+
+    # On s'assure que le DataFrame est propre
+    df_facet['lot_niveau'] = df_facet['lot_niveau'].astype(str)
+
+    # 1. On définit le nombre de colonnes
+    n_cols = 3
+    n_params = len(params_selectionnés)
+    n_rows = math.ceil(n_params / n_cols)
+
+    # 2. Création du graphique en forçant l'ordre
+    fig_facet = px.bar(
+        df_facet,
+        x='lot_niveau',
+        y='CV',
+        color=col_automate,
+        barmode='group',
+        facet_col='paramètre',
+        facet_col_wrap=n_cols,
+        # Espacement horizontal (entre 0 et 1, par défaut très faible)
+        facet_col_spacing=0.08, 
+        # Espacement vertical (entre 0 et 1)
+        facet_row_spacing=0.06,
+        category_orders={
+            "paramètre": params_selectionnés, # Ordre strict
+            "lot_niveau": sorted(df_facet['lot_niveau'].unique().tolist())
+        },
+        title='CV MAD avec CV Max recommandés'
+    )
+
+    # 3. Ajout des seuils avec inversion de l'index des lignes
+    # Plotly Express place l'index 0 en BAS à GAUCHE.
+    for i, p in enumerate(params_selectionnés):
+        sub_df = df_facet[df_facet['paramètre'] == p].drop_duplicates(subset=['lot_niveau'])
+        sub_df = sub_df.dropna(subset=['CV_max_reco'])
+        
+        if not sub_df.empty:
+            # CALCUL DE POSITION SPÉCIFIQUE PLOTLY
+            # La colonne est simple :
+            col_pos = (i % n_cols) + 1
+            
+            # La ligne doit être inversée car Plotly compte depuis le bas
+            # Row 1 est en bas, Row N est en haut
+            current_row_from_top = (i // n_cols)
+            row_pos = n_rows - current_row_from_top
+            
+            fig_facet.add_trace(
+                go.Scatter(
+                    x=sub_df['lot_niveau'],
+                    y=sub_df['CV_max_reco'],
+                    mode='markers',
+                    marker=dict(
+                        symbol='line-ew', 
+                        size=40, 
+                        line=dict(width=3, color='red')
+                    ),
+                    name='CV max recommandés',
+                    legendgroup='Seuils',
+                    showlegend=(i == 0)
                 ),
-                name='CV max recommandés',
-                legendgroup='Seuils',
-                showlegend=(i == 0)
-            ),
-            row=int(row_pos), 
-            col=int(col_pos)
+                row=int(row_pos), 
+                col=int(col_pos)
+            )
+            
+
+    # 4. Ajustements
+    fig_facet.update_xaxes(
+        showticklabels=True, 
+        type='category', 
+        title_text="Niveau" # Optionnel : ajoute un titre sous chaque axe
+    )
+    fig_facet.update_yaxes(matches=None, showticklabels=True)
+    fig_facet.update_layout(
+        height=400 * n_rows, # On augmente un peu la hauteur par ligne
+        margin=dict(t=100, b=100) # Plus de marge en bas pour les derniers labels
+    )
+
+    st.plotly_chart(fig_facet, width='stretch')
+
+with tab_CV_interlot:
+
+    # == Choix du numéro de lot ===
+
+    st.subheader("Lots présents dans le jeu de données")
+
+    # Tableau récapitulatif par lot
+    table_lots_cvinter = (
+        CIQ
+        .dropna(subset=['lot_num', 'Date'])
+        .groupby('lot_num', as_index=False)
+        .agg(
+            Date_min=('Date', 'min'),
+            Date_max=('Date', 'max'),
+            Nb_mesures=('Date', 'count')
         )
-        
+        .sort_values('Date_min')
+    )
 
-# 4. Ajustements
-fig_facet.update_xaxes(
-    showticklabels=True, 
-    type='category', 
-    title_text="Niveau" # Optionnel : ajoute un titre sous chaque axe
-)
-fig_facet.update_yaxes(matches=None, showticklabels=True)
-fig_facet.update_layout(
-    height=400 * n_rows, # On augmente un peu la hauteur par ligne
-    margin=dict(t=100, b=100) # Plus de marge en bas pour les derniers labels
-)
+    # Format des dates pour l'affichage
+    table_lots_cvinter['Date_min'] = table_lots_cvinter['Date_min'].dt.strftime('%Y-%m-%d')
+    table_lots_cvinter['Date_max'] = table_lots_cvinter['Date_max'].dt.strftime('%Y-%m-%d')
 
-st.plotly_chart(fig_facet, width='stretch')
-
-# # Graphique facets avec Plotly Express
-# fig_facet2 = px.bar(
-#     df_facet,
-#     x='lot_niveau',
-#     y='CV',
-#     color=col_automate,
-#     barmode='group',
-#     facet_col='paramètre',
-#     facet_col_wrap=3,  # Nombre de colonnes dans la grille
-#     title='CV MAD par paramètre et par niveau de lot',
-#     facet_row_spacing=0.1,
-#     facet_col_spacing=0.1,
-#     height=1500,  # Plus grand pour laisser de la place
-#     labels={'CV': 'CV MAD (%)', 'lot_niveau': 'Niveau de lot'}
-# )
-
-# fig_facet2.update_yaxes(matches=None)  # axes Y indépendants
+    st.dataframe(
+        table_lots_cvinter,
+        width='stretch'
+    )
 
 
-# # Affiche tous les labels d’axe Y
-# for axis in fig_facet2.layout:
-#     if axis.startswith("yaxis"):
-#         fig_facet2.layout[axis].showticklabels = True
-#         fig_facet2.layout[axis].title = dict(text="CV MAD (%)")
+    lots_disponibles_cvinter = sorted(CIQ['lot_num'].dropna().astype(str).unique())
+    filt_lot_cvinter = st.multiselect("Numéro(s) de lot (CV inter-lot)", lots_disponibles_cvinter)
 
 
-# # Forcer l’affichage de l’axe X et du titre sur chaque subplot
-# for axis_name in fig_facet2.layout:
-#     if axis_name.startswith("xaxis"):
-#         axis = fig_facet2.layout[axis_name]
-#         axis.showticklabels = True  # Affiche les ticks
-#         axis.title = dict(text="Niveau de lot")  # Titre de l'axe X
+    # === Choix analyseurs ===
 
+    filt_automate_cvinter = st.multiselect("Automate(s) (CV inter-lot)", sorted(CIQ[col_automate].dropna().unique()), default=None)
 
-# fig_facet2.update_layout(height=300 * ((len(params_selectionnés) - 1) // 3 + 1))  # ajuste la hauteur automatiquement
-# st.plotly_chart(fig_facet2)
+    # === Choix niveau de lot ===
+    # Forcer tout en chaînes pour uniformiser les types
+    niveaux_disponibles_cvinter = sorted(CIQ['lot_niveau'].dropna().astype(str).unique())
+    # Définir les niveaux souhaités par défaut (aussi en str)
+    niveaux_defaut_souhaites_cvinter = ['1101', '1102', '1103']
+    # Ne garder que les niveaux par défaut présents dans les options
+    niveaux_defaut_valides_cvinter = [niveau for niveau in niveaux_defaut_souhaites_cvinter if niveau in niveaux_disponibles_cvinter]
+    # Affichage du multiselect sécurisé
+    filt_niveau_cvinter = st.multiselect("Niveau(x) de lot (CV inter-lot)", niveaux_disponibles_cvinter, default=niveaux_defaut_valides_cvinter)
 
 
 
+    filt_annee_cvinter = st.multiselect("Année(s) (CV inter-lot)", sorted(CIQ['Annee'].dropna().unique()), default=None)
 
-# =======================
-# ➕ Graphique Facets ( valeur paramètre) avec filtre année
-# =======================
+    # Filtrage des données
+    data_filtrée_cvinter = CIQ.copy()
+    if filt_automate_cvinter:
+        data_filtrée_cvinter = data_filtrée_cvinter[data_filtrée_cvinter[col_automate].isin(filt_automate_cvinter)]
+    if filt_niveau_cvinter:
+        data_filtrée_cvinter = data_filtrée_cvinter[data_filtrée_cvinter['lot_niveau'].isin(filt_niveau_cvinter)]
+    if filt_lot_cvinter:
+        data_filtrée_cvinter = data_filtrée_cvinter[data_filtrée_cvinter['lot_num'].isin(filt_lot_cvinter)]
+    if filt_annee_cvinter:
+        data_filtrée_cvinter = data_filtrée_cvinter[data_filtrée_cvinter['Annee'].isin(filt_annee_cvinter)]
 
-st.subheader("Distribution des valeurs de chaque paramètre")
+    st.subheader(f"Choix du paramètre à étudier pour les lots {filt_lot}")
 
-if st.button("Afficher la distribution des valeurs des paramètres"):
-    
-    if len(params_selectionnés) == 0:
-        st.warning("Veuillez sélectionner au moins un paramètre.")
-    else:
-        df_facet = data_filtrée[[col_automate, 'lot_niveau','Annee'] + params_selectionnés].copy()
-        df_facet['lot_niveau'] = df_facet['lot_niveau'].astype(str)
-        
-    
-        df_melted = df_facet.melt(
-            id_vars=[col_automate, 'lot_niveau','Annee'],
-            value_vars=params_selectionnés,
-            var_name='paramètre',
-            value_name='valeur'
+    # === Choix du paramètre ===
+    choix_param_cvinter = CIQ.columns[8:]  # adapter si besoin
+    param_cvinter = st.selectbox("Choisissez le paramètre à étudier (CV inter-lot)", choix_param_cvinter)
+
+    # Conversion du paramètre sélectionné en float
+    data_filtrée_cvinter[param_cvinter] = pd.to_numeric(data_filtrée_cvinter[param_cvinter], errors='coerce')
+
+    # Agrégation par automate, lot_num et niveau
+    grouped_cvinter = data_filtrée_cvinter.groupby([col_automate, 'lot_num','lot_niveau','Annee'])[param_cvinter].agg(
+        n='count',
+        Moyenne='mean',
+        Mediane='median',
+        Ecart_type='std',
+        CV=cv,
+        CV_IQR=cv_robuste_iqr,
+        CV_IQR2=cv_robuste_iqr2,
+        CV_MAD=cv_robuste_mad
+    ).reset_index()
+
+    grouped_cvinter['paramètre'] = param_cvinter
+
+    # 1. Conversion forcée en string pour garantir la correspondance
+    grouped_cvinter['lot_niveau'] = grouped_cvinter['lot_niveau'].astype(str).str.strip()
+    df_cv_max['lot_niveau'] = df_cv_max['lot_niveau'].astype(str).str.strip()
+
+    # 2. On fait de même pour la colonne 'paramètre' par sécurité
+    grouped_cvinter['paramètre'] = grouped_cvinter['paramètre'].astype(str).str.strip()
+    df_cv_max['paramètre'] = df_cv_max['paramètre'].astype(str).str.strip()
+
+    # 3. Maintenant le merge fonctionnera
+    grouped_cvinter = grouped_cvinter.merge(
+        df_cv_max[['paramètre', 'lot_niveau', 'CV_max_reco']], 
+        on=['paramètre', 'lot_niveau'], 
+        how='left'
+    )
+
+
+
+    st.subheader(f"Tableau des CV inter-lot (CV classique / CV IQR / CV IQR robuste / CV MAD) par Lot pour {param_cvinter} (lot(s) {filt_lot_cvinter})")
+    st.dataframe(grouped_cvinter)
+
+    # st.subheader(f"Comparaison des CV inter-lot (CV classique / CV IQR / CV IQR robuste / CV MAD) pour les paramètres des lots {filt_lot_cvinter})")
+
+    # # Sélectionne les colonnes de l'index 8 à 125 pour permettre la conversion en numérique
+    # # st.dataframe(CIQ.head())
+    # colonnes_numeriques_cvinter = CIQ.columns[8:125]
+
+    # # Nettoyage et conversion en float
+    # for col in colonnes_numeriques_cvinter:
+    #     CIQ[col] = (
+    #         CIQ[col]
+    #         .astype(str)
+    #         .str.replace(',', '.', regex=False)
+    #         .str.replace(r'[<>]', '', regex=True)
+    #         .str.strip()
+    #     )
+    #     CIQ[col] = pd.to_numeric(CIQ[col], errors='coerce')
+
+    # # Détection des colonnes numériques uniquement
+    # params_all_numeriques_cvinter = CIQ.select_dtypes(include=[np.number]).columns.tolist()
+
+    # # Exclure les colonnes de comptage ou de type ID si nécessaire
+    # params_all_numeriques_cvinter = [col for col in params_all_numeriques_cvinter if col not in ['n']]
+
+    # # Liste par défaut
+    # #params_all_visibles_par_défaut = [    
+    # #    'WBC(10^9/L)','RBC(10^12/L)','HGB(g/L)','HCT(%)','MCV(fL)','MCH(pg)','MCHC(g/L)','PLT(10^9/L)','[RBC-O(10^12/L)]','[PLT-O(10^9/L)]','[PLT-F(10^9/L)]','IPF#(10^9/L)','[HGB-O(g/dL)]'
+    # #    ]
+
+    # # Sélecteur des paramètres à inclure
+    # params_all_selectionnés_cvinter = st.multiselect(
+    #     "Paramètres à afficher (CV inter-lot)",
+    #     options=params_all_numeriques_cvinter,
+    #     default=params_all_numeriques_cvinter
+    #     #default=[p for p in params_all_numériques if p != "Annee"] # ✅ tous sauf 'Annee'
+    # )
+
+    # lots_uniques_cvinter = data_filtrée_cvinter["lot_num"].dropna().unique()
+    # lots_str_cvinter = ", ".join(map(str, sorted(lots_uniques_cvinter)))
+
+    # st.success(f"Liste des lots de CIQ inclus : {lots_str_cvinter}")
+
+    # # Mise en long format : chaque ligne = une mesure pour un paramètre donné
+    # data_long_cvinter = data_filtrée_cvinter.melt(
+    #     id_vars=['Nickname', 'lot_num', 'lot_niveau', 'Annee'],
+    #     value_vars=params_all_selectionnés_cvinter,
+    #     var_name='paramètre',
+    #     value_name='valeur'
+    # )
+
+    # # Conversion explicite en numérique
+    # data_long_cvinter["valeur"] = pd.to_numeric(data_long_cvinter["valeur"], errors="coerce")
+
+    # grouped3 = (
+    #     data_long_cvinter
+    #     .groupby(['paramètre','Nickname','lot_niveau','Annee'])
+    #     .apply(lambda g: pd.Series({
+    #         "n_total": g["valeur"].count(),
+    #         "n_lots": g["lot_num"].nunique(), # Nombre de lots différents détectés
+    #         "Moyenne": g["valeur"].mean(),
+    #         "CV_Intra_MAD": cv_robuste_mad(g["valeur"]), # Variabilité courte durée
+    #         "LT_CV_MAD": cv_long_terme_mad(g["valeur"]), # Variabilité longue durée (inclut changements de lots)
+    #         "CV_max_reco": g["CV_max_reco"].iloc[0] if "CV_max_reco" in g.columns else np.nan
+    #     }))
+    #     .reset_index()
+    # )
+
+    # # 1. Conversion forcée en string pour garantir la correspondance
+    # grouped3['lot_niveau'] = grouped3['lot_niveau'].astype(str).str.strip()
+    # df_cv_max['lot_niveau'] = df_cv_max['lot_niveau'].astype(str).str.strip()
+
+    # # 2. On fait de même pour la colonne 'paramètre' par sécurité
+    # grouped3['paramètre'] = grouped3['paramètre'].astype(str).str.strip()
+    # df_cv_max['paramètre'] = df_cv_max['paramètre'].astype(str).str.strip()
+
+    # # 3. Maintenant le merge fonctionnera
+    # grouped3 = grouped3.merge(
+    #     df_cv_max[['paramètre', 'lot_niveau', 'CV_max_reco']], 
+    #     on=['paramètre', 'lot_niveau'], 
+    #     how='left'
+    # )
+
+
+    # st.dataframe(grouped3)
+
+
+    grouped_cvinter['lot_annee'] = grouped_cvinter['lot_niveau'].astype(str) + " (" + grouped_cvinter['Annee'].astype(str) + ")"
+    grouped_cvinter['lot_num2'] = grouped_cvinter['lot_num'].astype(str) + " (" + grouped_cvinter['lot_niveau'].astype(str) + ")"
+
+    st.subheader(f"Graphiques des CV inter-lot (lot(s) {filt_lot_cvinter})")
+    plot_cvinter("CV", f"{param_cvinter} : CV classique", "CV (%)")
+    plot_cvinter("CV_IQR", f"{param_cvinter} : CV IQR", "CV (%)")
+    plot_cvinter("CV_IQR2", f"{param_cvinter} : CV IQR robuste", "CV (%)")
+    plot_cvinter("CV_MAD", f"{param_cvinter} : CV MAD", "CV (%)")
+
+
+with tab_CVref:
+
+    st.subheader("Calcul des CV de référence")
+
+ # == Choix du numéro de lot ===
+
+    st.subheader("Lots présents dans le jeu de données")
+
+    # Tableau récapitulatif par lot
+    table_lots_cvref = (
+        CIQ
+        .dropna(subset=['lot_num', 'Date'])
+        .groupby('lot_num', as_index=False)
+        .agg(
+            Date_min=('Date', 'min'),
+            Date_max=('Date', 'max'),
+            Nb_mesures=('Date', 'count')
         )
-    
-        df_melted[col_automate] = df_melted[col_automate].astype(str)
-        df_melted['lot_niveau'] = df_melted['lot_niveau'].astype(str)
-        df_melted = df_melted.dropna()
-    
-        
-    
-        fig_facet = px.box(
-            df_melted,
-            x='lot_niveau',
-            y='valeur',
-            color=col_automate,
-            facet_col='paramètre',
-            facet_col_wrap=3,
-            title="Distribution des paramètres par niveau de lot",
-            facet_row_spacing=0.1,
-            facet_col_spacing=0.1,
-            height=1500,
-            labels={
-                'valeur': 'Valeur mesurée',
-                'lot_niveau': 'Niveau de lot'
-            }
+        .sort_values('Date_min')
+    )
+
+    # Format des dates pour l'affichage
+    table_lots_cvref['Date_min'] = table_lots_cvref['Date_min'].dt.strftime('%Y-%m-%d')
+    table_lots_cvref['Date_max'] = table_lots_cvref['Date_max'].dt.strftime('%Y-%m-%d')
+
+    st.dataframe(
+        table_lots_cvref,
+        width='stretch'
+    )
+
+
+    lots_disponibles_cvref = sorted(CIQ['lot_num'].dropna().astype(str).unique())
+    filt_lot_cvref = st.multiselect("Numéro(s) de lot (CV ref)", lots_disponibles_cvref)
+
+    # === Choix analyseurs ===
+
+    filt_automate_cvref = st.multiselect("Automate(s) (CV ref)", sorted(CIQ[col_automate].dropna().unique()), default=None)
+
+    # === Choix niveau de lot ===
+    # Forcer tout en chaînes pour uniformiser les types
+    niveaux_disponibles_cvref = sorted(CIQ['lot_niveau'].dropna().astype(str).unique())
+    # Définir les niveaux souhaités par défaut (aussi en str)
+    niveaux_defaut_souhaites_cvref = ['1101', '1102', '1103']
+    # Ne garder que les niveaux par défaut présents dans les options
+    niveaux_defaut_valides_cvref = [niveau for niveau in niveaux_defaut_souhaites_cvref if niveau in niveaux_disponibles_cvref]
+    # Affichage du multiselect sécurisé
+    filt_niveau_cvref = st.multiselect("Niveau(x) de lot (CV ref)", niveaux_disponibles_cvref, default=niveaux_defaut_valides_cvref)
+
+    filt_annee_cvref = st.multiselect("Année(s) (CV ref)", sorted(CIQ['Annee'].dropna().unique()), default=None)
+
+    # Filtrage des données
+    data_filtrée_cvref = CIQ.copy()
+    if filt_automate_cvref:
+        data_filtrée_cvref = data_filtrée_cvref[data_filtrée_cvref[col_automate].isin(filt_automate_cvref)]
+    if filt_niveau_cvref:
+        data_filtrée_cvref = data_filtrée_cvref[data_filtrée_cvref['lot_niveau'].isin(filt_niveau_cvref)]
+    if filt_lot_cvref:
+        data_filtrée_cvref = data_filtrée_cvref[data_filtrée_cvref['lot_num'].isin(filt_lot_cvref)]
+    if filt_annee_cvref:
+        data_filtrée_cvref = data_filtrée_cvref[data_filtrée_cvref['Annee'].isin(filt_annee_cvref)]
+
+
+    st.subheader(f"Tableau des CV de référence (CV classique / CV IQR / CV IQR robuste / CV MAD) | lots {filt_lot_cvref}")
+
+    # === Choix du paramètre ===
+    choix_param_cvref = CIQ.columns[8:]  # adapter si besoin
+    param_cvref = st.selectbox("Choisissez le paramètre à étudier (CV ref)", choix_param_cvref)
+
+    # Conversion du paramètre sélectionné en float
+    data_filtrée_cvref[param_cvref] = pd.to_numeric(data_filtrée_cvref[param_cvref], errors='coerce')
+
+    # st.dataframe(data_filtrée_cvref)
+
+    # Agrégation par automate, lot_num et niveau
+    grouped_cvref = data_filtrée_cvref.groupby([col_automate,'lot_niveau','Annee'])[param_cvref].agg(
+        n='count',
+        Moyenne='mean',
+        Mediane='median',
+        Ecart_type='std',
+        CV=cv,
+        CV_IQR=cv_robuste_iqr,
+        CV_IQR2=cv_robuste_iqr2,
+        CV_MAD=cv_robuste_mad
+    ).reset_index()
+
+    grouped_cvref['paramètre'] = param_cvref
+
+    st.dataframe(grouped_cvref)
+
+    st.subheader(f"Comparaison des CV de référence (CV MAD) pour les paramètres sélectionnés | lots {filt_lot_cvref}")
+
+    # Sélectionne les colonnes de l'index 8 à 125 pour permettre la conversion en numérique
+    # st.dataframe(CIQ.head())
+    colonnes_numeriques_cvref = CIQ.columns[8:125]
+
+    # Nettoyage et conversion en float
+    for col in colonnes_numeriques_cvref:
+        CIQ[col] = (
+            CIQ[col]
+            .astype(str)
+            .str.replace(',', '.', regex=False)
+            .str.replace(r'[<>]', '', regex=True)
+            .str.strip()
         )
-        fig_facet.update_yaxes(matches=None)
-    
-        for axis in fig_facet.layout:
-            if axis.startswith("yaxis"):
-                fig_facet.layout[axis].showticklabels = True
-                fig_facet.layout[axis].title = dict(text="Valeur")
-    
-        for axis_name in fig_facet.layout:
-            if axis_name.startswith("xaxis"):
-                axis = fig_facet.layout[axis_name]
-                axis.showticklabels = True
-                axis.title = dict(text="Niveau de lot")
-    
-        fig_facet.update_layout(height=300 * ((len(params_selectionnés) - 1) // 3 + 1))  # ajuste la hauteur automatiquement
-        st.plotly_chart(fig_facet)
+        CIQ[col] = pd.to_numeric(CIQ[col], errors='coerce')
+        
+    # st.write(CIQ.iloc[:, 8:125].dtypes)
+    # st.dataframe(CIQ.head())
+
+    # Détection des colonnes numériques uniquement
+    params_numeriques_cvref = CIQ.select_dtypes(include=[np.number]).columns.tolist()
+
+    # Exclure les colonnes de comptage ou de type ID si nécessaire
+    params_numeriques_cvref = [col for col in params_numeriques_cvref if col not in ['n']]
+
+    # Liste par défaut
+    params_visibles_par_défaut_cvref = [    
+        'WBC(10^9/L)','RBC(10^12/L)','HGB(g/L)','HCT(%)','MCV(fL)','MCH(pg)','MCHC(g/L)','PLT(10^9/L)','[RBC-O(10^12/L)]','[PLT-O(10^9/L)]','[PLT-F(10^9/L)]','IPF#(10^9/L)','[HGB-O(g/dL)]'
+        ]
+
+    # Sélecteur des paramètres à inclure dans les facets
+    params_selectionnés_cvref = st.multiselect(
+        "Paramètres à sélectionner (CV ref)",
+        options=params_numeriques_cvref,
+        default=[p for p in params_visibles_par_défaut_cvref if p in params_numeriques_cvref]
+    )
+
+    #st.write("Paramètres dans Excel :", df_cv_max['paramètre'].unique())
+    #st.write("Paramètres dans vos données :", params_selectionnés)
+
+    # Compilation des CV_MAD pour chaque paramètre
+    liste_dfs_cvref = []
+
+    for p_cvref in params_selectionnés_cvref:
+        df_tmp_cvref = data_filtrée_cvref.groupby([col_automate, 'lot_niveau'])[p_cvref].agg(
+            n='count',
+            CV_MAD=cv_robuste_mad
+        ).reset_index()
+        
+        # On ajoute le nom du paramètre pour pouvoir faire le merge
+        df_tmp_cvref['paramètre'] = p_cvref
+        df_tmp_cvref.rename(columns={'CV_MAD': 'CV'}, inplace=True)
+        
+        # # Nettoyage des types avant le merge
+        # df_tmp_cvref['lot_niveau'] = df_tmp_cvref['lot_niveau'].astype(str).str.strip()
+        # df_tmp_cvref['paramètre'] = df_tmp_cvref['paramètre'].astype(str).str.strip()
+        
+        # # Merge individuel pour récupérer le CV_max de ce paramètre
+        # df_tmp_cvref = df_tmp_cvref.merge(
+        #     df_cv_max[['paramètre', 'lot_niveau', 'CV_max_reco']], 
+        #     on=['paramètre', 'lot_niveau'], 
+        #     how='left'
+        # )
+        
+        liste_dfs_cvref.append(df_tmp_cvref)
 
 
-### ---------------- #####
-### EEQ => IM ###
 
-st.title("Incertitudes élargies")
+    # Fusion de tous les DataFrames
+    df_facet_cvref = pd.concat(liste_dfs_cvref, ignore_index=True)
 
-# === Fonction générique de lecture EEQ (sans ignorer la première ligne) ===
-def lire_fichier_eeq(fichier_path=None, contenu_brut=None, nom=""):
-    """
-    Lit un fichier EEQ en gardant la première ligne (en-tête),
-    en utilisant le séparateur ';' et encodage ISO-8859-1.
-    """
-    try:
-        if fichier_path:
-            with open(fichier_path, 'r', encoding='ISO-8859-1', errors='replace') as f:
-                content = f.read().splitlines()
-        elif contenu_brut:
-            content = contenu_brut.decode('ISO-8859-1', errors='replace').splitlines()
+    # On s'assure que le DataFrame est propre
+    df_facet_cvref['lot_niveau'] = df_facet_cvref['lot_niveau'].astype(str)
+
+    # 1. On définit le nombre de colonnes
+    n_cols_cvref = 3
+    n_params_cvref = len(params_selectionnés_cvref)
+    n_rows_cvref = math.ceil(n_params_cvref / n_cols_cvref)
+
+
+    # Graphique facets avec Plotly Express
+    fig_facet_cvref = px.bar(
+        df_facet_cvref,
+        x='lot_niveau',
+        y='CV',
+        color=col_automate,
+        barmode='group',
+        facet_col='paramètre',
+        facet_col_wrap=3,  # Nombre de colonnes dans la grille
+        title='CV MAD par paramètre et par niveau de lot',
+        facet_row_spacing=0.1,
+        facet_col_spacing=0.1,
+        height=1500,  # Plus grand pour laisser de la place
+        labels={'CV': 'CV MAD (%)', 'lot_niveau': 'Niveau de lot'}
+    )
+
+    fig_facet_cvref.update_yaxes(matches=None)  # axes Y indépendants
+
+
+    # Affiche tous les labels d’axe Y
+    for axis in fig_facet_cvref.layout:
+        if axis.startswith("yaxis"):
+            fig_facet_cvref.layout[axis].showticklabels = True
+            fig_facet_cvref.layout[axis].title = dict(text="CV MAD (%)")
+
+
+    # Forcer l’affichage de l’axe X et du titre sur chaque subplot
+    for axis_name in fig_facet_cvref.layout:
+        if axis_name.startswith("xaxis"):
+            axis = fig_facet_cvref.layout[axis_name]
+            axis.showticklabels = True  # Affiche les ticks
+            axis.title = dict(text="Niveau de lot")  # Titre de l'axe X
+
+
+    fig_facet_cvref.update_layout(height=300 * ((len(params_selectionnés_cvref) - 1) // 3 + 1))  # ajuste la hauteur automatiquement
+    st.plotly_chart(fig_facet_cvref)
+
+
+
+
+    # =======================
+    # ➕ Graphique Facets ( valeur paramètre) avec filtre année
+    # =======================
+
+    st.subheader("Distribution des valeurs de chaque paramètre")
+
+    if st.button("Afficher la distribution des valeurs des paramètres"):
+        
+        if len(params_selectionnés_cvref) == 0:
+            st.warning("Veuillez sélectionner au moins un paramètre.")
         else:
+            df_facet_cvref = data_filtrée_cvref[[col_automate, 'lot_niveau','Annee'] + params_selectionnés_cvref].copy()
+            df_facet_cvref['lot_niveau'] = df_facet_cvref['lot_niveau'].astype(str)
+            
+        
+            df_melted_cvref = df_facet_cvref.melt(
+                id_vars=[col_automate, 'lot_niveau','Annee'],
+                value_vars=params_selectionnés_cvref,
+                var_name='paramètre',
+                value_name='valeur'
+            )
+        
+            df_melted_cvref[col_automate] = df_melted_cvref[col_automate].astype(str)
+            df_melted_cvref['lot_niveau'] = df_melted_cvref['lot_niveau'].astype(str)
+            df_melted_cvref = df_melted_cvref.dropna()
+        
+            
+        
+            fig_facet_cvref2 = px.box(
+                df_melted_cvref,
+                x='lot_niveau',
+                y='valeur',
+                color=col_automate,
+                facet_col='paramètre',
+                facet_col_wrap=3,
+                title="Distribution des paramètres par niveau de lot",
+                facet_row_spacing=0.1,
+                facet_col_spacing=0.1,
+                height=1500,
+                labels={
+                    'valeur': 'Valeur mesurée',
+                    'lot_niveau': 'Niveau de lot'
+                }
+            )
+            fig_facet_cvref2.update_yaxes(matches=None)
+        
+            for axis in fig_facet_cvref2.layout:
+                if axis.startswith("yaxis"):
+                    fig_facet_cvref2.layout[axis].showticklabels = True
+                    fig_facet_cvref.layout[axis].title = dict(text="Valeur")
+        
+            for axis_name in fig_facet_cvref2.layout:
+                if axis_name.startswith("xaxis"):
+                    axis = fig_facet_cvref2.layout[axis_name]
+                    axis.showticklabels = True
+                    axis.title = dict(text="Niveau de lot")
+        
+            fig_facet_cvref2.update_layout(height=300 * ((len(params_selectionnés_cvref) - 1) // 3 + 1))  # ajuste la hauteur automatiquement
+            st.plotly_chart(fig_facet_cvref2)
+
+with tab_IM:
+    ### ---------------- #####
+    ### EEQ => IM ###
+
+    st.title("Incertitudes élargies")
+
+    # === Fonction générique de lecture EEQ (sans ignorer la première ligne) ===
+    def lire_fichier_eeq(fichier_path=None, contenu_brut=None, nom=""):
+        """
+        Lit un fichier EEQ en gardant la première ligne (en-tête),
+        en utilisant le séparateur ';' et encodage ISO-8859-1.
+        """
+        try:
+            if fichier_path:
+                with open(fichier_path, 'r', encoding='ISO-8859-1', errors='replace') as f:
+                    content = f.read().splitlines()
+            elif contenu_brut:
+                content = contenu_brut.decode('ISO-8859-1', errors='replace').splitlines()
+            else:
+                return None
+
+            if len(content) < 1:
+                st.warning(f"Le fichier {nom} semble vide ou mal formaté.")
+                return None
+
+            content_str = StringIO('\n'.join(content))  # On garde toutes les lignes
+            df = pd.read_csv(content_str, sep=';', on_bad_lines='skip')
+            return df
+
+        except Exception as e:
+            st.error(f"Erreur lecture du fichier {nom or fichier_path} : {e}")
             return None
 
-        if len(content) < 1:
-            st.warning(f"Le fichier {nom} semble vide ou mal formaté.")
-            return None
+    # === Choix de la source de données EEQ ===
+    options = ["Importer un fichier EEQ", "Utiliser un fichier EEQ par défaut", "Rechercher un fichier EEQ en local"]
+    choix_eeq = st.radio("Source du fichier EEQ :", options)
 
-        content_str = StringIO('\n'.join(content))  # On garde toutes les lignes
-        df = pd.read_csv(content_str, sep=';', on_bad_lines='skip')
-        return df
-
-    except Exception as e:
-        st.error(f"Erreur lecture du fichier {nom or fichier_path} : {e}")
-        return None
-
-# === Choix de la source de données EEQ ===
-options = ["Importer un fichier EEQ", "Utiliser un fichier EEQ par défaut", "Rechercher un fichier EEQ en local"]
-choix_eeq = st.radio("Source du fichier EEQ :", options)
-
-if choix_eeq == "Importer un fichier EEQ":
-    uploaded_eeq = st.file_uploader("Importer fichier EEQ", type=["csv"])
-    if uploaded_eeq:
-        EEQ = lire_fichier_eeq(contenu_brut=uploaded_eeq.read(), nom=uploaded_eeq.name)
-        if EEQ is not None:
-            st.success(f"Fichier importé : {uploaded_eeq.name}")
+    if choix_eeq == "Importer un fichier EEQ":
+        uploaded_eeq = st.file_uploader("Importer fichier EEQ", type=["csv"])
+        if uploaded_eeq:
+            EEQ = lire_fichier_eeq(contenu_brut=uploaded_eeq.read(), nom=uploaded_eeq.name)
+            if EEQ is not None:
+                st.success(f"Fichier importé : {uploaded_eeq.name}")
+            else:
+                st.stop()
         else:
             st.stop()
-    else:
-        st.stop()
 
-elif choix_eeq == "Utiliser un fichier EEQ par défaut":
-    EEQ = lire_fichier_eeq(fichier_path="exportEEQ1952.csv")
-    if EEQ is not None:
-        st.success("Fichier par défaut chargé.")
-    else:
-        st.stop()
+    elif choix_eeq == "Utiliser un fichier EEQ par défaut":
+        EEQ = lire_fichier_eeq(fichier_path="exportEEQ1952.csv")
+        if EEQ is not None:
+            st.success("Fichier par défaut chargé.")
+        else:
+            st.stop()
 
-elif choix_eeq == "Rechercher un fichier EEQ en local":
-    # On liste les fichiers CSV du dossier actuel (ou un chemin spécifique)
-    fichiers_locaux = [f for f in os.listdir('.') if f.endswith('.csv') and 'EEQ' in f.upper()]
+    elif choix_eeq == "Rechercher un fichier EEQ en local":
+        # On liste les fichiers CSV du dossier actuel (ou un chemin spécifique)
+        fichiers_locaux = [f for f in os.listdir('.') if f.endswith('.csv') and 'EEQ' in f.upper()]
+        
+        if fichiers_locaux:
+            fichier_choisi = st.selectbox("Sélectionnez un fichier EEQ trouvé en local :", fichiers_locaux)
+            if fichier_choisi:
+                EEQ = lire_fichier_eeq(fichier_path=fichier_choisi)
+                st.success(f"Fichier local chargé : {fichier_choisi}")
+        else:
+            st.error("Aucun fichier contenant 'EEQ' n'a été trouvé dans le dossier local.")
+            st.stop()
     
-    if fichiers_locaux:
-        fichier_choisi = st.selectbox("Sélectionnez un fichier EEQ trouvé en local :", fichiers_locaux)
-        if fichier_choisi:
-            EEQ = lire_fichier_eeq(fichier_path=fichier_choisi)
-            st.success(f"Fichier local chargé : {fichier_choisi}")
-    else:
-        st.error("Aucun fichier contenant 'EEQ' n'a été trouvé dans le dossier local.")
-        st.stop()
-   
     # === Traitement données EEQ ===
     # Exemple: filtrer et ajouter 'Nickname', 'variable', 'Date' (adapter selon colonnes EEQ)
     # On suppose EEQ a colonnes 'Date', 'App', 'Anonymat', 'Analyte', 'Biais |c| pairs', etc.
@@ -956,17 +1477,7 @@ elif choix_eeq == "Rechercher un fichier EEQ en local":
 
     # Extraire Année
     EEQ['Annee'] = EEQ['Date'].dt.year
- 
-    # Joindre CIQ et EEQ pour la même variable, Nickname (automate), année
-    # Dans CIQ, on doit avoir colonne Année à créer (par exemple date d’analyse)
-    # Ici on suppose CIQ a une colonne date, sinon on crée Année manuellement (à adapter)
-    if 'Date' in CIQ.columns:
-        CIQ['Date'] = pd.to_datetime(CIQ['Date'], errors='coerce')
-        CIQ['Annee'] = CIQ['Date'].dt.year
-    else:
-        st.warning("Pas de colonne Date dans CIQ : Année non disponible.")
-        CIQ['Annee'] = 0  # placeholder
-    
+
     # Calcul du biais moyen absolu par groupe
     # st.dataframe(EEQ.head())
 
@@ -977,31 +1488,106 @@ elif choix_eeq == "Rechercher un fichier EEQ en local":
         EEQ["Biais |c| pairs"]
         .str.replace(",", ".", regex=False)  # remplacer la virgule par un point
         .astype(float)                       # convertir en float
-)
+        )
     st.dataframe(EEQ.head())
- 
 
 
+    #### Choix des lots de CIQ pour calcul des IM #####
+    ## choix sur année et/ou numéro de lot
+    st.subheader('Choix des lots de CIQ à utiliser pour le calcul des IM')
+    # Tableau récapitulatif par lot
+    table_lots_IM = (
+        CIQ
+        .dropna(subset=['lot_num', 'Date'])
+        .groupby('lot_num', as_index=False)
+        .agg(
+            Date_min=('Date', 'min'),
+            Date_max=('Date', 'max'),
+            Nb_mesures=('Date', 'count')
+        )
+        .sort_values('Date_min')
+    )
 
-    # st.dataframe(CIQ)
+    # Format des dates pour l'affichage
+    table_lots_IM['Date_min'] = table_lots_IM['Date_min'].dt.strftime('%Y-%m-%d')
+    table_lots_IM['Date_max'] = table_lots_IM['Date_max'].dt.strftime('%Y-%m-%d')
 
-    colonnes_valeurs = CIQ.columns[8:125]  
+    st.dataframe(
+        table_lots_IM,
+        width='stretch'
+    )
+
+
+    lots_disponibles_IM = sorted(CIQ['lot_num'].dropna().astype(str).unique())
+    filt_lot_IM = st.multiselect("Numéro(s) de lot (IM)", lots_disponibles_IM)
+
+    # === Choix analyseurs ===
+
+    filt_automate_IM = st.multiselect("Automate(s) (IM)", sorted(CIQ[col_automate].dropna().unique()), default=None)
+
+    # === Choix niveau de lot ===
+    # Forcer tout en chaînes pour uniformiser les types
+    niveaux_disponibles_IM = sorted(CIQ['lot_niveau'].dropna().astype(str).unique())
+    # Définir les niveaux souhaités par défaut (aussi en str)
+    niveaux_defaut_souhaites_IM = ['1101', '1102', '1103']
+    # Ne garder que les niveaux par défaut présents dans les options
+    niveaux_defaut_valides_IM = [niveau for niveau in niveaux_defaut_souhaites_IM if niveau in niveaux_disponibles_IM]
+    # Affichage du multiselect sécurisé
+    filt_niveau_IM = st.multiselect("Niveau(x) de lot (IM)", niveaux_disponibles_IM, default=niveaux_defaut_valides_IM)
+
+    filt_annee_IM = st.multiselect("Année(s) (IM)", sorted(CIQ['Annee'].dropna().unique()), default=None)
+
+    # Filtrage des données
+    data_filtrée_IM = CIQ.copy()
+    if filt_automate_IM:
+        data_filtrée_IM = data_filtrée_IM[data_filtrée_IM[col_automate].isin(filt_automate_IM)]
+    if filt_niveau_IM:
+        data_filtrée_IM = data_filtrée_IM[data_filtrée_IM['lot_niveau'].isin(filt_niveau_IM)]
+    if filt_lot_IM:
+        data_filtrée_IM = data_filtrée_IM[data_filtrée_IM['lot_num'].isin(filt_lot_IM)]
+    if filt_annee_IM:
+        data_filtrée_IM = data_filtrée_IM[data_filtrée_IM['Annee'].isin(filt_annee_IM)]
+
+    # Joindre CIQ et EEQ pour la même variable, Nickname (automate), année
+    # Dans CIQ, on doit avoir colonne Année à créer (par exemple date d’analyse)
+    # Ici on suppose CIQ a une colonne date, sinon on crée Année manuellement (à adapter)
+    if 'Date' in data_filtrée_IM.columns:
+        data_filtrée_IM['Date'] = pd.to_datetime(data_filtrée_IM['Date'], errors='coerce')
+        data_filtrée_IM['Annee'] = data_filtrée_IM['Date'].dt.year
+    else:
+        st.warning("Pas de colonne Date dans CIQ : Année non disponible.")
+        data_filtrée_IM['Annee'] = 0  # placeholder
     
-    CIQ_long = CIQ.melt(
+
+
+
+
+    # st.dataframe(data_filtrée_IM)
+
+    colonnes_valeurs_IM = data_filtrée_IM.columns[8:125]  
+    
+    data_filtrée_IM_long = data_filtrée_IM.melt(
         id_vars=["Nickname", "lot_niveau", "Annee"],
-        value_vars=colonnes_valeurs,
+        value_vars=colonnes_valeurs_IM,
         var_name="Paramètre",
         value_name="Valeur"
     )
-    # st.dataframe(CIQ_long.head())
+
+    # 1. Convertir la colonne Valeur en numérique (force les erreurs en NaN)
+    data_filtrée_IM_long['Valeur'] = pd.to_numeric(data_filtrée_IM_long['Valeur'], errors='coerce')
+
+    # 2. Supprimer les lignes où la Valeur est NaN (très important pour le groupby)
+    data_filtrée_IM_long = data_filtrée_IM_long.dropna(subset=['Valeur'])
+
+    # st.dataframe(data_filtrée_IM_long.head())
     
-    CIQ_moyennes = (
-    CIQ_long.groupby(["Nickname", "Paramètre", "lot_niveau", "Annee"])
+    data_filtrée_IM_moyennes = (
+    data_filtrée_IM_long.groupby(["Nickname", "Paramètre", "lot_niveau", "Annee"])
     .agg(moy_valeur=("Valeur", lambda x: pd.to_numeric(x, errors="coerce").mean()))
     .reset_index()
-)
+    )
 
-    # st.dataframe(CIQ_moyennes.head())
+    # st.dataframe(data_filtrée_IM_moyennes.head())
     
     EEQ["Resultat"] = (
         EEQ["Resultat"]
@@ -1010,13 +1596,13 @@ elif choix_eeq == "Rechercher un fichier EEQ en local":
     )
 
     EEQ["Resultat"] = pd.to_numeric(EEQ["Resultat"], errors="coerce")
-    CIQ_moyennes["moy_valeur"] = pd.to_numeric(CIQ_moyennes["moy_valeur"], errors="coerce")
+    data_filtrée_IM_moyennes["moy_valeur"] = pd.to_numeric(data_filtrée_IM_moyennes["moy_valeur"], errors="coerce")
 
     # Application sur ton DataFrame EEQ
-    EEQ["lot_niveau_proche"] = EEQ.apply(lambda row: trouver_lot_niveau_proche(row, CIQ_moyennes), axis=1)
-   
+    EEQ["lot_niveau_proche"] = EEQ.apply(lambda row: trouver_lot_niveau_proche(row, data_filtrée_IM_moyennes), axis=1)
+
     # st.dataframe(EEQ)
-   
+
     biais_moyen = (
     EEQ.groupby(["Nickname", "Paramètre", "Annee","lot_niveau_proche"])
     .agg(
@@ -1026,12 +1612,12 @@ elif choix_eeq == "Rechercher un fichier EEQ en local":
     .reset_index()
     )
     
-   
+
     # st.write("Aperçu des colonnes  :", biais_moyen.columns.tolist())
     # st.dataframe(biais_moyen.head())
     
     
-    CIQ_grouped = CIQ_long.groupby(["Nickname", "lot_niveau", "Annee", "Paramètre"]).agg(
+    data_filtrée_IM_grouped = data_filtrée_IM_long.groupby(["Nickname", "lot_niveau", "Annee", "Paramètre"]).agg(
         Moyenne=('Valeur', 'mean'),
         Médiane=('Valeur', 'median'),
         Ecart_type=('Valeur', 'std'),
@@ -1046,17 +1632,15 @@ elif choix_eeq == "Rechercher un fichier EEQ en local":
         SD_MAD=('Valeur',mad)
         ).reset_index()
 
-    # st.dataframe(CIQ_grouped)
+    # st.dataframe(data_filtrée_IM_grouped, hide_index = True)
     
-    # CIQ_grouped_1102 = CIQ_grouped[CIQ_grouped["lot_niveau"] == "1102"]
-    # st.dataframe(CIQ_grouped_1102)
     
     # df_IM = pd.merge(
     # biais_moyen,
     # CIQ_grouped_1102,
     # on=["Nickname", "Paramètre", "Annee"],
     # how="inner"  # ou "left", "right", "outer" selon ton besoin
-# )
+    # )
     limites_en_pourcentage = {
     "WBC(10^9/L)": 15.49,
     "RBC(10^12/L)": 4.4,
@@ -1075,7 +1659,7 @@ elif choix_eeq == "Rechercher un fichier EEQ en local":
     
     df_IM = pd.merge(
         biais_moyen,
-        CIQ_grouped,
+        data_filtrée_IM_grouped,
         left_on=["Nickname", "Paramètre", "Annee", "lot_niveau_proche"],
         right_on=["Nickname", "Paramètre", "Annee", "lot_niveau"],
         how="inner"  # ou "left", "right", "outer" selon ton besoin
@@ -1094,10 +1678,27 @@ elif choix_eeq == "Rechercher un fichier EEQ en local":
 
     df_IM['limite_accept'] = df_IM.apply(calculer_limite_absolue, axis=1)
 
-    
+
+    def highlight_status(row):
+        styles = [''] * len(row)
+        u_idx = row.index.get_loc('U')
+        statut_idx = row.index.get_loc('Statut')
+        parametre_idx = row.index.get_loc('Paramètre')
+        nickname_idx = row.index.get_loc('Nickname')
+        
+        if row['Statut'] == "❌ Non Conforme":
+            color = 'background-color: #FF4B4B; color: white; font-weight: bold'
+            styles[u_idx] = color
+            styles[statut_idx] = color
+            styles[parametre_idx] = color
+            styles[nickname_idx] = color
+            
+        return styles
+
+        
     # st.dataframe(df_IM)
-    
-# Calcul incertitudes
+        
+    # Calcul incertitudes
     # Colonnes proposées
     options_sd = ['SD_classique', 'SD_IQR', 'SD_IQR2', 'SD_MAD']
 
@@ -1118,8 +1719,24 @@ elif choix_eeq == "Rechercher un fichier EEQ en local":
     df_IM['U'] = df_IM['u_total'] * 2  # élargie (k=2)
     df_IM['U%'] = 100 * df_IM['U'] / df_IM['Moyenne']
 
-    st.dataframe(df_IM)
+    # 1. Création de la colonne de conformité
+    # On vérifie si U est supérieur à la limite_accept
+    df_IM['Statut'] = np.where(
+        df_IM['U'] > df_IM['limite_accept'], 
+        "❌ Non Conforme", 
+        "✅ Conforme"
+    )
+
+    # Optionnel : Gérer les cas où les données sont manquantes (NaN)
+    df_IM.loc[df_IM['U'].isnull() | df_IM['limite_accept'].isnull(), 'Statut'] = "Incomplet"
+
+    # st.dataframe(df_IM)
     
+    # Application du style
+    styled_df = df_IM.style.apply(highlight_status, axis=1)
+
+    # Affichage dans Streamlit
+    st.dataframe(styled_df)
 
 
     # =======================
@@ -1138,7 +1755,7 @@ elif choix_eeq == "Rechercher un fichier EEQ en local":
     # param_selectionnes = st.multiselect("Sélectionnez un ou plusieurs paramètres",options=parametres_disponibles,
     #    default=[p for p in params_visibles_par_défaut if p in parametres_disponibles])
 
-     # Choix des paramètres via menu déroulant
+    # Choix des paramètres via menu déroulant
     parametres_disponibles = df_IM['Paramètre'].unique()
     param_selectionnes = st.multiselect("Sélectionnez un ou plusieurs paramètres",options=parametres_disponibles,
         default=None)
@@ -1193,7 +1810,7 @@ elif choix_eeq == "Rechercher un fichier EEQ en local":
     #    facet_row_wrap=1  # 🔥 Forcer une seule série de facettes
     #)
 
-  
+
     fig_IM.update_layout(
         height=max(300, 250 * len(facet_row_order)),  # Ajuste en fonction du nombre réel de lignes
         showlegend=True,  # 🔥 Forcer une seule série de facettes
@@ -1201,145 +1818,145 @@ elif choix_eeq == "Rechercher un fichier EEQ en local":
     )
 
 
-# Inversion de l'indexation des facettes pour correspondre au vrai mapping
-# facet_row_order_reversed = list(reversed(facet_row_order))  # 🔄 Inverse l'ordre des lignes
-# st.write("Ordre des facettes  - lot_niveau_proche:", facet_row_order)
-# st.write("Ordre des facettes inversé - lot_niveau_proche:", facet_row_order_reversed)
+    # Inversion de l'indexation des facettes pour correspondre au vrai mapping
+    # facet_row_order_reversed = list(reversed(facet_row_order))  # 🔄 Inverse l'ordre des lignes
+    # st.write("Ordre des facettes  - lot_niveau_proche:", facet_row_order)
+    # st.write("Ordre des facettes inversé - lot_niveau_proche:", facet_row_order_reversed)
 
 
-# Ajout des points pour 'limite_accept' en respectant l'affichage des facettes
-#for lot in facet_row_order:
- #   for param in facet_col_order:
-  #      df_subset = df_IM_filtré[(df_IM_filtré["lot_niveau_proche"] == lot) & (df_IM_filtré["Paramètre"] == param)]
-   #     
-    #    fig_IM.add_trace(
-     #       go.Scatter(
-      #          x=df_subset["Annee"],
-       #         y=df_subset["limite_accept"],
-        #        mode="markers",
-         #       marker=dict(color="red", size=8),
-          #      name=f"Limite acceptée - {lot}, {param}",
-           # ),
-            #row=facet_row_order_reversed.index(lot) + 1,  # 🔥 Utilisation correcte des indices réels
-            #col=facet_col_order.index(param) + 1  # 🔥 Alignement parfait des colonnes
-        #)
+    # Ajout des points pour 'limite_accept' en respectant l'affichage des facettes
+    #for lot in facet_row_order:
+    #   for param in facet_col_order:
+    #      df_subset = df_IM_filtré[(df_IM_filtré["lot_niveau_proche"] == lot) & (df_IM_filtré["Paramètre"] == param)]
+    #     
+        #    fig_IM.add_trace(
+        #       go.Scatter(
+        #          x=df_subset["Annee"],
+        #         y=df_subset["limite_accept"],
+            #        mode="markers",
+            #       marker=dict(color="red", size=8),
+            #      name=f"Limite acceptée - {lot}, {param}",
+            # ),
+                #row=facet_row_order_reversed.index(lot) + 1,  # 🔥 Utilisation correcte des indices réels
+                #col=facet_col_order.index(param) + 1  # 🔥 Alignement parfait des colonnes
+            #)
 
-# Palette de couleurs (tu peux choisir d'autres couleurs ou symboles)
-# colors = px.colors.qualitative.Plotly
-# symbols = ["circle", "square", "diamond", "star", "triangle-up", "cross"]
+    # Palette de couleurs (tu peux choisir d'autres couleurs ou symboles)
+    # colors = px.colors.qualitative.Plotly
+    # symbols = ["circle", "square", "diamond", "star", "triangle-up", "cross"]
 
-nicknames = df_IM_filtré["Nickname"].unique()
+    nicknames = df_IM_filtré["Nickname"].unique()
 
-# for lot in facet_row_order:
-#    for param in facet_col_order:
-#       for i, nickname in enumerate(nicknames):
-#           df_subset = df_IM_filtré[
-#               (df_IM_filtré["lot_niveau_proche"] == lot) &
-#               (df_IM_filtré["Paramètre"] == param) &
-#               (df_IM_filtré["Nickname"] == nickname)
-#           ]
-#           if df_subset.empty:
-#               continue
+    # for lot in facet_row_order:
+    #    for param in facet_col_order:
+    #       for i, nickname in enumerate(nicknames):
+    #           df_subset = df_IM_filtré[
+    #               (df_IM_filtré["lot_niveau_proche"] == lot) &
+    #               (df_IM_filtré["Paramètre"] == param) &
+    #               (df_IM_filtré["Nickname"] == nickname)
+    #           ]
+    #           if df_subset.empty:
+    #               continue
 
-#           fig_IM.add_trace(
-#               go.Scatter(
-#                   x=df_subset["Annee"],
-#                   y=df_subset["limite_accept"],
-#                   mode="markers",
-#                   marker=dict(
-#                       color=colors[i % len(colors)],
-#                       size=10,
-#                       symbol=symbols[i % len(symbols)],
-#                       line=dict(width=1, color="black")  # contour noir pour bien voir
-#                   ),
-#                   name=f"Limite acceptée - {nickname}",
-#                   showlegend=True,
-#                   hovertemplate=(
-#                       f"Limite: %{{y}}<br>"
-#                       f"Année: %{{x}}<br>"
-#                       f"Analyseur: {nickname}<extra></extra>"
-#                   )
-#               ),
-#               row=facet_row_order_reversed.index(lot) + 1,
-#               col=facet_col_order.index(param) + 1
-#           )
+    #           fig_IM.add_trace(
+    #               go.Scatter(
+    #                   x=df_subset["Annee"],
+    #                   y=df_subset["limite_accept"],
+    #                   mode="markers",
+    #                   marker=dict(
+    #                       color=colors[i % len(colors)],
+    #                       size=10,
+    #                       symbol=symbols[i % len(symbols)],
+    #                       line=dict(width=1, color="black")  # contour noir pour bien voir
+    #                   ),
+    #                   name=f"Limite acceptée - {nickname}",
+    #                   showlegend=True,
+    #                   hovertemplate=(
+    #                       f"Limite: %{{y}}<br>"
+    #                       f"Année: %{{x}}<br>"
+    #                       f"Analyseur: {nickname}<extra></extra>"
+    #                   )
+    #               ),
+    #               row=facet_row_order_reversed.index(lot) + 1,
+    #               col=facet_col_order.index(param) + 1
+    #           )
 
-    # fig_IM.update_layout(height=300 * len(param_selectionnes))
-st.plotly_chart(fig_IM, width='stretch')
-
-
-### Méthode 2 pour graph ###
-
-    # Charger le fichier
-#df = pd.read_csv("2025-06-11T06-52_export.csv")
-
-# Garder uniquement les colonnes utiles et supprimer les lignes avec U ou Annee manquants
-df_plot = df_IM_filtré[['Annee', 'Nickname', 'lot_niveau_proche', 'U', 'limite_accept']].dropna(subset=['U', 'Annee'])
-
-# Transformer en format long pour U et limite_accept
-df_long = df_plot.melt(
-    id_vars=['Annee', 'Nickname', 'lot_niveau_proche'],
-    value_vars=['U', 'limite_accept'],
-    var_name='Type',
-    value_name='Valeur'
-)
-
-df_long = df_long.rename(columns={"Nickname": "Analyseur"})
-df_long['Type'] = df_long['Type'].replace({
-    'U': 'U',
-    'limite_accept': 'Limites acceptables'
-})
-
-# st.dataframe(df_long)
-
-color_discrete_map = {
-    'U': 'royalblue',
-    'Limites acceptables': 'red'
-}
-
-pattern_shape_map = {
-    'U': '',
-    'Limites acceptables': '/'
-}
+        # fig_IM.update_layout(height=300 * len(param_selectionnes))
+    st.plotly_chart(fig_IM, width='stretch')
 
 
-titre_graph = f"Incertitudes de mesure (U) pour {param_selectionnes} et limites acceptables par année, par analyseur et par niveau de lot"
+    ### Méthode 2 pour graph ###
 
-# Sélection interactive des analyseurs
-analyseurs_disponibles = df_long['Analyseur'].unique()
-analyseurs_selectionnes = st.multiselect(
-    "Sélectionnez les analyseurs à afficher :",
-    options=sorted(analyseurs_disponibles),
-    default=sorted(analyseurs_disponibles)
-)
-df_long_filtre = df_long[df_long['Analyseur'].isin(analyseurs_selectionnes)]
+        # Charger le fichier
+    #df = pd.read_csv("2025-06-11T06-52_export.csv")
 
-# 🎨 Autres motifs disponibles : '' (plein) '/' (diagonal 45°) '\\' (diagonal -45°) 'x' (croix) '-' (horizontal) '|' (vertical) '+' (croix pleine) '.' (points)
+    # Garder uniquement les colonnes utiles et supprimer les lignes avec U ou Annee manquants
+    df_plot = df_IM_filtré[['Annee', 'Nickname', 'lot_niveau_proche', 'U', 'limite_accept']].dropna(subset=['U', 'Annee'])
 
-# Création du graphique en barres interactif
-fig_IM2 = px.bar(
-    df_long_filtre,
-    x='Analyseur',
-    facet_row='lot_niveau_proche',
-    y='Valeur',
-    color='Type',
-    barmode='group',
-    facet_col='Annee',
-    facet_col_wrap=3,
-    pattern_shape='Type',
-    pattern_shape_map={
-        'U': '',
-        'limite_accept': '/'
-    },
-    color_discrete_map={
+    # Transformer en format long pour U et limite_accept
+    df_long = df_plot.melt(
+        id_vars=['Annee', 'Nickname', 'lot_niveau_proche'],
+        value_vars=['U', 'limite_accept'],
+        var_name='Type',
+        value_name='Valeur'
+    )
+
+    df_long = df_long.rename(columns={"Nickname": "Analyseur"})
+    df_long['Type'] = df_long['Type'].replace({
+        'U': 'U',
+        'limite_accept': 'Limites acceptables'
+    })
+
+    # st.dataframe(df_long)
+
+    color_discrete_map = {
         'U': 'royalblue',
-        'limite_accept': 'red'
-    },
-    title=titre_graph,
-    labels={'Annee': 'Année', 'Valeur': 'Valeur', 'Type': 'Type de mesure'},
-    hover_data=['Analyseur']
-)
+        'Limites acceptables': 'red'
+    }
 
-fig_IM2.update_layout(height=600, legend_title_text='Type')
-#fig_IM2.update_traces(mode="lines+markers")
-st.plotly_chart(fig_IM2, width='stretch')
+    pattern_shape_map = {
+        'U': '',
+        'Limites acceptables': '/'
+    }
+
+
+    titre_graph = f"Incertitudes de mesure (U) pour {param_selectionnes} et limites acceptables par année, par analyseur et par niveau de lot"
+
+    # Sélection interactive des analyseurs
+    analyseurs_disponibles = df_long['Analyseur'].unique()
+    analyseurs_selectionnes = st.multiselect(
+        "Sélectionnez les analyseurs à afficher :",
+        options=sorted(analyseurs_disponibles),
+        default=sorted(analyseurs_disponibles)
+    )
+    df_long_filtre = df_long[df_long['Analyseur'].isin(analyseurs_selectionnes)]
+
+    # 🎨 Autres motifs disponibles : '' (plein) '/' (diagonal 45°) '\\' (diagonal -45°) 'x' (croix) '-' (horizontal) '|' (vertical) '+' (croix pleine) '.' (points)
+
+    # Création du graphique en barres interactif
+    fig_IM2 = px.bar(
+        df_long_filtre,
+        x='Analyseur',
+        facet_row='lot_niveau_proche',
+        y='Valeur',
+        color='Type',
+        barmode='group',
+        facet_col='Annee',
+        facet_col_wrap=3,
+        pattern_shape='Type',
+        pattern_shape_map={
+            'U': '',
+            'limite_accept': '/'
+        },
+        color_discrete_map={
+            'U': 'royalblue',
+            'limite_accept': 'red'
+        },
+        title=titre_graph,
+        labels={'Annee': 'Année', 'Valeur': 'Valeur', 'Type': 'Type de mesure'},
+        hover_data=['Analyseur']
+    )
+
+    fig_IM2.update_layout(height=600, legend_title_text='Type')
+    #fig_IM2.update_traces(mode="lines+markers")
+    st.plotly_chart(fig_IM2, width='stretch')
