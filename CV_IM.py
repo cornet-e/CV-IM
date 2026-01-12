@@ -1716,7 +1716,7 @@ with tab_IM:
     
     df_IM['u_biais'] = df_IM['sd_biais']
     df_IM['u_total'] = np.sqrt(df_IM['u_biais']**2 + df_IM['u_CIQ']**2)
-    df_IM['U'] = df_IM['u_total'] * 2  # élargie (k=2)
+    df_IM['U'] = df_IM['u_total'] * 1.96  # élargie (k=1.96)
     df_IM['U%'] = 100 * df_IM['U'] / df_IM['Moyenne']
 
     # 1. Création de la colonne de conformité
