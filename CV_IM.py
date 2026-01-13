@@ -3,7 +3,7 @@ import numpy as np
 import streamlit as st
 import plotly.express as px
 from io import StringIO
-from datetime import datetime
+# from datetime import datetime
 import glob
 import os
 import plotly.graph_objects as go
@@ -501,216 +501,216 @@ with tab_data:
     )
 
 
-    # lots_disponibles = sorted(CIQ['lot_num'].dropna().astype(str).unique())
-    lots_disponibles_brut = CIQ['lot_num'].astype(str).unique()
-    filt_lot_brut = st.selectbox("Numéro(s) de lot (raw data)", lots_disponibles_brut)
+    # # lots_disponibles = sorted(CIQ['lot_num'].dropna().astype(str).unique())
+    # lots_disponibles_brut = CIQ['lot_num'].astype(str).unique()
+    # filt_lot_brut = st.selectbox("Numéro(s) de lot (raw data)", lots_disponibles_brut)
 
-    # === Choix analyseurs ===
+    # # === Choix analyseurs ===
 
-    filt_automate_brut = st.multiselect("Automate(s) (raw data)", sorted(CIQ[col_automate].dropna().unique()), default=None)
+    # filt_automate_brut = st.multiselect("Automate(s) (raw data)", sorted(CIQ[col_automate].dropna().unique()), default=None)
 
-    # === Choix niveau de lot ===
-    # Forcer tout en chaînes pour uniformiser les types
-    niveaux_disponibles_brut = sorted(CIQ['lot_niveau'].dropna().astype(str).unique())
-    # Définir les niveaux souhaités par défaut (aussi en str)
-    niveaux_defaut_souhaites_brut = ['1101', '1102', '1103']
-    # Ne garder que les niveaux par défaut présents dans les options
-    niveaux_defaut_valides_brut = [niveau for niveau in niveaux_defaut_souhaites_brut if niveau in niveaux_disponibles_brut]
-    # Affichage du multiselect sécurisé
-    filt_niveau_brut = st.multiselect("Niveau(x) de lot (raw data)", niveaux_disponibles_brut, default=niveaux_defaut_valides_brut)
-
-
-
-    filt_annee_brut = st.multiselect("Année(s) (raw data)", sorted(CIQ['Annee'].dropna().unique()), default=None)
+    # # === Choix niveau de lot ===
+    # # Forcer tout en chaînes pour uniformiser les types
+    # niveaux_disponibles_brut = sorted(CIQ['lot_niveau'].dropna().astype(str).unique())
+    # # Définir les niveaux souhaités par défaut (aussi en str)
+    # niveaux_defaut_souhaites_brut = ['1101', '1102', '1103']
+    # # Ne garder que les niveaux par défaut présents dans les options
+    # niveaux_defaut_valides_brut = [niveau for niveau in niveaux_defaut_souhaites_brut if niveau in niveaux_disponibles_brut]
+    # # Affichage du multiselect sécurisé
+    # filt_niveau_brut = st.multiselect("Niveau(x) de lot (raw data)", niveaux_disponibles_brut, default=niveaux_defaut_valides_brut)
 
 
-    # Filtrage des données
-    data_filtrée_brut = CIQ.copy()
-    if filt_automate_brut:
-        data_filtrée_brut = data_filtrée_brut[data_filtrée_brut[col_automate].isin(filt_automate_brut)]
-    if filt_niveau_brut:
-        data_filtrée_brut = data_filtrée_brut[data_filtrée_brut['lot_niveau'].isin(filt_niveau_brut)]
-    if filt_lot_brut:
-        data_filtrée_brut = data_filtrée_brut[data_filtrée_brut['lot_num'] == filt_lot_brut]
-    if filt_annee_brut:
-        data_filtrée_brut = data_filtrée_brut[data_filtrée_brut['Annee'].isin(filt_annee_brut)]
 
-    st.subheader(f"Choix du paramètre à étudier pour le lot {filt_lot_brut}")
+    # filt_annee_brut = st.multiselect("Année(s) (raw data)", sorted(CIQ['Annee'].dropna().unique()), default=None)
 
-    # === Choix du paramètre ===
-    choix_param_brut = CIQ.columns[8:]  # adapter si besoin
-    param_brut = st.selectbox("Choisissez le paramètre à étudier (raw data)", choix_param_brut)
 
-    # Conversion du paramètre sélectionné en float
-    data_filtrée_brut[param_brut] = pd.to_numeric(data_filtrée_brut[param_brut], errors='coerce')
+    # # Filtrage des données
+    # data_filtrée_brut = CIQ.copy()
+    # if filt_automate_brut:
+    #     data_filtrée_brut = data_filtrée_brut[data_filtrée_brut[col_automate].isin(filt_automate_brut)]
+    # if filt_niveau_brut:
+    #     data_filtrée_brut = data_filtrée_brut[data_filtrée_brut['lot_niveau'].isin(filt_niveau_brut)]
+    # if filt_lot_brut:
+    #     data_filtrée_brut = data_filtrée_brut[data_filtrée_brut['lot_num'] == filt_lot_brut]
+    # if filt_annee_brut:
+    #     data_filtrée_brut = data_filtrée_brut[data_filtrée_brut['Annee'].isin(filt_annee_brut)]
 
-    # Agrégation par automate et niveau
-    grouped_brut = data_filtrée_brut.groupby([col_automate, 'lot_niveau','Annee'])[param_brut].agg(
-        n='count',
-        Moyenne='mean',
-        Mediane='median',
-        Ecart_type='std',
-        CV=cv,
-        CV_IQR=cv_robuste_iqr,
-        CV_IQR2=cv_robuste_iqr2,
-        CV_MAD=cv_robuste_mad
-    ).reset_index()
+    # st.subheader(f"Choix du paramètre à étudier pour le lot {filt_lot_brut}")
 
-    grouped_brut['paramètre'] = param_brut
+    # # === Choix du paramètre ===
+    # choix_param_brut = CIQ.columns[8:]  # adapter si besoin
+    # param_brut = st.selectbox("Choisissez le paramètre à étudier (raw data)", choix_param_brut)
+
+    # # Conversion du paramètre sélectionné en float
+    # data_filtrée_brut[param_brut] = pd.to_numeric(data_filtrée_brut[param_brut], errors='coerce')
+
+    # # Agrégation par automate et niveau
+    # grouped_brut = data_filtrée_brut.groupby([col_automate, 'lot_niveau','Annee'])[param_brut].agg(
+    #     n='count',
+    #     Moyenne='mean',
+    #     Mediane='median',
+    #     Ecart_type='std',
+    #     CV=cv,
+    #     CV_IQR=cv_robuste_iqr,
+    #     CV_IQR2=cv_robuste_iqr2,
+    #     CV_MAD=cv_robuste_mad
+    # ).reset_index()
+
+    # grouped_brut['paramètre'] = param_brut
     
     # st.dataframe(grouped_brut)
     # st.dataframe(data_filtrée_brut)
 
-    # Sélecteurs pour le graphique
-    st.subheader("Visualisation de la carte de contrôle (Levey-Jennings)")
-    # On n'a plus besoin de choisir le paramètre (il est déjà dans param_brut)
-    # Mais on doit choisir l'Automate et le Niveau si plusieurs sont présents dans les données filtrées
-    col1, col2 = st.columns(2)
-    with col1:
-        # On choisit l'automate (Nickname) parmi ceux restants après filtrage
-        automate_choisi = st.selectbox("Automate à visualiser :", data_filtrée_brut[col_automate].unique())
-    with col2:
-        # On choisit le niveau parmi ceux restants
-        niveau_choisi = st.selectbox("Niveau à visualiser :", data_filtrée_brut['lot_niveau'].unique())
+#     # Sélecteurs pour le graphique
+#     st.subheader("Visualisation de la carte de contrôle (Levey-Jennings)")
+#     # On n'a plus besoin de choisir le paramètre (il est déjà dans param_brut)
+#     # Mais on doit choisir l'Automate et le Niveau si plusieurs sont présents dans les données filtrées
+#     col1, col2 = st.columns(2)
+#     with col1:
+#         # On choisit l'automate (Nickname) parmi ceux restants après filtrage
+#         automate_choisi = st.selectbox("Automate à visualiser :", data_filtrée_brut[col_automate].unique())
+#     with col2:
+#         # On choisit le niveau parmi ceux restants
+#         niveau_choisi = st.selectbox("Niveau à visualiser :", data_filtrée_brut['lot_niveau'].unique())
 
-    # --- FILTRAGE DES DONNÉES ---
-    # On prend les lignes correspondant à l'automate et au niveau
-    df_plot_brut = data_filtrée_brut[
-        (data_filtrée_brut[col_automate] == automate_choisi) & 
-        (data_filtrée_brut['lot_niveau'] == niveau_choisi)
-    ].copy()
+#     # --- FILTRAGE DES DONNÉES ---
+#     # On prend les lignes correspondant à l'automate et au niveau
+#     df_plot_brut = data_filtrée_brut[
+#         (data_filtrée_brut[col_automate] == automate_choisi) & 
+#         (data_filtrée_brut['lot_niveau'] == niveau_choisi)
+#     ].copy()
 
-    # --- RÉCUPÉRATION DES STATS ---
-    # Attention : on filtre grouped_brut sur l'automate et le niveau pour avoir la moyenne/SD
-    stats_selection = grouped_brut[
-        (grouped_brut[col_automate] == automate_choisi) & 
-        (grouped_brut['lot_niveau'] == niveau_choisi)
-    ]
+#     # --- RÉCUPÉRATION DES STATS ---
+#     # Attention : on filtre grouped_brut sur l'automate et le niveau pour avoir la moyenne/SD
+#     stats_selection = grouped_brut[
+#         (grouped_brut[col_automate] == automate_choisi) & 
+#         (grouped_brut['lot_niveau'] == niveau_choisi)
+#     ]
 
-    if not stats_selection.empty:
-        stats = stats_selection.iloc[0]
-        moy_brut = stats['Moyenne']
-        sd_brut = stats['Ecart_type']
-        cv_brut = stats['CV']
+#     if not stats_selection.empty:
+#         stats = stats_selection.iloc[0]
+#         moy_brut = stats['Moyenne']
+#         sd_brut = stats['Ecart_type']
+#         cv_brut = stats['CV']
         
-        # Appel de la fonction de graphique (en utilisant df_plot_brut[param_brut])
-        # st.plotly_chart(plot_levey_jennings(df_plot_brut, moy_brut, sd_brut, param_brut))
-    else:
-        st.warning("Pas de statistiques calculées pour cette sélection.")
+#         # Appel de la fonction de graphique (en utilisant df_plot_brut[param_brut])
+#         # st.plotly_chart(plot_levey_jennings(df_plot_brut, moy_brut, sd_brut, param_brut))
+#     else:
+#         st.warning("Pas de statistiques calculées pour cette sélection.")
 
-    def generer_levey_jennings(df, param_nom, moyenne, sd):
-        # Tri par date pour un tracé chronologique
-        df = df.sort_values('Date')
+#     def generer_levey_jennings(df, param_nom, moyenne, sd):
+#         # Tri par date pour un tracé chronologique
+#         df = df.sort_values('Date')
         
-        fig = go.Figure()
+#         fig = go.Figure()
 
-        # Définition des zones de contrôle (±1SD, ±2SD, ±3SD)
-        limites = {
-            'Moyenne': {'val': moyenne, 'color': 'green', 'dash': 'solid'},
-            '+1 SD': {'val': moyenne + sd, 'color': 'orange', 'dash': 'dot'},
-            '-1 SD': {'val': moyenne - sd, 'color': 'orange', 'dash': 'dot'},
-            '+2 SD': {'val': moyenne + 2*sd, 'color': 'red', 'dash': 'dash'},
-            '-2 SD': {'val': moyenne - 2*sd, 'color': 'red', 'dash': 'dash'},
-            '+3 SD': {'val': moyenne + 3*sd, 'color': 'darkred', 'dash': 'dashdot'},
-            '-3 SD': {'val': moyenne - 3*sd, 'color': 'darkred', 'dash': 'dashdot'},
-        }
+#         # Définition des zones de contrôle (±1SD, ±2SD, ±3SD)
+#         limites = {
+#             'Moyenne': {'val': moyenne, 'color': 'green', 'dash': 'solid'},
+#             '+1 SD': {'val': moyenne + sd, 'color': 'orange', 'dash': 'dot'},
+#             '-1 SD': {'val': moyenne - sd, 'color': 'orange', 'dash': 'dot'},
+#             '+2 SD': {'val': moyenne + 2*sd, 'color': 'red', 'dash': 'dash'},
+#             '-2 SD': {'val': moyenne - 2*sd, 'color': 'red', 'dash': 'dash'},
+#             '+3 SD': {'val': moyenne + 3*sd, 'color': 'darkred', 'dash': 'dashdot'},
+#             '-3 SD': {'val': moyenne - 3*sd, 'color': 'darkred', 'dash': 'dashdot'},
+#         }
 
-        for label, config in limites.items():
-            fig.add_hline(y=config['val'], 
-                        line=dict(color=config['color'], dash=config['dash'], width=1),
-                        annotation_text=label, 
-                        annotation_position="top right")
+#         for label, config in limites.items():
+#             fig.add_hline(y=config['val'], 
+#                         line=dict(color=config['color'], dash=config['dash'], width=1),
+#                         annotation_text=label, 
+#                         annotation_position="top right")
 
-        # Ajout des points de mesure
-        # On colorie les points dynamiquement selon leur éloignement
-        colors = []
-        for val in df[param_nom]:
-            if abs(val - moyenne) > 3 * sd: 
-                colors.append('darkred')
-            elif abs(val - moyenne) > 2 * sd: 
-                colors.append('red')
-            else: 
-                colors.append('blue')
+#         # Ajout des points de mesure
+#         # On colorie les points dynamiquement selon leur éloignement
+#         colors = []
+#         for val in df[param_nom]:
+#             if abs(val - moyenne) > 3 * sd: 
+#                 colors.append('darkred')
+#             elif abs(val - moyenne) > 2 * sd: 
+#                 colors.append('red')
+#             else: 
+#                 colors.append('blue')
 
-        fig.add_trace(go.Scatter(
-            x=df['Date'],
-            y=df[param_nom],
-            mode='lines+markers',
-            name=param_nom,
-            line=dict(color='lightgray', width=1),
-            marker=dict(size=10, color=colors, symbol='circle')
-        ))
+#         fig.add_trace(go.Scatter(
+#             x=df['Date'],
+#             y=df[param_nom],
+#             mode='lines+markers',
+#             name=param_nom,
+#             line=dict(color='lightgray', width=1),
+#             marker=dict(size=10, color=colors, symbol='circle')
+#         ))
 
-        fig.update_layout(
-            title=f"Levey-Jennings : {param_nom} (Lot: {df['lot_num'].iloc[0]})",
-            xaxis_title="Date d'analyse",
-            yaxis_title="Valeur mesurée",
-            template="plotly_white",
-            height=600
-        )
+#         fig.update_layout(
+#             title=f"Levey-Jennings : {param_nom} (Lot: {df['lot_num'].iloc[0]})",
+#             xaxis_title="Date d'analyse",
+#             yaxis_title="Valeur mesurée",
+#             template="plotly_white",
+#             height=600
+#         )
         
-        return fig
+#         return fig
 
-# --- SELECTION POUR LE GRAPHIQUE ---
+# # --- SELECTION POUR LE GRAPHIQUE ---
 
-    if not data_filtrée_brut.empty:
-        col_g1, col_g2 = st.columns(2)
+#     if not data_filtrée_brut.empty:
+#         col_g1, col_g2 = st.columns(2)
         
-        # with col_g1:
-        #     # On choisit l'automate parmi ceux présents dans les données filtrées
-        #     automate_choisi = st.selectbox("Sélectionner l'automate :", data_filtrée_brut[col_automate].unique())
+#         # with col_g1:
+#         #     # On choisit l'automate parmi ceux présents dans les données filtrées
+#         #     automate_choisi = st.selectbox("Sélectionner l'automate :", data_filtrée_brut[col_automate].unique())
         
-        # with col_g2:
-        #     # On choisit le niveau
-        #     niveau_choisi = st.selectbox("Sélectionner le niveau :", data_filtrée_brut['lot_niveau'].unique())
+#         # with col_g2:
+#         #     # On choisit le niveau
+#         #     niveau_choisi = st.selectbox("Sélectionner le niveau :", data_filtrée_brut['lot_niveau'].unique())
 
-        # --- FILTRAGE FINAL POUR LE GRAPH ---
-        df_plot_brut = data_filtrée_brut[
-            (data_filtrée_brut[col_automate] == automate_choisi) & 
-            (data_filtrée_brut['lot_niveau'] == niveau_choisi)
-        ].copy()
+#         # --- FILTRAGE FINAL POUR LE GRAPH ---
+#         df_plot_brut = data_filtrée_brut[
+#             (data_filtrée_brut[col_automate] == automate_choisi) & 
+#             (data_filtrée_brut['lot_niveau'] == niveau_choisi)
+#         ].copy()
 
-        # Récupération des stats calculées précédemment dans grouped_brut
-        # Rappel : grouped_brut contient une ligne par (Automate, Niveau, Annee)
-        stats_select = grouped_brut[
-            (grouped_brut[col_automate] == automate_choisi) & 
-            (grouped_brut['lot_niveau'] == niveau_choisi)
-        ]
+#         # Récupération des stats calculées précédemment dans grouped_brut
+#         # Rappel : grouped_brut contient une ligne par (Automate, Niveau, Annee)
+#         stats_select = grouped_brut[
+#             (grouped_brut[col_automate] == automate_choisi) & 
+#             (grouped_brut['lot_niveau'] == niveau_choisi)
+#         ]
 
-        if not stats_select.empty and not df_plot_brut.empty:
-            # On prend les stats de la première ligne correspondante
-            s = stats_select.iloc[0]
+#         if not stats_select.empty and not df_plot_brut.empty:
+#             # On prend les stats de la première ligne correspondante
+#             s = stats_select.iloc[0]
             
-            # Génération du graphique
-            fig_lj = generer_levey_jennings(
-                df_plot_brut, 
-                param_brut,      # Le nom de la colonne choisie plus haut
-                s['Moyenne'], 
-                s['Ecart_type']
-            )
+#             # Génération du graphique
+#             fig_lj_brut = generer_levey_jennings(
+#                 df_plot_brut, 
+#                 param_brut,      # Le nom de la colonne choisie plus haut
+#                 s['Moyenne'], 
+#                 s['Ecart_type']
+#             )
             
-            st.plotly_chart(fig_lj, use_container_width=True)
+#             st.plotly_chart(fig_lj_brut, width='stretch')
             
-            # Petit récapitulatif sous le graph
-            st.info(f"**Statistiques pour ce graphique :** n={s['n']} | Moyenne={s['Moyenne']:.3f} | SD={s['Ecart_type']:.3f} | CV={s['CV']:.3f}")
-        else:
-            st.warning("Données insuffisantes pour générer le graphique sur cette sélection.")
-    else:
-        st.error("Le jeu de données filtré est vide.")
+#             # Petit récapitulatif sous le graph
+#             st.info(f"**Statistiques pour ce graphique :** n={s['n']} | Moyenne={s['Moyenne']:.3f} | SD={s['Ecart_type']:.3f} | CV={s['CV']:.3f}")
+#         else:
+#             st.warning("Données insuffisantes pour générer le graphique sur cette sélection.")
+#     else:
+#         st.error("Le jeu de données filtré est vide.")
 
-    st.subheader("Recommandations EFLM ")
+    st.subheader("Recommandations EFLM + Probioqual ")
     # === import fichier excel EFLM_2025.xlsx ===
     # Charger la première feuille en DataFrame
-    df_reco_eflm = pd.read_excel("EFLM_2025.xlsx", sheet_name=0, usecols=range(17))
+    df_reco_eflm = pd.read_excel("EFLM_2025.xlsx", sheet_name=0, usecols=range(18))
 
     st.dataframe(df_reco_eflm,hide_index = True)
 
     # Rappel des définitions
 
     st.markdown("### Légendes")
-    st.write("CVI = \% Within-subject (CVI) estimate")
-    st.write("CVG = \% Between-subject (CVG) estimate")
-    st.write("MAU = k * MAu (k=2)")
+    st.write(r"CVI = \% Within-subject (CVI) estimate")
+    st.write(r"CVG = \% Between-subject (CVG) estimate")
+    st.write(r"MAU = k \times MAu (k=2)")
 
     st.image("EFLM_definitions.png", caption="Définitions de l'EFLM")
 
@@ -1066,6 +1066,145 @@ with tab_CV_intralot:
 
     st.plotly_chart(fig_facet, width='stretch')
 
+    # Sélecteurs pour le graphique
+    st.subheader("Visualisation de la carte de contrôle (Levey-Jennings)")
+    # On n'a plus besoin de choisir le paramètre (il est déjà dans param_brut)
+    # Mais on doit choisir l'Automate et le Niveau si plusieurs sont présents dans les données filtrées
+    col1, col2 = st.columns(2)
+    with col1:
+        # On choisit l'automate (Nickname) parmi ceux restants après filtrage
+        automate_choisi = st.selectbox("Automate à visualiser (intralot):", data_filtrée[col_automate].unique())
+    with col2:
+        # On choisit le niveau parmi ceux restants
+        niveau_choisi = st.selectbox("Niveau à visualiser (intralot):", data_filtrée['lot_niveau'].unique())
+
+    # --- FILTRAGE DES DONNÉES ---
+    # On prend les lignes correspondant à l'automate et au niveau
+    df_plot = data_filtrée[
+        (data_filtrée[col_automate] == automate_choisi) & 
+        (data_filtrée['lot_niveau'] == niveau_choisi)
+    ].copy()
+
+    # --- RÉCUPÉRATION DES STATS ---
+    # Attention : on filtre grouped_brut sur l'automate et le niveau pour avoir la moyenne/SD
+    stats_selection = grouped[
+        (grouped[col_automate] == automate_choisi) & 
+        (grouped['lot_niveau'] == niveau_choisi)
+    ]
+
+    if not stats_selection.empty:
+        stats = stats_selection.iloc[0]
+        moy_brut = stats['Moyenne']
+        sd_brut = stats['Ecart_type']
+        cv_brut = stats['CV']
+        
+        # Appel de la fonction de graphique (en utilisant df_plot[param_brut])
+        # st.plotly_chart(plot_levey_jennings(df_plot, moy_brut, sd_brut, param_brut))
+    else:
+        st.warning("Pas de statistiques calculées pour cette sélection.")
+
+    def generer_levey_jennings(df, param_nom, moyenne, sd):
+        # Tri par date pour un tracé chronologique
+        df = df.sort_values('Date')
+        
+        fig = go.Figure()
+
+        # Définition des zones de contrôle (±1SD, ±2SD, ±3SD)
+        limites = {
+            'Moyenne': {'val': moyenne, 'color': 'green', 'dash': 'solid'},
+            '+1 SD': {'val': moyenne + sd, 'color': 'orange', 'dash': 'dot'},
+            '-1 SD': {'val': moyenne - sd, 'color': 'orange', 'dash': 'dot'},
+            '+2 SD': {'val': moyenne + 2*sd, 'color': 'red', 'dash': 'dash'},
+            '-2 SD': {'val': moyenne - 2*sd, 'color': 'red', 'dash': 'dash'},
+            '+3 SD': {'val': moyenne + 3*sd, 'color': 'darkred', 'dash': 'dashdot'},
+            '-3 SD': {'val': moyenne - 3*sd, 'color': 'darkred', 'dash': 'dashdot'},
+        }
+
+        for label, config in limites.items():
+            fig.add_hline(y=config['val'], 
+                        line=dict(color=config['color'], dash=config['dash'], width=1),
+                        annotation_text=label, 
+                        annotation_position="top right")
+
+        # Ajout des points de mesure
+        # On colorie les points dynamiquement selon leur éloignement
+        colors = []
+        for val in df[param_nom]:
+            if abs(val - moyenne) > 3 * sd: 
+                colors.append('darkred')
+            elif abs(val - moyenne) > 2 * sd: 
+                colors.append('red')
+            else: 
+                colors.append('blue')
+
+        fig.add_trace(go.Scatter(
+            x=df['Date'],
+            y=df[param_nom],
+            mode='lines+markers',
+            name=param_nom,
+            line=dict(color='lightgray', width=1),
+            marker=dict(size=10, color=colors, symbol='circle')
+        ))
+
+        fig.update_layout(
+            title=f"Levey-Jennings : {param_nom} (Lot: {df['lot_num'].iloc[0]})",
+            xaxis_title="Date d'analyse",
+            yaxis_title="Valeur mesurée",
+            template="plotly_white",
+            height=600
+        )
+        
+        return fig
+
+# --- SELECTION POUR LE GRAPHIQUE ---
+
+    if not data_filtrée.empty:
+        col_g1, col_g2 = st.columns(2)
+        
+        # with col_g1:
+        #     # On choisit l'automate parmi ceux présents dans les données filtrées
+        #     automate_choisi = st.selectbox("Sélectionner l'automate :", data_filtrée_brut[col_automate].unique())
+        
+        # with col_g2:
+        #     # On choisit le niveau
+        #     niveau_choisi = st.selectbox("Sélectionner le niveau :", data_filtrée_brut['lot_niveau'].unique())
+
+        # --- FILTRAGE FINAL POUR LE GRAPH ---
+        df_plot = data_filtrée[
+            (data_filtrée[col_automate] == automate_choisi) & 
+            (data_filtrée['lot_niveau'] == niveau_choisi)
+        ].copy()
+
+        # Récupération des stats calculées précédemment dans grouped
+        # Rappel : grouped contient une ligne par (Automate, Niveau, Annee)
+        stats_select = grouped[
+            (grouped[col_automate] == automate_choisi) & 
+            (grouped['lot_niveau'] == niveau_choisi)
+        ]
+
+        if not stats_select.empty and not df_plot.empty:
+            # On prend les stats de la première ligne correspondante
+            s = stats_select.iloc[0]
+            
+            # Génération du graphique
+            fig_lj = generer_levey_jennings(
+                df_plot, 
+                param,      # Le nom de la colonne choisie plus haut
+                s['Moyenne'], 
+                s['Ecart_type']
+            )
+            
+            st.plotly_chart(fig_lj, width = 'stretch', key="LJ intralot")
+            
+            # Petit récapitulatif sous le graph
+            st.info(f"**Statistiques pour ce graphique :** n={s['n']} | Moyenne={s['Moyenne']:.3f} | SD={s['Ecart_type']:.3f} | CV={s['CV']:.3f}")
+        else:
+            st.warning("Données insuffisantes pour générer le graphique sur cette sélection.")
+    else:
+        st.error("Le jeu de données filtré est vide.")
+
+
+
 with tab_CV_interlot:
 
     # == Choix du numéro de lot ===
@@ -1328,7 +1467,7 @@ with tab_CVref:
         data_filtrée_cvref = data_filtrée_cvref[data_filtrée_cvref['Annee'].isin(filt_annee_cvref)]
 
 
-    st.subheader(f"Tableau des CV de référence (CV classique / CV IQR / CV IQR robuste / CV MAD) | lots {filt_lot_cvref}")
+    st.subheader(f"Tableau des CV de référence (CV classique / CV IQR / CV IQR robuste / CV MAD / CV poolé robuste) | lots {filt_lot_cvref}")
 
     # === Choix du paramètre ===
     choix_param_cvref = CIQ.columns[8:]  # adapter si besoin
@@ -1372,7 +1511,16 @@ with tab_CVref:
     with st.expander("🔬 Note méthodologique : CV Pooled Robuste"):
         st.latex(r"CV_{pooled\_rob} = \frac{\sqrt{\frac{\sum (n_i - 1) \cdot (MAD_i \cdot 1.4826)^2}{\sum n_i - k}}}{\mu_{globale}} \times 100")
         st.write("Ce CV est calculé en combinant les variances robustes de chaque numéro de lot sélectionné. Il neutralise l'effet des sauts de moyennes entre les lots.")
-
+        st.info("**Justification pour l'accréditation (ISO 15189)**")
+        st.markdown(r"""
+        **Objet : Méthodologie de calcul des limites de performance.**
+        Afin de garantir une estimation fiable et représentative de la précision de nos méthodes d'analyse, le laboratoire a fait le choix d'utiliser le Coefficient de Variation (CV) poolé robuste pour le suivi de ses indicateurs de qualité et le calcul de l’incertitude de mesure (conformément à l'article 7.3.3 de l'ISO 15189).
+        Cette approche repose sur la combinaison des variances de plusieurs lots de contrôle (pooling), permettant ainsi d'intégrer la variabilité interlot et d'augmenter la puissance statistique de nos estimations. Pour s'affranchir de l'influence indue des valeurs aberrantes ou des incidents analytiques isolés, une méthode de robustesse (type élimination des outliers ou utilisation de la MAD) est appliquée systématiquement.
+        Ce choix méthodologique assure la stabilité des limites de contrôle dans le temps, évite la redéfinition erratique des cibles à chaque changement de lot et permet une surveillance fine des dérives analytiques réelles, garantissant ainsi la validité clinique des résultats délivrés.
+        * **Robustesse :** Application du facteur $1.4826 \times MAD$.
+        * **Stabilité :** Neutralisation des sauts de moyennes interlots.
+        """)
+        
     st.subheader(f"Comparaison des CV de référence (CV MAD) pour les paramètres sélectionnés | lots {filt_lot_cvref}")
 
     # Sélectionne les colonnes de l'index 8 à 125 pour permettre la conversion en numérique
@@ -1489,10 +1637,73 @@ with tab_CVref:
 
 
     fig_facet_cvref.update_layout(height=300 * ((len(params_selectionnés_cvref) - 1) // 3 + 1))  # ajuste la hauteur automatiquement
-    st.plotly_chart(fig_facet_cvref)
+    st.plotly_chart(fig_facet_cvref, width='stretch')
 
+    st.subheader(f"Comparaison des CV de référence (CV poolé robuste) pour les paramètres sélectionnés | lots {filt_lot_cvref}")
 
+    # Compilation des CV pooled robuste pour chaque paramètre
+    liste_dfs_cvref2 = []
 
+    for p in params_selectionnés_cvref:
+        # On effectue le calcul pour chaque paramètre du multiselect
+        # en utilisant la même logique que votre tableau du haut
+        df_p = data_filtrée_cvref.groupby([col_automate, 'lot_niveau', 'Annee']).apply(
+            lambda x: calculate_cv_pooled_robust_internal(x, p, 'lot_num'),
+            include_groups=False
+        ).reset_index(name='CV')
+        
+        df_p['paramètre'] = p
+        liste_dfs_cvref2.append(df_p)
+
+    # On fusionne tout pour le graphique facet
+    if liste_dfs_cvref2:
+        df_facet_cvref2 = pd.concat(liste_dfs_cvref2, ignore_index=True)
+    else:
+        st.warning("Aucune donnée disponible pour les paramètres sélectionnés.")
+    
+    # On s'assure qu'on a une seule valeur unique par combinaison (Barre)
+    df_plot = df_facet_cvref2.groupby([col_automate, 'lot_niveau', 'paramètre'], as_index=False).agg({'CV': 'mean'})
+
+    # Nettoyage final des types
+    df_plot['CV'] = pd.to_numeric(df_plot['CV'], errors='coerce')
+    df_plot['lot_niveau'] = df_plot['lot_niveau'].astype(str)
+
+    fig_facet_cvref2 = px.bar(
+        df_plot, # Utilisation du DF agrégé
+        x='lot_niveau',
+        y='CV',
+        color=col_automate,
+        barmode='group',
+        facet_col='paramètre',
+        facet_col_wrap=3,
+        title='CV poolé robuste par paramètre et par niveau de lot',
+        facet_row_spacing=0.08,
+        facet_col_spacing=0.05,
+        labels={'CV': 'CV (%)', 'lot_niveau': 'Niveau'}
+    )
+
+    # 1. Libérer les axes Y
+    fig_facet_cvref2.update_yaxes(matches=None, showticklabels=True)
+
+    # 2. Forcer les titres et le comportement des axes pour chaque subplot
+    for axis in fig_facet_cvref2.layout:
+        if axis.startswith("yaxis"):
+            fig_facet_cvref2.layout[axis].update(
+                title_text="CV poolé robuste (%)",
+                showticklabels=True,
+                rangemode="tozero" # Force l'axe à partir de 0
+            )
+        if axis.startswith("xaxis"):
+            fig_facet_cvref2.layout[axis].update(
+                title_text="Niveau",
+                showticklabels=True
+            )
+
+    # 3. Ajustement de la hauteur
+    n_rows = math.ceil(len(params_selectionnés_cvref) / 3)
+    fig_facet_cvref2.update_layout(height=350 * n_rows)
+
+    st.plotly_chart(fig_facet_cvref2, width='stretch')
 
     # =======================
     # ➕ Graphique Facets ( valeur paramètre) avec filtre année
@@ -1522,7 +1733,7 @@ with tab_CVref:
         
             
         
-            fig_facet_cvref2 = px.box(
+            fig_facet_cvref3 = px.box(
                 df_melted_cvref,
                 x='lot_niveau',
                 y='valeur',
@@ -1538,21 +1749,80 @@ with tab_CVref:
                     'lot_niveau': 'Niveau de lot'
                 }
             )
-            fig_facet_cvref2.update_yaxes(matches=None)
+            fig_facet_cvref3.update_yaxes(matches=None)
         
-            for axis in fig_facet_cvref2.layout:
+            for axis in fig_facet_cvref3.layout:
                 if axis.startswith("yaxis"):
-                    fig_facet_cvref2.layout[axis].showticklabels = True
-                    fig_facet_cvref.layout[axis].title = dict(text="Valeur")
+                    fig_facet_cvref3.layout[axis].showticklabels = True
+                    fig_facet_cvref3.layout[axis].title = dict(text="Valeur")
         
-            for axis_name in fig_facet_cvref2.layout:
+            for axis_name in fig_facet_cvref3.layout:
                 if axis_name.startswith("xaxis"):
-                    axis = fig_facet_cvref2.layout[axis_name]
+                    axis = fig_facet_cvref3.layout[axis_name]
                     axis.showticklabels = True
                     axis.title = dict(text="Niveau de lot")
         
-            fig_facet_cvref2.update_layout(height=300 * ((len(params_selectionnés_cvref) - 1) // 3 + 1))  # ajuste la hauteur automatiquement
-            st.plotly_chart(fig_facet_cvref2)
+            fig_facet_cvref3.update_layout(height=300 * ((len(params_selectionnés_cvref) - 1) // 3 + 1))  # ajuste la hauteur automatiquement
+            st.plotly_chart(fig_facet_cvref3, width='stretch')
+
+    st.subheader("Distribution détaillée par Numéro de Lot")
+
+    if st.button("Afficher la distribution par Lot"):
+        if len(params_selectionnés_cvref) == 0:
+            st.warning("Veuillez sélectionner au moins un paramètre.")
+        else:
+            # 1. Préparation des données incluant 'lot_num'
+            # On ajoute 'lot_num' aux colonnes extraites
+            df_facet_lot = data_filtrée_cvref[[col_automate, 'lot_niveau', 'lot_num', 'Annee'] + params_selectionnés_cvref].copy()
+            
+            # Conversion en string pour éviter les problèmes d'affichage
+            df_facet_lot['lot_num'] = df_facet_lot['lot_num'].astype(str)
+            df_facet_lot['lot_niveau'] = df_facet_lot['lot_niveau'].astype(str)
+
+            # 2. Passage au format long (Melt)
+            df_melted_lot = df_facet_lot.melt(
+                id_vars=[col_automate, 'lot_niveau', 'lot_num', 'Annee'],
+                value_vars=params_selectionnés_cvref,
+                var_name='paramètre',
+                value_name='valeur'
+            ).dropna()
+
+            # 3. Création du Boxplot
+            # On met 'lot_num' en X pour voir l'évolution lot par lot
+            fig_facet_lot = px.box(
+                df_melted_lot,
+                x='lot_num', 
+                y='valeur',
+                color=col_automate,
+                facet_col='paramètre',
+                facet_col_wrap=3,
+                title="Distribution des paramètres par Numéro de Lot (Détail)",
+                facet_row_spacing=0.08,
+                facet_col_spacing=0.08,
+                labels={
+                    'valeur': 'Valeur',
+                    'lot_num': 'N° de Lot',
+                    col_automate: 'Automate'
+                },
+                # On peut ajouter les points pour mieux voir la dispersion
+                points="outliers" 
+            )
+
+            # 4. Nettoyage des axes (Indépendance et labels)
+            fig_facet_lot.update_yaxes(matches=None, showticklabels=True)
+            fig_facet_lot.update_xaxes(showticklabels=True, tickangle=45) # Inclinaison car les numéros de lots sont longs
+
+            for axis_name in fig_facet_lot.layout:
+                if axis_name.startswith("yaxis"):
+                    fig_facet_lot.layout[axis_name].title = dict(text="Valeur")
+                if axis_name.startswith("xaxis"):
+                    fig_facet_lot.layout[axis_name].title = dict(text="Lot")
+
+            # 5. Ajustement dynamique de la hauteur
+            n_rows = math.ceil(len(params_selectionnés_cvref) / 3)
+            fig_facet_lot.update_layout(height=400 * n_rows)
+
+            st.plotly_chart(fig_facet_lot, width='stretch')
 
 with tab_IM:
     ### ---------------- #####
