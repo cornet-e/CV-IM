@@ -589,6 +589,22 @@ with tab_data:
     else:
         st.error("Le jeu de données filtré est vide.")
 
+    st.subheader("Recommandations EFLM ")
+    # === import fichier excel EFLM_2025.xlsx ===
+    # Charger la première feuille en DataFrame
+    df_reco_eflm = pd.read_excel("EFLM_2025.xlsx", sheet_name=0, usecols=range(17))
+
+    st.dataframe(df_reco_eflm,hide_index = True)
+
+    # Rappel des définitions
+
+    st.markdown("### Légendes")
+    st.write("CVI = \% Within-subject (CVI) estimate")
+    st.write("CVG = \% Between-subject (CVG) estimate")
+    st.write("MAU = k * MAu (k=2)")
+
+    st.image("EFLM_definitions.png", caption="Définitions de l'EFLM")
+
 with tab_CV_intralot:
 
     st.subheader("Calcul des CV intra-lot, par paramètre, par analyseur, par niveau de lot")
@@ -606,26 +622,26 @@ with tab_CV_intralot:
     st.markdown("### Formule du CV Classique")
     st.latex(r"CV_{classique} (\%) = \frac{\sigma}{\mu}*100")
 
-    st.info("Où $\sigma$ représente l'écart-type de la série et $\mu$ représente la moyenne de la série.")
+    st.info(r"Où $\sigma$ représente l'écart-type de la série et $\mu$ représente la moyenne de la série.")
 
     st.markdown("### Formule du CV IQR (interquartile standard)")
     st.latex(r"CV_{IQR} (\%) = \frac{\text{IQR}}{\tilde{x}}*100")
 
-    st.info("Où $\\tilde{x}$ représente la médiane de la série et IQR représente l'intervalle interquartile (25%-75%).")
+    st.info(r"Où $\\tilde{x}$ représente la médiane de la série et IQR représente l'intervalle interquartile (25%-75%).")
 
     st.markdown("### Formule du CV IQR_robuste (interquartile normalisé)")
     st.latex(r"CV_{IQR robuste} (\%) = \frac{\text{IQR}}{1,349*\tilde{x}}*100")
 
-    st.info("Où $\\tilde{x}$ représente la médiane de la série et IQR représente l'intervalle interquartile (25%-75%). Normalisation à la loi normale standard par le facteur 1,349.")
+    st.info(r"Où $\\tilde{x}$ représente la médiane de la série et IQR représente l'intervalle interquartile (25%-75%). Normalisation à la loi normale standard par le facteur 1,349.")
 
     st.markdown("### Formule du CV MAD (Median Absolute Deviation)")
     st.latex(r"CV_{MAD} (\%) = \frac{\text{median}(|x_i - \tilde{x}|)}{\tilde{x}}*1,4826*100")
 
-    st.info("Où $\\tilde{x}$ représente la médiane de la série. Normalisation à la loi normale standard par le facteur 1,4826. Tanterdtid, J., et al. (2007). Robustness of the median and the mean absolute deviation for the quality control of hematology analyzers.")
+    st.info(r"Où $\\tilde{x}$ représente la médiane de la série. Normalisation à la loi normale standard par le facteur 1,4826. Tanterdtid, J., et al. (2007). Robustness of the median and the mean absolute deviation for the quality control of hematology analyzers.")
 
     with st.expander("📊 Synthèse : Avantages et Inconvénients des 4 méthodes"):
     
-        st.markdown("#### 1. CV Classique ($\sigma/\mu$)")
+        st.markdown(r"#### 1. CV Classique ($\sigma/\mu$)")
         st.write("**Avantages :** Standard historique, connu de tous les biologistes et auditeurs (accréditation).")
         st.write("**Inconvénients :** Très sensible aux valeurs extrêmes (ex: fausse macrocytose). Risque de rejet de CIQ injustifié.")
         
@@ -1727,20 +1743,25 @@ with tab_IM:
     # on=["Nickname", "Paramètre", "Annee"],
     # how="inner"  # ou "left", "right", "outer" selon ton besoin
     # )
+
+    # Limites acceptables : sourve EFLM MAU min
     limites_en_pourcentage = {
-    "WBC(10^9/L)": 15.49,
-    "RBC(10^12/L)": 4.4,
-    "HGB(g/L)": 4.19,
-    "HCT(%)": 3.97,
-    "PLT(10^9/L)": 13.4,
-    "[PLT-F(10^9/L)]": 13.4,
-    "RET#(10^9/L)": 16.8,
-    "MCV(fL)": 2.42,
-    "LYMPH#(10^9/L)": 17.6,
-    "MONO#(10^9/L)": 27.9,
-    "BASO#(10^9/L)": 38.5,
-    "EO#(10^9/L)": 37.1,
-    "NEUT#(10^9/L)": 23.35
+    "WBC(10^9/L)": 16.7,
+    "RBC(10^12/L)": 4.2,
+    "HGB(g/L)": 4.1,
+    "HCT(%)": 4.2,
+    "PLT(10^9/L)": 11,
+    "[PLT-F(10^9/L)]": 11,
+    "RET#(10^9/L)": 14.6,
+    "MCV(fL)": 1.2,
+    "LYMPH#(10^9/L)": 15.8,
+    "MONO#(10^9/L)": 21,
+    "BASO#(10^9/L)": 18.9,
+    "EO#(10^9/L)": 22.7,
+    "NEUT#(10^9/L)": 18.8,
+    "RET-He(pg)": 2.6,
+    "MPV(fL)" : 3.5,
+    "RDW-CV(%)" : 2.6
     }
     
     df_IM = pd.merge(
