@@ -1934,9 +1934,26 @@ with tab_IM:
     "NEUT#(10^9/L)": 18.8,
     "RET-He(pg)": 2.6,
     "MPV(fL)" : 3.5,
-    "RDW-CV(%)" : 2.6
+    "RDW-CV(%)" : 2.6,
+    "MCH(pg)" : 1.1,
+    "MCHC(g/dL)" : 1.5
     }
     
+    # Limites acceptables : sourve PBQ U souhaitable
+    limitesPBQ_en_pourcentage = {
+    "WBC(10^9/L)": 14.8,
+    "RBC(10^12/L)": 4.6,
+    "HGB(g/L)": 4.3,
+    "HCT(%)": 4.2,
+    "PLT(10^9/L)": 11.4,
+    "[PLT-F(10^9/L)]": 11.4,
+    "MCV(fL)": 2.1,
+    "MPV(fL)" : 4.4,
+    "RDW-CV(%)" : 2.9,
+    "MCH(pg)" : 2.5,
+    "MCHC(g/dL)" : 1.3
+    }
+
     df_IM = pd.merge(
         biais_moyen,
         data_filtrée_IM_grouped,
@@ -1956,23 +1973,47 @@ with tab_IM:
         else:
             return np.nan
 
+    def calculer_limite_absoluePBQ(row):
+        param = row['Paramètre']
+        moyenne = row['Moyenne']
+        if param in limitesPBQ_en_pourcentage and pd.notnull(moyenne):
+            return moyenne * limitesPBQ_en_pourcentage[param] / 100
+        else:
+            return np.nan
+
     df_IM['limite_accept'] = df_IM.apply(calculer_limite_absolue, axis=1)
+    df_IM['limite_accept_PBQ'] = df_IM.apply(calculer_limite_absoluePBQ, axis=1)
 
 
     def highlight_status(row):
+        # Initialisation d'une liste de styles vides (même taille que la ligne)
         styles = [''] * len(row)
+        
+        # Récupération dynamique des positions des colonnes
         u_idx = row.index.get_loc('U')
         statut_idx = row.index.get_loc('Statut')
         parametre_idx = row.index.get_loc('Paramètre')
         nickname_idx = row.index.get_loc('Nickname')
         
-        if row['Statut'] == "❌ Non Conforme":
-            color = 'background-color: #FF4B4B; color: white; font-weight: bold'
-            styles[u_idx] = color
-            styles[statut_idx] = color
-            styles[parametre_idx] = color
-            styles[nickname_idx] = color
-            
+        # On vérifie si Statut_PBQ existe dans la ligne avant de chercher l'index
+        pbq_idx = row.index.get_loc('Statut_PBQ') if 'Statut_PBQ' in row.index else None
+
+        # Style à appliquer
+        error_style = 'background-color: #FF4B4B; color: white; font-weight: bold'
+
+        # Condition : Si l'un des deux statuts est Non Conforme
+        # (Utilisation de .get pour éviter les erreurs si une colonne manque)
+        is_nc_standard = row.get('Statut') == "❌ Non Conforme"
+        is_nc_pbq = row.get('Statut_PBQ') == "❌ Non Conforme"
+
+        if is_nc_standard or is_nc_pbq:
+            styles[u_idx] = error_style
+            styles[statut_idx] = error_style
+            styles[parametre_idx] = error_style
+            styles[nickname_idx] = error_style
+            if pbq_idx is not None:
+                styles[pbq_idx] = error_style
+                
         return styles
 
         
@@ -2007,8 +2048,15 @@ with tab_IM:
         "✅ Conforme"
     )
 
+    df_IM['Statut_PBQ'] = np.where(
+    df_IM['U'] > df_IM['limite_accept_PBQ'], 
+    "❌ Non Conforme", 
+    "✅ Conforme"
+    )
+
     # Optionnel : Gérer les cas où les données sont manquantes (NaN)
     df_IM.loc[df_IM['U'].isnull() | df_IM['limite_accept'].isnull(), 'Statut'] = "Incomplet"
+    df_IM.loc[df_IM['U'].isnull() | df_IM['limite_accept_PBQ'].isnull(), 'Statut_PBQ'] = "Incomplet"
 
     # st.dataframe(df_IM)
     
