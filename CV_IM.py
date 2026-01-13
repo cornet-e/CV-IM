@@ -113,6 +113,115 @@ def mad(x):
     med = np.nanmedian(x)
     return np.nanmedian(np.abs(x - med)) * 1.4826
 
+def sd_pooled(df, param_name):
+    """
+    Calcule l'écart-type combiné (Pooled SD) pour un paramètre,
+    en groupant par numéro de lot pour neutraliser les bais inter-lots.
+    """
+    # On s'assure que les données sont numériques
+    df[param_name] = pd.to_numeric(df[param_name], errors='coerce')
+    
+    # On groupe par 'lot_num' pour avoir le SD et le n de chaque lot
+    stats = df.groupby('lot_num')[param_name].agg(['std', 'count']).dropna()
+    
+    if stats.empty or len(stats) < 1:
+        return np.nan
+    
+    # Calcul du numérateur : Somme des (n-1) * SD^2
+    numerator = sum((stats['count'] - 1) * (stats['std']**2))
+    
+    # Calcul du dénominateur : Somme des n - nombre de lots (k)
+    denominator = sum(stats['count']) - len(stats)
+    
+    if denominator <= 0:
+        return np.nan
+        
+    return np.sqrt(numerator / denominator)
+
+def calcul_sd_pooled_robuste(group):
+    """
+    Calcule le SD Pooled Robuste (basé sur la MAD)
+    """
+    if 'lot_num' not in group.columns or group.empty:
+        return np.nan
+
+    # SD robuste par lot (MAD * 1.4826)
+    def get_mad_sd(x):
+        x = pd.to_numeric(x, errors='coerce').dropna()
+        if len(x) < 2: 
+            return np.nan
+        return np.nanmedian(np.abs(x - np.nanmedian(x))) * 1.4826
+
+    # Calcul du SD robuste et effectif par lot
+    stats = group.groupby('lot_num')['Valeur'].agg([get_mad_sd, 'count']).dropna()
+    stats.columns = ['sd_rob', 'n']
+    stats = stats[stats['n'] > 1] # On ignore les lots isolés
+    
+    if stats.empty:
+        return np.nan
+        
+    # Formule du Pooled Variance -> Pooled SD
+    numerator = ((stats['n'] - 1) * (stats['sd_rob']**2)).sum()
+    denominator = stats['n'].sum() - len(stats)
+    
+    if denominator <= 0:
+        return np.nan
+        
+    return np.sqrt(numerator / denominator)
+
+def calcul_sd_pooled_custom(group):
+    """Fonction corrigée pour le calcul du SD Pooled"""
+    # On vérifie si 'lot_num' est présent dans les colonnes du groupe
+    # Si include_groups=False a été utilisé, il faut s'assurer que lot_num n'était pas dans les clés
+    target_col = 'lot_num'
+    
+    if target_col not in group.columns:
+        return np.nan
+
+    # Calcul des stats par lot
+    stats = group.groupby(target_col)['Valeur'].agg(['std', 'count']).dropna()
+    
+    if stats.empty:
+        return np.nan
+    
+    # On ne garde que les lots ayant au moins 2 mesures pour avoir un SD calculable
+    stats = stats[stats['count'] > 1]
+    
+    if stats.empty:
+        return np.nan
+        
+    numerator = ((stats['count'] - 1) * (stats['std']**2)).sum()
+    denominator = stats['count'].sum() - len(stats)
+    
+    return np.sqrt(numerator / denominator) if denominator > 0 else np.nan
+
+def calculate_cv_pooled_robust_internal(df, param_col, lot_col):
+    """Calcule le CV Pooled Robuste pour un sous-groupe de données"""
+    def get_mad_sd(x):
+        x = pd.to_numeric(x, errors='coerce').dropna()
+        if len(x) < 2: 
+            return np.nan
+        return np.nanmedian(np.abs(x - np.nanmedian(x))) * 1.4826
+
+    # Groupement par lot réel pour le calcul pooled
+    stats = df.groupby(lot_col)[param_col].agg([get_mad_sd, 'count']).dropna()
+    stats.columns = ['sd_rob', 'n']
+    stats = stats[stats['n'] > 1]
+    
+    if stats.empty: 
+        return np.nan
+    
+    numerator = ((stats['n'] - 1) * (stats['sd_rob']**2)).sum()
+    denominator = stats['n'].sum() - len(stats)
+    
+    if denominator <= 0: 
+        return np.nan
+    
+    sd_pooled_rob = np.sqrt(numerator / denominator)
+    moyenne_globale = df[param_col].mean()
+    
+    return (sd_pooled_rob / moyenne_globale) * 100 if moyenne_globale != 0 else np.nan
+
 # === Fonctions de calcul des LT-CV
 
 def cv_long_terme_mad(x):
@@ -1230,6 +1339,12 @@ with tab_CVref:
 
     # st.dataframe(data_filtrée_cvref)
 
+    # --- CALCUL DU CV POOLED ROBUSTE ---
+    # On utilise apply pour passer par lot_num tout en restant groupé par Automate/Niveau/Annee
+    cv_pooled_rob_df = data_filtrée_cvref.groupby([col_automate, 'lot_niveau', 'Annee']).apply(
+        lambda x: calculate_cv_pooled_robust_internal(x, param_cvref, 'lot_num')
+    ).reset_index(name='CV_Pooled_Robuste')
+
     # Agrégation par automate, lot_num et niveau
     grouped_cvref = data_filtrée_cvref.groupby([col_automate,'lot_niveau','Annee'])[param_cvref].agg(
         n='count',
@@ -1242,9 +1357,21 @@ with tab_CVref:
         CV_MAD=cv_robuste_mad
     ).reset_index()
 
+    # --- FUSION DES DEUX ---
+    grouped_cvref = grouped_cvref.merge(
+        cv_pooled_rob_df, 
+        on=[col_automate, 'lot_niveau', 'Annee'], 
+        how='left'
+    )
+
     grouped_cvref['paramètre'] = param_cvref
 
     st.dataframe(grouped_cvref)
+
+    # Affichage de la formule pour justifier le calcul
+    with st.expander("🔬 Note méthodologique : CV Pooled Robuste"):
+        st.latex(r"CV_{pooled\_rob} = \frac{\sqrt{\frac{\sum (n_i - 1) \cdot (MAD_i \cdot 1.4826)^2}{\sum n_i - k}}}{\mu_{globale}} \times 100")
+        st.write("Ce CV est calculé en combinant les variances robustes de chaque numéro de lot sélectionné. Il neutralise l'effet des sauts de moyennes entre les lots.")
 
     st.subheader(f"Comparaison des CV de référence (CV MAD) pour les paramètres sélectionnés | lots {filt_lot_cvref}")
 
@@ -1669,7 +1796,7 @@ with tab_IM:
     colonnes_valeurs_IM = data_filtrée_IM.columns[8:125]  
     
     data_filtrée_IM_long = data_filtrée_IM.melt(
-        id_vars=["Nickname", "lot_niveau", "Annee"],
+        id_vars=["Nickname", "lot_niveau", "Annee","lot_num"],
         value_vars=colonnes_valeurs_IM,
         var_name="Paramètre",
         value_name="Valeur"
@@ -1706,14 +1833,21 @@ with tab_IM:
     # st.dataframe(EEQ)
 
     biais_moyen = (
-    EEQ.groupby(["Nickname", "Paramètre", "Annee","lot_niveau_proche"])
-    .agg(
-    moy_biais=("Biais |c| pairs", lambda x: np.mean(np.abs(x.dropna()))),
-    sd_biais=("Biais |c| pairs", lambda x: np.std(x.dropna()))
-    ) 
-    .reset_index()
+        EEQ.groupby(["Nickname", "Paramètre", "Annee", "lot_niveau_proche"])
+        .agg(
+            # Moyenne simple des biais (en valeur absolue si vous préférez)
+            moy_biais=("Biais |c| pairs", lambda x: np.mean(np.abs(x.dropna()))),
+            
+            # Écart-type des biais
+            sd_biais=("Biais |c| pairs", lambda x: np.std(x.dropna())),
+            
+            # Calcul de l'uBIAS (RMS=moy quadratique) : racine de la moyenne des carrés (Équivalent mathématique à sqrt(moyenne^2 + SD^2))
+            uBIAS=("Biais |c| pairs", lambda x: np.sqrt(np.mean(x.dropna()**2)))
+        )
+        .reset_index()
     )
     
+
 
     # st.write("Aperçu des colonnes  :", biais_moyen.columns.tolist())
     # st.dataframe(biais_moyen.head())
@@ -1736,7 +1870,46 @@ with tab_IM:
 
     # st.dataframe(data_filtrée_IM_grouped, hide_index = True)
     
+    # Calcul spécifique du SD Pooled par groupe
+    # Assurez-vous d'abord que 'lot_num' est bien présent dans votre DataFrame long
+    if 'lot_num' not in data_filtrée_IM_long.columns:
+        st.error("La colonne 'lot_num' est absente de data_filtrée_IM_long")
+    else:
+        # On calcule le SD Pooled
+        # Note: On ne met PAS 'lot_num' dans le groupby principal
+        sd_pooled_series = data_filtrée_IM_long.groupby(
+            ["Nickname", "lot_niveau", "Annee", "Paramètre"], 
+            group_keys=False
+        ).apply(calcul_sd_pooled_custom) # On retire include_groups=False pour garder l'accès aux colonnes
+
+        # On transforme la série en DataFrame pour le merge
+        sd_pooled_df = sd_pooled_series.reset_index()
+        sd_pooled_df.columns = ["Nickname", "lot_niveau", "Annee", "Paramètre", "SD_Pooled"]
+
+        # Fusion avec votre tableau de stats existant
+        data_filtrée_IM_grouped = data_filtrée_IM_grouped.merge(
+            sd_pooled_df, 
+            on=["Nickname", "lot_niveau", "Annee", "Paramètre"], 
+            how="left"
+        )
     
+    # Calcul du SD Pooled Robuste par groupe (Nickname, Niveau, Année, Paramètre)
+    sd_pooled_series = data_filtrée_IM_long.groupby(
+        ["Nickname", "lot_niveau", "Annee", "Paramètre"], 
+        group_keys=False
+    ).apply(calcul_sd_pooled_robuste)
+
+    # 2. Préparation du DataFrame pour la fusion
+    sd_pooled_df = sd_pooled_series.reset_index()
+    sd_pooled_df.columns = ["Nickname", "lot_niveau", "Annee", "Paramètre", "SD_Pooled_Robuste"]
+
+    # 3. Fusion avec votre tableau de synthèse final
+    data_filtrée_IM_grouped = data_filtrée_IM_grouped.merge(
+        sd_pooled_df, 
+        on=["Nickname", "lot_niveau", "Annee", "Paramètre"], 
+        how="left"
+    )
+
     # df_IM = pd.merge(
     # biais_moyen,
     # CIQ_grouped_1102,
@@ -1807,10 +1980,10 @@ with tab_IM:
         
     # Calcul incertitudes
     # Colonnes proposées
-    options_sd = ['SD_classique', 'SD_IQR', 'SD_IQR2', 'SD_MAD']
+    options_sd = ['SD_classique', 'SD_IQR', 'SD_IQR2', 'SD_MAD', 'SD_Pooled','SD_Pooled_Robuste']
 
     # Sélecteur unique
-    choix_sd = st.selectbox("Choisissez le type de CV pour calculer u_CIQ :", options_sd)
+    choix_sd = st.selectbox("Choisissez le type de CV pour calculer u_CIQ :", options_sd, index = 5)
 
     # Affecter la colonne choisie à u_CIQ si elle existe dans df_IM
     if choix_sd in df_IM.columns:
@@ -1845,6 +2018,47 @@ with tab_IM:
     # Affichage dans Streamlit
     st.dataframe(styled_df)
 
+    
+    with st.expander("🔬 Détails des calculs : SD Pooled et SD Pooled Robuste"):
+        
+        st.write("Méthodologie : Calcul du SD Pooled")
+
+        # Affichage de la formule mathématique
+        st.latex(r"""
+        SD_{pooled} = \sqrt{\frac{\sum_{i=1}^{k} (n_i - 1) \cdot SD_i^2}{\sum_{i=1}^{k} n_i - k}}
+        """)
+
+        # Explication des termes pour votre dossier d'accréditation
+        st.info(r"""
+        **Légende :**
+        - $SD_{pooled}$ : Écart-type combiné (Fidélité intermédiaire).
+        - $k$ : Nombre de lots de contrôle différents sur la période.
+        - $n_i$ : Nombre de mesures effectuées pour le lot $i$.
+        - $SD_i$ : Écart-type calculé spécifiquement pour le lot $i$.
+        """)
+        st.write("""
+        Cette méthode est recommandée pour estimer l'incertitude de mesure 
+        sans surestimer la variance due aux changements de moyennes cibles entre les lots.
+        """)
+        
+        st.write("Méthodologie : Calcul du SD Pooled Robuste")
+
+        st.write("""
+        Le **SD Pooled Robuste** estime l'imprécision du système en neutralisant les changements de lots 
+        et les valeurs aberrantes. C'est l'indicateur privilégié pour la fidélité intermédiaire.
+        """)
+        
+        # Formule LaTeX complète
+        st.latex(r"""
+        SD_{pooled\_rob} = \sqrt{\frac{\sum_{i=1}^{k} (n_i - 1) \cdot (MAD_i \cdot 1,4826)^2}{\sum_{i=1}^{k} n_i - k}}
+        """)
+        
+        st.info("""
+        **Composantes de la formule :**
+        * $(MAD_i \cdot 1,4826)$ : Correspond au **SD robuste** du lot $i$. L'utilisation de la MAD (Median Absolute Deviation) permet d'ignorer les valeurs aberrantes.
+        * $\sum (n_i - 1)$ : Somme des degrés de liberté de chaque lot.
+        * $k$ : Nombre total de lots différents sur la période.
+        """)
 
     # =======================
     # ➕ Graphique Facets (IM)

@@ -15,6 +15,7 @@ dist/
 *.log
 *.tmp
 *.bak
+~*
 
 # Ignorer les fichiers de configuration locaux
 *.env
