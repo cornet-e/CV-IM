@@ -596,6 +596,64 @@ with tab_CV_intralot:
     # Afficher un aperçu du DataFrame
     st.dataframe(df_cv_max)
 
+    # Rappel des formules utilisées pour le calcul du CV
+
+    st.markdown("### Formule du CV Classique")
+    st.latex(r"CV_{classique} (\%) = \frac{\sigma}{\mu}*100")
+
+    st.info("Où $\sigma$ représente l'écart-type de la série et $\mu$ représente la moyenne de la série.")
+
+    st.markdown("### Formule du CV IQR (interquartile standard)")
+    st.latex(r"CV_{IQR} (\%) = \frac{\text{IQR}}{\tilde{x}}*100")
+
+    st.info("Où $\\tilde{x}$ représente la médiane de la série et IQR représente l'intervalle interquartile (25%-75%).")
+
+    st.markdown("### Formule du CV IQR_robuste (interquartile normalisé)")
+    st.latex(r"CV_{IQR_robuste} (\%) = \frac{\text{IQR}}{1,349*\tilde{x}}*100")
+
+    st.info("Où $\\tilde{x}$ représente la médiane de la série et IQR représente l'intervalle interquartile (25%-75%). Normalisation à la loi normale standard par le facteur 1,349.")
+
+    st.markdown("### Formule du CV MAD (Median Absolute Deviation)")
+    st.latex(r"CV_{MAD} (\%) = \frac{\text{median}(|x_i - \tilde{x}|)}{\tilde{x}}*1,4826*100")
+
+    st.info("Où $\\tilde{x}$ représente la médiane de la série. Normalisation à la loi normale standard par le facteur 1,4826.")
+
+    with st.expander("📊 Synthèse : Avantages et Inconvénients des 4 méthodes"):
+    
+        st.markdown("#### 1. CV Classique ($\sigma/\mu$)")
+        st.write("**Avantages :** Standard historique, connu de tous les biologistes et auditeurs (accréditation).")
+        st.write("**Inconvénients :** Très sensible aux valeurs extrêmes (ex: fausse macrocytose). Risque de rejet de CIQ injustifié.")
+        
+        st.divider()
+
+        st.markdown("#### 2. CV IQR (Standard)")
+        st.write("**Avantages :** Simple, mesure le cœur de la population (50% centraux).")
+        st.write("**Inconvénients :** Difficile à comparer aux limites de performance usuelles (valeurs numériques différentes).")
+        
+        st.divider()
+
+        st.markdown("#### 3. CV IQR robuste (Normalisé par 1,349)")
+        st.success("**Recommandé en Hématologie**")
+        st.write("**Avantages :** Estime l'écart-type sur une distribution normale sans être pollué par les débris ou amas.")
+        st.write("**Pourquoi ?** Donne le même chiffre que le CV classique si la distribution est propre.")
+        
+        st.divider()
+
+        st.markdown("#### 4. CV MAD (Normalisé par 1,482)")
+        st.write("**Avantages :** Statistique la plus robuste. Idéale pour les populations très bruitées.")
+        st.write("**Inconvénients :** Parfois 'trop stable', peut masquer une dérive précoce. Plus complexe à justifier en audit (ISO 15189).")
+    
+        st.divider()
+
+        st.markdown("""
+        | Méthode | Robustesse | Sensibilité aux Outliers | Usage recommandé en Hématologie |
+        | :--- | :---: | :---: | :--- |
+        | **CV Classique** | ❌ Nulle | 🔴 Très sensible | Uniquement sur des populations parfaitement normales et propres. |
+        | **CV IQR** | ✅ Bonne | 🟢 Très faible | Étude de la largeur de distribution (ex: RDW). |
+        | **CV IQR robuste** | ✅ Excellente | 🟢 Faible | **Le meilleur compromis** pour comparer au CV classique cible. |
+        | **CV MAD** | 🏆 Maximale | 🟢 Quasi nulle | Analyse de populations cellulaires très bruitées (Cytométrie/Hématologie). |
+        """)
+
     # == Choix du numéro de lot ===
 
     st.subheader("Lots présents dans le jeu de données")
