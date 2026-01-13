@@ -616,7 +616,7 @@ with tab_CV_intralot:
     st.markdown("### Formule du CV MAD (Median Absolute Deviation)")
     st.latex(r"CV_{MAD} (\%) = \frac{\text{median}(|x_i - \tilde{x}|)}{\tilde{x}}*1,4826*100")
 
-    st.info("Où $\\tilde{x}$ représente la médiane de la série. Normalisation à la loi normale standard par le facteur 1,4826.")
+    st.info("Où $\\tilde{x}$ représente la médiane de la série. Normalisation à la loi normale standard par le facteur 1,4826. Tanterdtid, J., et al. (2007). Robustness of the median and the mean absolute deviation for the quality control of hematology analyzers.")
 
     with st.expander("📊 Synthèse : Avantages et Inconvénients des 4 méthodes"):
     
@@ -653,6 +653,19 @@ with tab_CV_intralot:
         | **CV IQR robuste** | ✅ Excellente | 🟢 Faible | **Le meilleur compromis** pour comparer au CV classique cible. |
         | **CV MAD** | 🏆 Maximale | 🟢 Quasi nulle | Analyse de populations cellulaires très bruitées (Cytométrie/Hématologie). |
         """)
+
+    with st.expander("📊 Synthèse : choix des CV max"):
+
+        # Nom du fichier sur votre serveur
+        file_path = "10.1515_cclm-2024-0108.pdf"
+
+        with open(file_path, "rb") as f:
+            st.download_button(
+                label="📥 Télécharger la référence (EFLM 2024 : Clin Chem Lab Med 2024; 62(8): 1483–1489)",
+                data=f,
+                file_name="Analytical performance specifications based on biological variation data - considerations, strengths and limitations",
+                mime="application/pdf"
+            )
 
     # == Choix du numéro de lot ===
 
