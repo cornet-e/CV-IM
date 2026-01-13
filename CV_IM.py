@@ -609,7 +609,7 @@ with tab_CV_intralot:
     st.info("Où $\\tilde{x}$ représente la médiane de la série et IQR représente l'intervalle interquartile (25%-75%).")
 
     st.markdown("### Formule du CV IQR_robuste (interquartile normalisé)")
-    st.latex(r"CV_{IQR_robuste} (\%) = \frac{\text{IQR}}{1,349*\tilde{x}}*100")
+    st.latex(r"CV_{IQR robuste} (\%) = \frac{\text{IQR}}{1,349*\tilde{x}}*100")
 
     st.info("Où $\\tilde{x}$ représente la médiane de la série et IQR représente l'intervalle interquartile (25%-75%). Normalisation à la loi normale standard par le facteur 1,349.")
 
