@@ -121,10 +121,12 @@ def cv_long_terme_mad(x):
     Prend l'ensemble des points d'un niveau (tous lots confondus).
     """
     x = pd.to_numeric(x, errors='coerce').dropna()
-    if len(x) < 2: return np.nan
+    if len(x) < 2:
+        return np.nan
     
     med_globale = np.nanmedian(x)
-    if med_globale == 0: return np.nan
+    if med_globale == 0:
+        return np.nan
     
     # On calcule la MAD sur la totalité des données du niveau
     mad_totale = np.nanmedian(np.abs(x - med_globale)) * 1.4826
@@ -514,9 +516,12 @@ with tab_data:
         # On colorie les points dynamiquement selon leur éloignement
         colors = []
         for val in df[param_nom]:
-            if abs(val - moyenne) > 3 * sd: colors.append('darkred')
-            elif abs(val - moyenne) > 2 * sd: colors.append('red')
-            else: colors.append('blue')
+            if abs(val - moyenne) > 3 * sd: 
+                colors.append('darkred')
+            elif abs(val - moyenne) > 2 * sd: 
+                colors.append('red')
+            else: 
+                colors.append('blue')
 
         fig.add_trace(go.Scatter(
             x=df['Date'],
@@ -1495,18 +1500,28 @@ with tab_IM:
         if pd.isna(d) or pd.isna(a):
             return np.nan
         if d >= pd.Timestamp("2013-01-01") and d <= pd.Timestamp("2023-05-10"):
-            if a == "1952": return "ATHOS-1"
-            elif a == "1952A": return "PORTHOS-2"
-            elif a == "1952B": return "ARAMIS-3"
+            if a == "1952": 
+                return "ATHOS-1"
+            elif a == "1952A": 
+                return "PORTHOS-2"
+            elif a == "1952B": 
+                return "ARAMIS-3"
         elif d >= pd.Timestamp("2023-05-11") and d <= pd.Timestamp("2023-12-10"):
-            if a == "1952": return "XN-9100-1-A"
-            elif a == "1952A": return "XN-9100-2-A"
-            elif a == "1952B": return "XN-9100-3-A"
+            if a == "1952": 
+                return "XN-9100-1-A"
+            elif a == "1952A": 
+                return "XN-9100-2-A"
+            elif a == "1952B": 
+                return "XN-9100-3-A"
         elif d >= pd.Timestamp("2023-12-11"):
-            if a == "1952": return "XR-ISIS-A"
-            elif a == "1952A": return "XR-OSIRIS-A"
-            elif a == "1952B": return "XR-ANUBIS-A"
-            elif a == "1952Z": return "XN-1000-1-A"
+            if a == "1952": 
+                return "XR-ISIS-A"
+            elif a == "1952A": 
+                return "XR-OSIRIS-A"
+            elif a == "1952B": 
+                return "XR-ANUBIS-A"
+            elif a == "1952Z": 
+                return "XN-1000-1-A"
         return np.nan
 
     EEQ['Nickname'] = EEQ.apply(assign_nickname, axis=1)
