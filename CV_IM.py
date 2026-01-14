@@ -470,9 +470,15 @@ CIQ['lot_niveau'] = CIQ[col_lot].astype(str).str[18:22]
 CIQ['Date'] = pd.to_datetime(CIQ['Date'], errors='coerce')
 CIQ['Annee'] = CIQ['Date'].dt.year.astype("Int64")
 
+
+# === import fichier excel CV max sysmex / CV max recommandé ===
+# Charger la première feuille en DataFrame
+df_cv_max = pd.read_excel("CV_max_reco.xlsx", sheet_name=0, usecols=range(5))
+
 with tab_data:
-    st.title("Data brutes")
-    st.dataframe(CIQ)
+    st.title("Data")
+    with st.expander("Data brutes (CIQ Sysmex)"):
+        st.dataframe(CIQ)
 
    # == Choix du numéro de lot ===
 
@@ -500,289 +506,9 @@ with tab_data:
         width='stretch'
     )
 
-
-    # # lots_disponibles = sorted(CIQ['lot_num'].dropna().astype(str).unique())
-    # lots_disponibles_brut = CIQ['lot_num'].astype(str).unique()
-    # filt_lot_brut = st.selectbox("Numéro(s) de lot (raw data)", lots_disponibles_brut)
-
-    # # === Choix analyseurs ===
-
-    # filt_automate_brut = st.multiselect("Automate(s) (raw data)", sorted(CIQ[col_automate].dropna().unique()), default=None)
-
-    # # === Choix niveau de lot ===
-    # # Forcer tout en chaînes pour uniformiser les types
-    # niveaux_disponibles_brut = sorted(CIQ['lot_niveau'].dropna().astype(str).unique())
-    # # Définir les niveaux souhaités par défaut (aussi en str)
-    # niveaux_defaut_souhaites_brut = ['1101', '1102', '1103']
-    # # Ne garder que les niveaux par défaut présents dans les options
-    # niveaux_defaut_valides_brut = [niveau for niveau in niveaux_defaut_souhaites_brut if niveau in niveaux_disponibles_brut]
-    # # Affichage du multiselect sécurisé
-    # filt_niveau_brut = st.multiselect("Niveau(x) de lot (raw data)", niveaux_disponibles_brut, default=niveaux_defaut_valides_brut)
-
-
-
-    # filt_annee_brut = st.multiselect("Année(s) (raw data)", sorted(CIQ['Annee'].dropna().unique()), default=None)
-
-
-    # # Filtrage des données
-    # data_filtrée_brut = CIQ.copy()
-    # if filt_automate_brut:
-    #     data_filtrée_brut = data_filtrée_brut[data_filtrée_brut[col_automate].isin(filt_automate_brut)]
-    # if filt_niveau_brut:
-    #     data_filtrée_brut = data_filtrée_brut[data_filtrée_brut['lot_niveau'].isin(filt_niveau_brut)]
-    # if filt_lot_brut:
-    #     data_filtrée_brut = data_filtrée_brut[data_filtrée_brut['lot_num'] == filt_lot_brut]
-    # if filt_annee_brut:
-    #     data_filtrée_brut = data_filtrée_brut[data_filtrée_brut['Annee'].isin(filt_annee_brut)]
-
-    # st.subheader(f"Choix du paramètre à étudier pour le lot {filt_lot_brut}")
-
-    # # === Choix du paramètre ===
-    # choix_param_brut = CIQ.columns[8:]  # adapter si besoin
-    # param_brut = st.selectbox("Choisissez le paramètre à étudier (raw data)", choix_param_brut)
-
-    # # Conversion du paramètre sélectionné en float
-    # data_filtrée_brut[param_brut] = pd.to_numeric(data_filtrée_brut[param_brut], errors='coerce')
-
-    # # Agrégation par automate et niveau
-    # grouped_brut = data_filtrée_brut.groupby([col_automate, 'lot_niveau','Annee'])[param_brut].agg(
-    #     n='count',
-    #     Moyenne='mean',
-    #     Mediane='median',
-    #     Ecart_type='std',
-    #     CV=cv,
-    #     CV_IQR=cv_robuste_iqr,
-    #     CV_IQR2=cv_robuste_iqr2,
-    #     CV_MAD=cv_robuste_mad
-    # ).reset_index()
-
-    # grouped_brut['paramètre'] = param_brut
-    
-    # st.dataframe(grouped_brut)
-    # st.dataframe(data_filtrée_brut)
-
-#     # Sélecteurs pour le graphique
-#     st.subheader("Visualisation de la carte de contrôle (Levey-Jennings)")
-#     # On n'a plus besoin de choisir le paramètre (il est déjà dans param_brut)
-#     # Mais on doit choisir l'Automate et le Niveau si plusieurs sont présents dans les données filtrées
-#     col1, col2 = st.columns(2)
-#     with col1:
-#         # On choisit l'automate (Nickname) parmi ceux restants après filtrage
-#         automate_choisi = st.selectbox("Automate à visualiser :", data_filtrée_brut[col_automate].unique())
-#     with col2:
-#         # On choisit le niveau parmi ceux restants
-#         niveau_choisi = st.selectbox("Niveau à visualiser :", data_filtrée_brut['lot_niveau'].unique())
-
-#     # --- FILTRAGE DES DONNÉES ---
-#     # On prend les lignes correspondant à l'automate et au niveau
-#     df_plot_brut = data_filtrée_brut[
-#         (data_filtrée_brut[col_automate] == automate_choisi) & 
-#         (data_filtrée_brut['lot_niveau'] == niveau_choisi)
-#     ].copy()
-
-#     # --- RÉCUPÉRATION DES STATS ---
-#     # Attention : on filtre grouped_brut sur l'automate et le niveau pour avoir la moyenne/SD
-#     stats_selection = grouped_brut[
-#         (grouped_brut[col_automate] == automate_choisi) & 
-#         (grouped_brut['lot_niveau'] == niveau_choisi)
-#     ]
-
-#     if not stats_selection.empty:
-#         stats = stats_selection.iloc[0]
-#         moy_brut = stats['Moyenne']
-#         sd_brut = stats['Ecart_type']
-#         cv_brut = stats['CV']
-        
-#         # Appel de la fonction de graphique (en utilisant df_plot_brut[param_brut])
-#         # st.plotly_chart(plot_levey_jennings(df_plot_brut, moy_brut, sd_brut, param_brut))
-#     else:
-#         st.warning("Pas de statistiques calculées pour cette sélection.")
-
-#     def generer_levey_jennings(df, param_nom, moyenne, sd):
-#         # Tri par date pour un tracé chronologique
-#         df = df.sort_values('Date')
-        
-#         fig = go.Figure()
-
-#         # Définition des zones de contrôle (±1SD, ±2SD, ±3SD)
-#         limites = {
-#             'Moyenne': {'val': moyenne, 'color': 'green', 'dash': 'solid'},
-#             '+1 SD': {'val': moyenne + sd, 'color': 'orange', 'dash': 'dot'},
-#             '-1 SD': {'val': moyenne - sd, 'color': 'orange', 'dash': 'dot'},
-#             '+2 SD': {'val': moyenne + 2*sd, 'color': 'red', 'dash': 'dash'},
-#             '-2 SD': {'val': moyenne - 2*sd, 'color': 'red', 'dash': 'dash'},
-#             '+3 SD': {'val': moyenne + 3*sd, 'color': 'darkred', 'dash': 'dashdot'},
-#             '-3 SD': {'val': moyenne - 3*sd, 'color': 'darkred', 'dash': 'dashdot'},
-#         }
-
-#         for label, config in limites.items():
-#             fig.add_hline(y=config['val'], 
-#                         line=dict(color=config['color'], dash=config['dash'], width=1),
-#                         annotation_text=label, 
-#                         annotation_position="top right")
-
-#         # Ajout des points de mesure
-#         # On colorie les points dynamiquement selon leur éloignement
-#         colors = []
-#         for val in df[param_nom]:
-#             if abs(val - moyenne) > 3 * sd: 
-#                 colors.append('darkred')
-#             elif abs(val - moyenne) > 2 * sd: 
-#                 colors.append('red')
-#             else: 
-#                 colors.append('blue')
-
-#         fig.add_trace(go.Scatter(
-#             x=df['Date'],
-#             y=df[param_nom],
-#             mode='lines+markers',
-#             name=param_nom,
-#             line=dict(color='lightgray', width=1),
-#             marker=dict(size=10, color=colors, symbol='circle')
-#         ))
-
-#         fig.update_layout(
-#             title=f"Levey-Jennings : {param_nom} (Lot: {df['lot_num'].iloc[0]})",
-#             xaxis_title="Date d'analyse",
-#             yaxis_title="Valeur mesurée",
-#             template="plotly_white",
-#             height=600
-#         )
-        
-#         return fig
-
-# # --- SELECTION POUR LE GRAPHIQUE ---
-
-#     if not data_filtrée_brut.empty:
-#         col_g1, col_g2 = st.columns(2)
-        
-#         # with col_g1:
-#         #     # On choisit l'automate parmi ceux présents dans les données filtrées
-#         #     automate_choisi = st.selectbox("Sélectionner l'automate :", data_filtrée_brut[col_automate].unique())
-        
-#         # with col_g2:
-#         #     # On choisit le niveau
-#         #     niveau_choisi = st.selectbox("Sélectionner le niveau :", data_filtrée_brut['lot_niveau'].unique())
-
-#         # --- FILTRAGE FINAL POUR LE GRAPH ---
-#         df_plot_brut = data_filtrée_brut[
-#             (data_filtrée_brut[col_automate] == automate_choisi) & 
-#             (data_filtrée_brut['lot_niveau'] == niveau_choisi)
-#         ].copy()
-
-#         # Récupération des stats calculées précédemment dans grouped_brut
-#         # Rappel : grouped_brut contient une ligne par (Automate, Niveau, Annee)
-#         stats_select = grouped_brut[
-#             (grouped_brut[col_automate] == automate_choisi) & 
-#             (grouped_brut['lot_niveau'] == niveau_choisi)
-#         ]
-
-#         if not stats_select.empty and not df_plot_brut.empty:
-#             # On prend les stats de la première ligne correspondante
-#             s = stats_select.iloc[0]
-            
-#             # Génération du graphique
-#             fig_lj_brut = generer_levey_jennings(
-#                 df_plot_brut, 
-#                 param_brut,      # Le nom de la colonne choisie plus haut
-#                 s['Moyenne'], 
-#                 s['Ecart_type']
-#             )
-            
-#             st.plotly_chart(fig_lj_brut, width='stretch')
-            
-#             # Petit récapitulatif sous le graph
-#             st.info(f"**Statistiques pour ce graphique :** n={s['n']} | Moyenne={s['Moyenne']:.3f} | SD={s['Ecart_type']:.3f} | CV={s['CV']:.3f}")
-#         else:
-#             st.warning("Données insuffisantes pour générer le graphique sur cette sélection.")
-#     else:
-#         st.error("Le jeu de données filtré est vide.")
-
-    st.subheader("Recommandations EFLM + Probioqual ")
-    # === import fichier excel EFLM_2025.xlsx ===
-    # Charger la première feuille en DataFrame
-    df_reco_eflm = pd.read_excel("EFLM_2025.xlsx", sheet_name=0, usecols=range(18))
-
-    st.dataframe(df_reco_eflm,hide_index = True)
-
-    # Rappel des définitions
-
-    st.markdown("### Légendes")
-    st.write(r"CVI = \% Within-subject (CVI) estimate")
-    st.write(r"CVG = \% Between-subject (CVG) estimate")
-    st.write(r"MAU = k \times MAu (k=2)")
-
-    st.image("EFLM_definitions.png", caption="Définitions de l'EFLM")
-
-with tab_CV_intralot:
-
-    st.subheader("Calcul des CV intra-lot, par paramètre, par analyseur, par niveau de lot")
-
-    st.subheader("CV max - Fournisseur / Recommandé ")
-    # === import fichier excel CV max sysmex / CV max recommandé ===
-    # Charger la première feuille en DataFrame
-    df_cv_max = pd.read_excel("CV_max_reco.xlsx", sheet_name=0, usecols=range(5))
-
-    # Afficher un aperçu du DataFrame
-    st.dataframe(df_cv_max)
-
-    # Rappel des formules utilisées pour le calcul du CV
-
-    st.markdown("### Formule du CV Classique")
-    st.latex(r"CV_{classique} (\%) = \frac{\sigma}{\mu}*100")
-
-    st.info(r"Où $\sigma$ représente l'écart-type de la série et $\mu$ représente la moyenne de la série.")
-
-    st.markdown("### Formule du CV IQR (interquartile standard)")
-    st.latex(r"CV_{IQR} (\%) = \frac{\text{IQR}}{\tilde{x}}*100")
-
-    st.info(r"Où $\\tilde{x}$ représente la médiane de la série et IQR représente l'intervalle interquartile (25%-75%).")
-
-    st.markdown("### Formule du CV IQR_robuste (interquartile normalisé)")
-    st.latex(r"CV_{IQR robuste} (\%) = \frac{\text{IQR}}{1,349*\tilde{x}}*100")
-
-    st.info(r"Où $\\tilde{x}$ représente la médiane de la série et IQR représente l'intervalle interquartile (25%-75%). Normalisation à la loi normale standard par le facteur 1,349.")
-
-    st.markdown("### Formule du CV MAD (Median Absolute Deviation)")
-    st.latex(r"CV_{MAD} (\%) = \frac{\text{median}(|x_i - \tilde{x}|)}{\tilde{x}}*1,4826*100")
-
-    st.info(r"Où $\\tilde{x}$ représente la médiane de la série. Normalisation à la loi normale standard par le facteur 1,4826. Tanterdtid, J., et al. (2007). Robustness of the median and the mean absolute deviation for the quality control of hematology analyzers.")
-
-    with st.expander("📊 Synthèse : Avantages et Inconvénients des 4 méthodes"):
-    
-        st.markdown(r"#### 1. CV Classique ($\sigma/\mu$)")
-        st.write("**Avantages :** Standard historique, connu de tous les biologistes et auditeurs (accréditation).")
-        st.write("**Inconvénients :** Très sensible aux valeurs extrêmes (ex: fausse macrocytose). Risque de rejet de CIQ injustifié.")
-        
-        st.divider()
-
-        st.markdown("#### 2. CV IQR (Standard)")
-        st.write("**Avantages :** Simple, mesure le cœur de la population (50% centraux).")
-        st.write("**Inconvénients :** Difficile à comparer aux limites de performance usuelles (valeurs numériques différentes).")
-        
-        st.divider()
-
-        st.markdown("#### 3. CV IQR robuste (Normalisé par 1,349)")
-        st.success("**Recommandé en Hématologie**")
-        st.write("**Avantages :** Estime l'écart-type sur une distribution normale sans être pollué par les débris ou amas.")
-        st.write("**Pourquoi ?** Donne le même chiffre que le CV classique si la distribution est propre.")
-        
-        st.divider()
-
-        st.markdown("#### 4. CV MAD (Normalisé par 1,482)")
-        st.write("**Avantages :** Statistique la plus robuste. Idéale pour les populations très bruitées.")
-        st.write("**Inconvénients :** Parfois 'trop stable', peut masquer une dérive précoce. Plus complexe à justifier en audit (ISO 15189).")
-    
-        st.divider()
-
-        st.markdown("""
-        | Méthode | Robustesse | Sensibilité aux Outliers | Usage recommandé en Hématologie |
-        | :--- | :---: | :---: | :--- |
-        | **CV Classique** | ❌ Nulle | 🔴 Très sensible | Uniquement sur des populations parfaitement normales et propres. |
-        | **CV IQR** | ✅ Bonne | 🟢 Très faible | Étude de la largeur de distribution (ex: RDW). |
-        | **CV IQR robuste** | ✅ Excellente | 🟢 Faible | **Le meilleur compromis** pour comparer au CV classique cible. |
-        | **CV MAD** | 🏆 Maximale | 🟢 Quasi nulle | Analyse de populations cellulaires très bruitées (Cytométrie/Hématologie). |
-        """)
+    st.subheader("CV maximum utilisés")
+    st.dataframe(df_cv_max, hide_index = True)
+    st.write("CV max = CVa de la table EFLM")
 
     with st.expander("📊 Synthèse : choix des CV max"):
 
@@ -796,6 +522,36 @@ with tab_CV_intralot:
                 file_name="Analytical performance specifications based on biological variation data - considerations, strengths and limitations",
                 mime="application/pdf"
             )
+
+
+    st.subheader("Recommandations EFLM + Probioqual ")
+    # === import fichier excel EFLM_2025.xlsx ===
+    # Charger la première feuille en DataFrame
+    df_reco_eflm = pd.read_excel("EFLM_2025.xlsx", sheet_name=0, usecols=range(18))
+
+    st.dataframe(df_reco_eflm,hide_index = True)
+    st.markdown("#### Incertitudes de mesures recommandées: ")
+    st.write(" - EFLM : privilégier MAU par rapport à TEa")
+    st.write(" - PBQ : valeurs issues de l'ancienne table RICOS (TEa desirable)")
+    st.write(" NB : tables RICOS remplacées par EFLM")
+    st.write("[Site Officiel EFLM](https://biologicalvariation.eu/)")
+
+    # Rappel des définitions
+
+    st.markdown("### Légendes")
+    st.write(r"CVI = \% Within-subject (CVI) estimate")
+    st.write(r"CVG = \% Between-subject (CVG) estimate")
+    st.write(r"$\text{MAU} = k \times \text{MAu} \quad (k=2)$")
+    
+    st.image("EFLM_definitions.png", caption="Définitions de l'EFLM")
+
+with tab_CV_intralot:
+
+    st.subheader("Calcul des CV intra-lot, par paramètre, par analyseur, par niveau de lot")
+
+    # st.subheader("CV max - Fournisseur / Recommandé ")
+    # Afficher un aperçu du DataFrame
+    # st.dataframe(df_cv_max)
 
     # == Choix du numéro de lot ===
 
@@ -901,7 +657,66 @@ with tab_CV_intralot:
     )
 
 
-    st.dataframe(grouped)
+    st.dataframe(grouped, hide_index = True)
+    st.write("Choix du CV max => cf Onlget Data source")
+
+    # Rappel des formules utilisées pour le calcul du CV
+    with st.expander("📊 Synthèse : Rappel des formules de CV utilisées"):
+        st.markdown("### Formule du CV Classique")
+        st.latex(r"CV_{classique} (\%) = \frac{\sigma}{\mu}*100")
+
+        st.info(r"Où $\sigma$ représente l'écart-type de la série et $\mu$ représente la moyenne de la série.")
+
+        st.markdown("### Formule du CV IQR (interquartile standard)")
+        st.latex(r"CV_{IQR} (\%) = \frac{\text{IQR}}{\tilde{x}}*100")
+
+        st.info(r"Où $\tilde{x}$ représente la médiane de la série et IQR représente l'intervalle interquartile (25%-75%).")
+
+        st.markdown("### Formule du CV IQR_robuste (interquartile normalisé)")
+        st.latex(r"CV_{IQR robuste} (\%) = \frac{\text{IQR}}{1,349*\tilde{x}}*100")
+
+        st.info(r"Où $\tilde{x}$ représente la médiane de la série et IQR représente l'intervalle interquartile (25%-75%). Normalisation à la loi normale standard par le facteur 1,349.")
+
+        st.markdown("### Formule du CV MAD (Median Absolute Deviation)")
+        st.latex(r"CV_{MAD} (\%) = \frac{\text{median}(|x_i - \tilde{x}|)}{\tilde{x}}*1,4826*100")
+
+        st.info(r"Où $\tilde{x}$ représente la médiane de la série. Normalisation à la loi normale standard par le facteur 1,4826. Tanterdtid, J., et al. (2007). Robustness of the median and the mean absolute deviation for the quality control of hematology analyzers.")
+
+    with st.expander("📊 Synthèse : Avantages et Inconvénients des 4 méthodes"):
+    
+        st.markdown(r"#### 1. CV Classique ($\sigma/\mu$)")
+        st.write("**Avantages :** Standard historique, connu de tous les biologistes et auditeurs (accréditation).")
+        st.write("**Inconvénients :** Très sensible aux valeurs extrêmes (ex: fausse macrocytose). Risque de rejet de CIQ injustifié.")
+        
+        st.divider()
+
+        st.markdown("#### 2. CV IQR (Standard)")
+        st.write("**Avantages :** Simple, mesure le cœur de la population (50% centraux).")
+        st.write("**Inconvénients :** Difficile à comparer aux limites de performance usuelles (valeurs numériques différentes).")
+        
+        st.divider()
+
+        st.markdown("#### 3. CV IQR robuste (Normalisé par 1,349)")
+        st.success("**Recommandé en Hématologie**")
+        st.write("**Avantages :** Estime l'écart-type sur une distribution normale sans être pollué par les débris ou amas.")
+        st.write("**Pourquoi ?** Donne le même chiffre que le CV classique si la distribution est propre.")
+        
+        st.divider()
+
+        st.markdown("#### 4. CV MAD (Normalisé par 1,482)")
+        st.write("**Avantages :** Statistique la plus robuste. Idéale pour les populations très bruitées.")
+        st.write("**Inconvénients :** Parfois 'trop stable', peut masquer une dérive précoce. Plus complexe à justifier en audit (ISO 15189).")
+    
+        st.divider()
+
+        st.markdown("""
+        | Méthode | Robustesse | Sensibilité aux Outliers | Usage recommandé en Hématologie |
+        | :--- | :---: | :---: | :--- |
+        | **CV Classique** | ❌ Nulle | 🔴 Très sensible | Uniquement sur des populations parfaitement normales et propres. |
+        | **CV IQR** | ✅ Bonne | 🟢 Très faible | Étude de la largeur de distribution (ex: RDW). |
+        | **CV IQR robuste** | ✅ Excellente | 🟢 Faible | **Le meilleur compromis** pour comparer au CV classique cible. |
+        | **CV MAD** | 🏆 Maximale | 🟢 Quasi nulle | Analyse de populations cellulaires très bruitées (Cytométrie/Hématologie). |
+        """)
 
     # Graphs des CV intra-lot
     st.subheader(f"Graphiques des CV pour le lot {filt_lot}")
@@ -1283,7 +1098,7 @@ with tab_CV_interlot:
         Mediane='median',
         Ecart_type='std',
         CV=cv,
-        CV_IQR=cv_robuste_iqr,
+        # CV_IQR=cv_robuste_iqr,
         CV_IQR2=cv_robuste_iqr2,
         CV_MAD=cv_robuste_mad
     ).reset_index()
@@ -1308,99 +1123,14 @@ with tab_CV_interlot:
 
 
     st.subheader(f"Tableau des CV inter-lot (CV classique / CV IQR / CV IQR robuste / CV MAD) par Lot pour {param_cvinter} (lot(s) {filt_lot_cvinter})")
-    st.dataframe(grouped_cvinter)
-
-    # st.subheader(f"Comparaison des CV inter-lot (CV classique / CV IQR / CV IQR robuste / CV MAD) pour les paramètres des lots {filt_lot_cvinter})")
-
-    # # Sélectionne les colonnes de l'index 8 à 125 pour permettre la conversion en numérique
-    # # st.dataframe(CIQ.head())
-    # colonnes_numeriques_cvinter = CIQ.columns[8:125]
-
-    # # Nettoyage et conversion en float
-    # for col in colonnes_numeriques_cvinter:
-    #     CIQ[col] = (
-    #         CIQ[col]
-    #         .astype(str)
-    #         .str.replace(',', '.', regex=False)
-    #         .str.replace(r'[<>]', '', regex=True)
-    #         .str.strip()
-    #     )
-    #     CIQ[col] = pd.to_numeric(CIQ[col], errors='coerce')
-
-    # # Détection des colonnes numériques uniquement
-    # params_all_numeriques_cvinter = CIQ.select_dtypes(include=[np.number]).columns.tolist()
-
-    # # Exclure les colonnes de comptage ou de type ID si nécessaire
-    # params_all_numeriques_cvinter = [col for col in params_all_numeriques_cvinter if col not in ['n']]
-
-    # # Liste par défaut
-    # #params_all_visibles_par_défaut = [    
-    # #    'WBC(10^9/L)','RBC(10^12/L)','HGB(g/L)','HCT(%)','MCV(fL)','MCH(pg)','MCHC(g/L)','PLT(10^9/L)','[RBC-O(10^12/L)]','[PLT-O(10^9/L)]','[PLT-F(10^9/L)]','IPF#(10^9/L)','[HGB-O(g/dL)]'
-    # #    ]
-
-    # # Sélecteur des paramètres à inclure
-    # params_all_selectionnés_cvinter = st.multiselect(
-    #     "Paramètres à afficher (CV inter-lot)",
-    #     options=params_all_numeriques_cvinter,
-    #     default=params_all_numeriques_cvinter
-    #     #default=[p for p in params_all_numériques if p != "Annee"] # ✅ tous sauf 'Annee'
-    # )
-
-    # lots_uniques_cvinter = data_filtrée_cvinter["lot_num"].dropna().unique()
-    # lots_str_cvinter = ", ".join(map(str, sorted(lots_uniques_cvinter)))
-
-    # st.success(f"Liste des lots de CIQ inclus : {lots_str_cvinter}")
-
-    # # Mise en long format : chaque ligne = une mesure pour un paramètre donné
-    # data_long_cvinter = data_filtrée_cvinter.melt(
-    #     id_vars=['Nickname', 'lot_num', 'lot_niveau', 'Annee'],
-    #     value_vars=params_all_selectionnés_cvinter,
-    #     var_name='paramètre',
-    #     value_name='valeur'
-    # )
-
-    # # Conversion explicite en numérique
-    # data_long_cvinter["valeur"] = pd.to_numeric(data_long_cvinter["valeur"], errors="coerce")
-
-    # grouped3 = (
-    #     data_long_cvinter
-    #     .groupby(['paramètre','Nickname','lot_niveau','Annee'])
-    #     .apply(lambda g: pd.Series({
-    #         "n_total": g["valeur"].count(),
-    #         "n_lots": g["lot_num"].nunique(), # Nombre de lots différents détectés
-    #         "Moyenne": g["valeur"].mean(),
-    #         "CV_Intra_MAD": cv_robuste_mad(g["valeur"]), # Variabilité courte durée
-    #         "LT_CV_MAD": cv_long_terme_mad(g["valeur"]), # Variabilité longue durée (inclut changements de lots)
-    #         "CV_max_reco": g["CV_max_reco"].iloc[0] if "CV_max_reco" in g.columns else np.nan
-    #     }))
-    #     .reset_index()
-    # )
-
-    # # 1. Conversion forcée en string pour garantir la correspondance
-    # grouped3['lot_niveau'] = grouped3['lot_niveau'].astype(str).str.strip()
-    # df_cv_max['lot_niveau'] = df_cv_max['lot_niveau'].astype(str).str.strip()
-
-    # # 2. On fait de même pour la colonne 'paramètre' par sécurité
-    # grouped3['paramètre'] = grouped3['paramètre'].astype(str).str.strip()
-    # df_cv_max['paramètre'] = df_cv_max['paramètre'].astype(str).str.strip()
-
-    # # 3. Maintenant le merge fonctionnera
-    # grouped3 = grouped3.merge(
-    #     df_cv_max[['paramètre', 'lot_niveau', 'CV_max_reco']], 
-    #     on=['paramètre', 'lot_niveau'], 
-    #     how='left'
-    # )
-
-
-    # st.dataframe(grouped3)
-
+    st.dataframe(grouped_cvinter, hide_index = True)
 
     grouped_cvinter['lot_annee'] = grouped_cvinter['lot_niveau'].astype(str) + " (" + grouped_cvinter['Annee'].astype(str) + ")"
     grouped_cvinter['lot_num2'] = grouped_cvinter['lot_num'].astype(str) + " (" + grouped_cvinter['lot_niveau'].astype(str) + ")"
 
     st.subheader(f"Graphiques des CV inter-lot (lot(s) {filt_lot_cvinter})")
     plot_cvinter("CV", f"{param_cvinter} : CV classique", "CV (%)")
-    plot_cvinter("CV_IQR", f"{param_cvinter} : CV IQR", "CV (%)")
+    # plot_cvinter("CV_IQR", f"{param_cvinter} : CV IQR", "CV (%)")
     plot_cvinter("CV_IQR2", f"{param_cvinter} : CV IQR robuste", "CV (%)")
     plot_cvinter("CV_MAD", f"{param_cvinter} : CV MAD", "CV (%)")
 
@@ -1491,7 +1221,7 @@ with tab_CVref:
         Mediane='median',
         Ecart_type='std',
         CV=cv,
-        CV_IQR=cv_robuste_iqr,
+        # CV_IQR=cv_robuste_iqr,
         CV_IQR2=cv_robuste_iqr2,
         CV_MAD=cv_robuste_mad
     ).reset_index()
@@ -1505,7 +1235,7 @@ with tab_CVref:
 
     grouped_cvref['paramètre'] = param_cvref
 
-    st.dataframe(grouped_cvref)
+    st.dataframe(grouped_cvref, hide_index = True)
 
     # Affichage de la formule pour justifier le calcul
     with st.expander("🔬 Note méthodologique : CV Pooled Robuste"):
@@ -1559,6 +1289,25 @@ with tab_CVref:
         default=[p for p in params_visibles_par_défaut_cvref if p in params_numeriques_cvref]
     )
 
+    ordre_parametres = params_selectionnés_cvref
+
+
+    # pour attribuer toujours la même couleur aux analyseurs
+    # 1. Identifier tous les automates uniques
+    automates_uniques = sorted(data_filtrée_cvref[col_automate].unique())
+
+    # 2. Créer un dictionnaire de couleurs (ex: Bleu, Rouge, Vert...)
+    # On utilise une palette qualitative de Plotly (ex: Set1, D3, Plotly)
+    palette = px.colors.qualitative.Plotly 
+    automates_color_map = {automate: palette[i % len(palette)] for i, automate in enumerate(automates_uniques)}
+    # Color map perso si besoin : Remplacez "Automate_1", etc. par les noms exacts présents dans votre colonne col_automate
+    # color_map_perso = {
+    #     "XN-1000": "#1f77b4",  # Un bleu spécifique
+    #     "XN-2000": "#FF4B4B",  # Le rouge Streamlit
+    #     "XN-3000": "orange",   # Nom de couleur standard
+    #     "Lieu_A": "#2ca02c"    # Un vert
+    # }
+
     #st.write("Paramètres dans Excel :", df_cv_max['paramètre'].unique())
     #st.write("Paramètres dans vos données :", params_selectionnés)
 
@@ -1574,18 +1323,7 @@ with tab_CVref:
         # On ajoute le nom du paramètre pour pouvoir faire le merge
         df_tmp_cvref['paramètre'] = p_cvref
         df_tmp_cvref.rename(columns={'CV_MAD': 'CV'}, inplace=True)
-        
-        # # Nettoyage des types avant le merge
-        # df_tmp_cvref['lot_niveau'] = df_tmp_cvref['lot_niveau'].astype(str).str.strip()
-        # df_tmp_cvref['paramètre'] = df_tmp_cvref['paramètre'].astype(str).str.strip()
-        
-        # # Merge individuel pour récupérer le CV_max de ce paramètre
-        # df_tmp_cvref = df_tmp_cvref.merge(
-        #     df_cv_max[['paramètre', 'lot_niveau', 'CV_max_reco']], 
-        #     on=['paramètre', 'lot_niveau'], 
-        #     how='left'
-        # )
-        
+             
         liste_dfs_cvref.append(df_tmp_cvref)
 
 
@@ -1596,11 +1334,15 @@ with tab_CVref:
     # On s'assure que le DataFrame est propre
     df_facet_cvref['lot_niveau'] = df_facet_cvref['lot_niveau'].astype(str)
 
-    # 1. On définit le nombre de colonnes
-    n_cols_cvref = 3
-    n_params_cvref = len(params_selectionnés_cvref)
-    n_rows_cvref = math.ceil(n_params_cvref / n_cols_cvref)
+    # Conversion en catégorie avec l'ordre défini
+    df_facet_cvref['paramètre'] = pd.Categorical(
+        df_facet_cvref['paramètre'], 
+        categories=ordre_parametres, 
+        ordered=True
+    )
 
+    # Tri du DataFrame pour s'assurer que Plotly respecte l'ordre
+    df_facet_cvref = df_facet_cvref.sort_values('paramètre')
 
     # Graphique facets avec Plotly Express
     fig_facet_cvref = px.bar(
@@ -1608,6 +1350,8 @@ with tab_CVref:
         x='lot_niveau',
         y='CV',
         color=col_automate,
+        color_discrete_map=automates_color_map,  # Force l'utilisation du dictionnaire
+        category_orders={"paramètre": ordre_parametres, col_automate: automates_uniques},   
         barmode='group',
         facet_col='paramètre',
         facet_col_wrap=3,  # Nombre de colonnes dans la grille
@@ -1646,7 +1390,6 @@ with tab_CVref:
 
     for p in params_selectionnés_cvref:
         # On effectue le calcul pour chaque paramètre du multiselect
-        # en utilisant la même logique que votre tableau du haut
         df_p = data_filtrée_cvref.groupby([col_automate, 'lot_niveau', 'Annee']).apply(
             lambda x: calculate_cv_pooled_robust_internal(x, p, 'lot_num'),
             include_groups=False
@@ -1668,17 +1411,29 @@ with tab_CVref:
     df_plot['CV'] = pd.to_numeric(df_plot['CV'], errors='coerce')
     df_plot['lot_niveau'] = df_plot['lot_niveau'].astype(str)
 
+    # Conversion en catégorie avec le même ordre
+    df_plot['paramètre'] = pd.Categorical(
+        df_plot['paramètre'], 
+        categories=ordre_parametres, 
+        ordered=True
+    )
+
+    # Tri du DataFrame
+    df_plot = df_plot.sort_values('paramètre')
+
     fig_facet_cvref2 = px.bar(
         df_plot, # Utilisation du DF agrégé
         x='lot_niveau',
         y='CV',
         color=col_automate,
+        color_discrete_map=automates_color_map,  # Force l'utilisation du dictionnaire
+        category_orders={"paramètre": ordre_parametres, col_automate: automates_uniques},
         barmode='group',
         facet_col='paramètre',
         facet_col_wrap=3,
         title='CV poolé robuste par paramètre et par niveau de lot',
-        facet_row_spacing=0.08,
-        facet_col_spacing=0.05,
+        facet_row_spacing=0.1,
+        facet_col_spacing=0.1,
         labels={'CV': 'CV (%)', 'lot_niveau': 'Niveau'}
     )
 
@@ -1988,7 +1743,8 @@ with tab_IM:
         .str.replace(",", ".", regex=False)  # remplacer la virgule par un point
         .astype(float)                       # convertir en float
         )
-    st.dataframe(EEQ.head())
+    with st.expander("Data EEQ"):
+        st.dataframe(EEQ, width='stretch')
 
 
     #### Choix des lots de CIQ pour calcul des IM #####
@@ -2057,10 +1813,6 @@ with tab_IM:
         st.warning("Pas de colonne Date dans CIQ : Année non disponible.")
         data_filtrée_IM['Annee'] = 0  # placeholder
     
-
-
-
-
     # st.dataframe(data_filtrée_IM)
 
     colonnes_valeurs_IM = data_filtrée_IM.columns[8:125]  
@@ -2150,8 +1902,8 @@ with tab_IM:
         sd_pooled_series = data_filtrée_IM_long.groupby(
             ["Nickname", "lot_niveau", "Annee", "Paramètre"], 
             group_keys=False
-        ).apply(calcul_sd_pooled_custom) # On retire include_groups=False pour garder l'accès aux colonnes
-
+        ).apply(calcul_sd_pooled_custom, include_groups=False) 
+        
         # On transforme la série en DataFrame pour le merge
         sd_pooled_df = sd_pooled_series.reset_index()
         sd_pooled_df.columns = ["Nickname", "lot_niveau", "Annee", "Paramètre", "SD_Pooled"]
@@ -2167,7 +1919,7 @@ with tab_IM:
     sd_pooled_series = data_filtrée_IM_long.groupby(
         ["Nickname", "lot_niveau", "Annee", "Paramètre"], 
         group_keys=False
-    ).apply(calcul_sd_pooled_robuste)
+    ).apply(calcul_sd_pooled_robuste, include_groups=False)
 
     # 2. Préparation du DataFrame pour la fusion
     sd_pooled_df = sd_pooled_series.reset_index()
@@ -2330,11 +2082,26 @@ with tab_IM:
 
     # st.dataframe(df_IM)
     
-    # Application du style
-    styled_df = df_IM.style.apply(highlight_status, axis=1)
+    # On récupère toutes les colonnes
+    cols_df_IM = list(df_IM.columns)
+
+    # On retire 'ID' et on le place au début
+    cols_df_IM.insert(27, cols_df_IM.pop(cols_df_IM.index('limite_accept')))
+    cols_df_IM.insert(28, cols_df_IM.pop(cols_df_IM.index('limite_accept_PBQ')))
+    df_IM = df_IM[cols_df_IM]
+
+    def style_gras(v):
+        return 'font-weight: bold'
+
+    # Application des styles
+    styled_df = (
+    df_IM.style
+    .apply(highlight_status, axis=1)
+    .map(style_gras, subset=['U','limite_accept', 'limite_accept_PBQ'])
+    )
 
     # Affichage dans Streamlit
-    st.dataframe(styled_df)
+    st.dataframe(styled_df, width='stretch')
 
     
     with st.expander("🔬 Détails des calculs : SD Pooled et SD Pooled Robuste"):
@@ -2371,7 +2138,7 @@ with tab_IM:
         SD_{pooled\_rob} = \sqrt{\frac{\sum_{i=1}^{k} (n_i - 1) \cdot (MAD_i \cdot 1,4826)^2}{\sum_{i=1}^{k} n_i - k}}
         """)
         
-        st.info("""
+        st.info(r"""
         **Composantes de la formule :**
         * $(MAD_i \cdot 1,4826)$ : Correspond au **SD robuste** du lot $i$. L'utilisation de la MAD (Median Absolute Deviation) permet d'ignorer les valeurs aberrantes.
         * $\sum (n_i - 1)$ : Somme des degrés de liberté de chaque lot.
