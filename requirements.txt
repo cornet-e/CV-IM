@@ -3,3 +3,6 @@ panda
 numpy
 plotly.express
 openpyxl
+matplotlib
+seaborn
+scipy
