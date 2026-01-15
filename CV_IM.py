@@ -548,12 +548,14 @@ with tab_data:
     
     st.image("EFLM_definitions.png", caption="Définitions de l'EFLM")
 
+    # --- ANALYSE COMPARATIVE CV (inter lots) ---
+
     st.title("📊 Analyse Comparative des CIQ (Multi-lots)")
     st.markdown("Cette interface compare les méthodes de calcul de la précision inter-lots et illustre l'impact des approches robustes.")
     st.subheader("Source des Données")
     mode = st.radio(
         "Sélectionnez le mode d'entrée :", 
-        ["Simulation de 3 lots", "Charger mon fichier (CSV/Excel)"], 
+        ["Simulation de 3 lots", "Utiliser données CIQ chargées", "Charger mon fichier (CSV/Excel)"], 
         horizontal=True,
         key="mode_ciq_unique_key"
     )
@@ -570,6 +572,70 @@ with tab_data:
                 values = np.concatenate([values, [mu+15, mu+18, mu-12]]) 
             data_list.append(pd.DataFrame({'Lot': name, 'Valeur': values}))
         df = pd.concat(data_list)
+    elif mode == "Utiliser données CIQ chargées":
+        # On vérifie si le dataframe existe dans l'état de la session (st.session_state)
+        # ou s'il a été défini précédemment dans votre code
+        if 'CIQ' in locals() or 'CIQ' in globals():
+            df = CIQ
+            st.success("Données de CIQ récupérées avec succès !")
+            # st.dataframe(df)
+            df=df.rename(columns={'lot_num':'Lot'})
+                    
+            lots_disponibles_stat = df['Lot'].astype(str).unique()
+            filt_lot_stat = st.multiselect("Numéro(s) de lot (stat)", lots_disponibles_stat)
+
+            # === Choix analyseurs ===
+
+            filt_automate_stat = st.multiselect("Automate(s) (stat)", sorted(df[col_automate].dropna().unique()), default=None)
+
+            # === Choix niveau de lot ===
+            # Forcer tout en chaînes pour uniformiser les types
+            niveaux_disponibles_stat = sorted(df['lot_niveau'].dropna().astype(str).unique())
+            # Définir les niveaux souhaités par défaut (aussi en str)
+            niveaux_defaut_souhaites_stat = ['1101', '1102', '1103']
+            # Affichage du multiselect sécurisé
+            filt_niveau_stat = st.selectbox("Niveau(x) de lot (stat)", niveaux_disponibles_stat)
+
+            filt_annee_stat = st.multiselect("Année(s) (stat)", sorted(df['Annee'].dropna().unique()), default=None)
+
+            # Filtrage des données
+            data_filtrée_stat = df.copy()
+            if filt_automate_stat:
+                data_filtrée_stat = data_filtrée_stat[data_filtrée_stat[col_automate].isin(filt_automate_stat)]
+            if filt_niveau_stat:
+                data_filtrée_stat = data_filtrée_stat[data_filtrée_stat['lot_niveau'] == filt_niveau_stat]
+            if filt_lot_stat:
+                data_filtrée_stat = data_filtrée_stat[data_filtrée_stat['Lot'].isin(filt_lot_stat)]
+            if filt_annee_stat:
+                data_filtrée_stat = data_filtrée_stat[data_filtrée_stat['Annee'].isin(filt_annee_stat)]
+
+            # st.subheader(f"Choix du paramètre à étudier pour le lot {filt_lot_stat}")
+
+            # === Choix du paramètre ===
+            choix_param_stat = df.columns[8:]  # adapter si besoin
+            param_stat = st.selectbox("Choisissez le paramètre à étudier", choix_param_stat)
+
+            # 1. On définit la liste des colonnes structurelles à garder
+            colonnes_contexte = [col_automate, 'Lot', 'Annee']
+
+            # 2. On s'assure que param_stat est bien numérique
+            data_filtrée_stat[param_stat] = pd.to_numeric(data_filtrée_stat[param_stat], errors='coerce')
+
+            # 3. On crée le DataFrame final avec uniquement les colonnes utiles
+            # On utilise set() pour éviter les doublons si param_stat est déjà dans colonnes_contexte
+            colonnes_finales = colonnes_contexte + [param_stat]
+            df_final = data_filtrée_stat[colonnes_finales].dropna(subset=[param_stat])
+            # 4. RENOMMAGE : On remplace le nom dynamique (param_stat) par 'Valeur'
+            df_final = df_final.rename(columns={param_stat: 'Valeur'})
+
+            # Affichage du résultat propre
+            st.subheader(f"Résultats pour : {param_stat}")
+            st.dataframe(df_final)
+            df=df_final
+
+        else:
+            st.error("Aucun DataFrame n'a été trouvé en mémoire.")
+            df = None
     else:
         uploaded_file = st.file_uploader("Upload (Excel/CSV)", type=["csv", "xlsx"], key="ciq_file_uploader")
         if uploaded_file:
@@ -579,7 +645,7 @@ with tab_data:
 
     # --- CALCULS ET AFFICHAGE SI DONNÉES PRÉSENTES ---
     if df is not None:
-        # --- CALCUL DES STATISTIQUES PAR LOT ---
+         # --- CALCUL DES STATISTIQUES PAR LOT ---
         stats_list = []
         for lot in df['Lot'].unique():
             subset = df[df['Lot'] == lot]['Valeur']
