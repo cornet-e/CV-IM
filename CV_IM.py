@@ -2199,7 +2199,10 @@ with tab_IM:
     "MPV(fL)" : 3.5,
     "RDW-CV(%)" : 2.6,
     "MCH(pg)" : 1.1,
-    "MCHC(g/dL)" : 1.5
+    "MCHC(g/dL)" : 1.5,
+    "PCT(%)" : 9.6,
+    "P-LCR(%)" : 10.2,
+    "PDW(fL)" : 5.7
     }
     
     # Limites acceptables : sourve PBQ U souhaitable
