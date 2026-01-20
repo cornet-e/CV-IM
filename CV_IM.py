@@ -1478,6 +1478,58 @@ with tab_CVref:
 
     st.dataframe(grouped_cvref, hide_index = True)
 
+
+    # --- CALCUL POUR TOUS LES PARAMÈTRES ---
+
+    st.subheader("Tableau récapitulatif de tous les paramètres (présentation nYna)")
+
+    # 1. On prépare une liste pour stocker les résultats de chaque paramètre
+    all_params_results = []
+
+    # On trie les paramètres par ordre alphabétique
+    params_tries = sorted(choix_param_cvref)
+
+    for p in params_tries:
+        # On s'assure que la colonne est numérique pour ce calcul
+        temp_df = data_filtrée_cvref.copy()
+        temp_df[p] = pd.to_numeric(temp_df[p], errors='coerce')
+        
+        # Calcul des stats classiques
+        stats = temp_df.groupby([col_automate, 'lot_niveau', 'Annee'])[p].agg(
+            n='count',
+            Moyenne='mean',
+            Mediane='median',
+            Ecart_type='std',
+            CV=cv,
+            CV_IQR2=cv_robuste_iqr2,
+            CV_MAD=cv_robuste_mad
+        ).reset_index()
+        
+        # Calcul du CV Pooled Robuste pour ce paramètre précis
+        pooled = temp_df.groupby([col_automate, 'lot_niveau', 'Annee']).apply(
+            lambda x: calculate_cv_pooled_robust_internal(x, p, 'lot_num')
+        ).reset_index(name='CV_Pooled_Robuste')
+        
+        # Fusion
+        merged = stats.merge(pooled, on=[col_automate, 'lot_niveau', 'Annee'], how='left')
+        merged['paramètre'] = p
+        
+        all_params_results.append(merged)
+
+    # 2. Concaténation de tous les résultats
+    if all_params_results:
+        df_global_cv = pd.concat(all_params_results, ignore_index=True)
+        
+        # Réorganiser les colonnes pour mettre le nom du paramètre en premier (optionnel)
+        cols = ['paramètre'] + [c for c in df_global_cv.columns if c != 'paramètre']
+        df_global_cv = df_global_cv[cols]
+
+        # Affichage
+        st.dataframe(df_global_cv, hide_index=True)
+    else:
+        st.warning("Aucune donnée disponible pour les paramètres sélectionnés.")
+
+
     # Affichage de la formule pour justifier le calcul
     with st.expander("🔬 Note méthodologique : CV Pooled Robuste"):
         st.latex(r"CV_{pooled\_rob} = \frac{\sqrt{\frac{\sum (n_i - 1) \cdot (MAD_i \cdot 1.4826)^2}{\sum n_i - k}}}{\mu_{globale}} \times 100")
